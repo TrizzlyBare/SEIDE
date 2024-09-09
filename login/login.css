@@ -10,7 +10,7 @@
 /* Body styling */
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  background: #ffffff;
+  background: #f8eded;
 }
 
 /* Input and button styling */
@@ -22,6 +22,24 @@ button {
   font-family: inherit;
 }
 
+header {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ff8225;
+}
+
+h2 {
+  color: #f8eded;
+}
+
+#homeLink {
+  margin-left: 30px;
+  display: flex;
+  align-items: center;
+}
+
 /* General tip styling */
 .tip {
   font-size: 20px;
@@ -29,15 +47,15 @@ button {
   text-align: center;
 }
 
-/* Container styling */
-.container {
+/* Main container styling */
+.main-container {
   border-radius: 20px;
   overflow: hidden;
   position: relative;
   width: 900px;
   height: 550px;
   margin: 15% auto 100px;
-  background: #fff;
+  background: #ff8225;
   box-shadow: -10px -10px 15px rgba(255, 255, 255, 0.3),
     10px 10px 15px rgba(70, 70, 70, 0.15),
     inset -10px -10px 15px rgba(255, 255, 255, 0.3),
@@ -45,7 +63,8 @@ button {
 }
 
 /* Form styling */
-.form {
+.login-form,
+.register-form {
   position: relative;
   width: 640px;
   height: 100%;
@@ -53,8 +72,18 @@ button {
   padding: 50px 30px 0;
 }
 
-/* Sub-container styling */
-.sub-container {
+.register-form h2,
+.register-form span {
+  color: #ff8225;
+}
+
+.register-form button {
+  background: #ff8225;
+  color: #f8eded;
+}
+
+/* Overlay container styling */
+.overlay-container {
   overflow: hidden;
   position: absolute;
   left: 640px;
@@ -66,7 +95,7 @@ button {
   transition: transform 1.2s ease-in-out;
 }
 
-.container.s--signup .sub-container {
+.main-container.show-signup .overlay-container {
   transform: translate3d(-640px, 0, 0);
 }
 
@@ -77,13 +106,13 @@ button {
   width: 260px;
   height: 36px;
   border-radius: 30px;
-  color: #fff;
+  color: #ff8225;
   font-size: 15px;
   cursor: pointer;
 }
 
-/* Image styling */
-.image {
+/* Image section styling */
+.image-section {
   overflow: hidden;
   z-index: 2;
   position: absolute;
@@ -94,7 +123,7 @@ button {
   padding-top: 360px;
 }
 
-.image:before {
+.image-section:before {
   content: "";
   position: absolute;
   right: 0;
@@ -107,7 +136,7 @@ button {
   transition: transform 1.2s ease-in-out;
 }
 
-.image:after {
+.image-section:after {
   content: "";
   position: absolute;
   left: 0;
@@ -117,12 +146,13 @@ button {
   background: rgba(0, 0, 0, 0.6);
 }
 
-.container.s--signup .image:before {
+.main-container.show-signup .image-section:before {
   transform: translate3d(640px, 0, 0);
 }
 
-/* Image text styling */
-.image__text {
+/* Text styling in the image section */
+.text-signup-visible,
+.text-login-visible {
   z-index: 2;
   position: absolute;
   left: 0;
@@ -134,30 +164,32 @@ button {
   transition: transform 1.2s ease-in-out;
 }
 
-.image__text h3 {
+.text-signup-visible h3,
+.text-login-visible h3 {
   margin-bottom: 10px;
   font-weight: normal;
 }
 
-.image__text p {
+.text-signup-visible p,
+.text-login-visible p {
   font-size: 14px;
   line-height: 1.5;
 }
 
-.container.s--signup .image__text.m--up {
+.main-container.show-signup .text-signup-visible {
   transform: translateX(520px);
 }
 
-.image__text.m--in {
+.text-login-visible {
   transform: translateX(-520px);
 }
 
-.container.s--signup .image__text.m--in {
+.main-container.show-signup .text-login-visible {
   transform: translateX(0);
 }
 
-/* Image button styling */
-.image__btn {
+/* Button toggle styling */
+.toggle-button {
   overflow: hidden;
   z-index: 2;
   position: relative;
@@ -171,7 +203,7 @@ button {
   cursor: pointer;
 }
 
-.image__btn:after {
+.toggle-button:after {
   content: "";
   z-index: 2;
   position: absolute;
@@ -183,7 +215,7 @@ button {
   border-radius: 30px;
 }
 
-.image__btn span {
+.toggle-button span {
   position: absolute;
   left: 0;
   top: 0;
@@ -195,23 +227,16 @@ button {
   transition: transform 1.2s;
 }
 
-.image__btn span.m--in {
+.toggle-button span.login-visible {
   transform: translateY(-72px);
 }
 
-.container.s--signup .image__btn span.m--in {
+.main-container.show-signup .toggle-button span.login-visible {
   transform: translateY(0);
 }
 
-.container.s--signup .image__btn span.m--up {
+.main-container.show-signup .toggle-button span.signup-visible {
   transform: translateY(72px);
-}
-
-/* Headings */
-h2 {
-  width: 100%;
-  font-size: 26px;
-  text-align: center;
 }
 
 /* Labels */
@@ -223,8 +248,8 @@ label {
 }
 
 label span {
-  font-size: 12px;
-  color: #cfcfcf;
+  font-size: 14px;
+  color: #f8eded;
   text-transform: uppercase;
 }
 
@@ -240,7 +265,7 @@ input {
 }
 
 /* Forgot password link */
-.forgot-pass {
+.forgot-password {
   margin-top: 15px;
   text-align: center;
   font-size: 12px;
@@ -248,40 +273,49 @@ input {
 }
 
 /* Submit button */
-.submit {
+.submit-button {
   margin-top: 40px;
   margin-bottom: 20px;
-  background: #d4af7a;
+  background: #f8eded;
   text-transform: uppercase;
 }
 
-/* Facebook button */
-.fb-btn {
-  border: 2px solid #d3dae9;
-  color: #8fa1c7;
-}
-
-.fb-btn span {
-  font-weight: bold;
-  color: #455a81;
-}
-
-/* Transition for sign-in */
-.sign-in {
+/* Transition for login form */
+.login-form {
   transition-timing-function: ease-out;
 }
 
-.container.s--signup .sign-in {
+.main-container.show-signup .login-form {
   transition-timing-function: ease-in-out;
   transition-duration: 1.2s;
   transform: translate3d(640px, 0, 0);
 }
 
-/* Transition for sign-up */
-.sign-up {
+/* Transition for register form */
+.register-form {
   transform: translate3d(-900px, 0, 0);
 }
 
-.container.s--signup .sign-up {
+.main-container.show-signup .register-form {
   transform: translate3d(0, 0, 0);
+}
+
+#homeLink a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#homeLink a:hover {
+  color: #ff8225;
+  background-color: #fff;
+  border: 2px solid #cfcfcf;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateX(-10px);
 }
