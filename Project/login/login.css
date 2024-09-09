@@ -299,3 +299,23 @@ input {
 .main-container.show-signup .register-form {
   transform: translate3d(0, 0, 0);
 }
+
+#homeLink a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#homeLink a:hover {
+  color: #ff8225;
+  background-color: #fff;
+  border: 2px solid #cfcfcf;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateX(-10px);
+}
