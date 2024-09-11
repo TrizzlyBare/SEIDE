@@ -1,0 +1,321 @@
+/* Reset and box-sizing */
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body styling */
+body {
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  background: #f8eded;
+}
+
+/* Input and button styling */
+input,
+button {
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+}
+
+header {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ff8225;
+}
+
+h2 {
+  color: #f8eded;
+}
+
+#homeLink {
+  margin-left: 30px;
+  display: flex;
+  align-items: center;
+}
+
+/* General tip styling */
+.tip {
+  font-size: 20px;
+  margin: 40px auto 50px;
+  text-align: center;
+}
+
+/* Main container styling */
+.main-container {
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  width: 900px;
+  height: 550px;
+  margin: 15% auto 100px;
+  background: #ff8225;
+  box-shadow: -10px -10px 15px rgba(255, 255, 255, 0.3),
+    10px 10px 15px rgba(70, 70, 70, 0.15),
+    inset -10px -10px 15px rgba(255, 255, 255, 0.3),
+    inset 10px 10px 15px rgba(70, 70, 70, 0.15);
+}
+
+/* Form styling */
+.login-form,
+.register-form {
+  position: relative;
+  width: 640px;
+  height: 100%;
+  transition: transform 1.2s ease-in-out;
+  padding: 50px 30px 0;
+}
+
+.register-form h2,
+.register-form span {
+  color: #ff8225;
+}
+
+.register-form button {
+  background: #ff8225;
+  color: #f8eded;
+}
+
+/* Overlay container styling */
+.overlay-container {
+  overflow: hidden;
+  position: absolute;
+  left: 640px;
+  top: 0;
+  width: 900px;
+  height: 100%;
+  padding-left: 260px;
+  background: #fff;
+  transition: transform 1.2s ease-in-out;
+}
+
+.main-container.show-signup .overlay-container {
+  transform: translate3d(-640px, 0, 0);
+}
+
+/* Button styling */
+button {
+  display: block;
+  margin: 0 auto;
+  width: 260px;
+  height: 36px;
+  border-radius: 30px;
+  color: #ff8225;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Image section styling */
+.image-section {
+  overflow: hidden;
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 100%;
+  padding-top: 360px;
+}
+
+.image-section:before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 900px;
+  height: 100%;
+  background-image: url("ext.jpg");
+  opacity: 0.8;
+  background-size: cover;
+  transition: transform 1.2s ease-in-out;
+}
+
+.image-section:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.main-container.show-signup .image-section:before {
+  transform: translate3d(640px, 0, 0);
+}
+
+/* Text styling in the image section */
+.text-signup-visible,
+.text-login-visible {
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  top: 50px;
+  width: 100%;
+  padding: 0 15px;
+  text-align: center;
+  color: #fff;
+  transition: transform 1.2s ease-in-out;
+}
+
+.text-signup-visible h3,
+.text-login-visible h3 {
+  margin-bottom: 10px;
+  font-weight: normal;
+}
+
+.text-signup-visible p,
+.text-login-visible p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.main-container.show-signup .text-signup-visible {
+  transform: translateX(520px);
+}
+
+.text-login-visible {
+  transform: translateX(-520px);
+}
+
+.main-container.show-signup .text-login-visible {
+  transform: translateX(0);
+}
+
+/* Button toggle styling */
+.toggle-button {
+  overflow: hidden;
+  z-index: 2;
+  position: relative;
+  width: 100px;
+  height: 36px;
+  margin: 0 auto;
+  background: transparent;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.toggle-button:after {
+  content: "";
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #fff;
+  border-radius: 30px;
+}
+
+.toggle-button span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.2s;
+}
+
+.toggle-button span.login-visible {
+  transform: translateY(-72px);
+}
+
+.main-container.show-signup .toggle-button span.login-visible {
+  transform: translateY(0);
+}
+
+.main-container.show-signup .toggle-button span.signup-visible {
+  transform: translateY(72px);
+}
+
+/* Labels */
+label {
+  display: block;
+  width: 260px;
+  margin: 25px auto 0;
+  text-align: center;
+}
+
+label span {
+  font-size: 14px;
+  color: #f8eded;
+  text-transform: uppercase;
+}
+
+/* Inputs */
+input {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+/* Forgot password link */
+.forgot-password {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 12px;
+  color: #cfcfcf;
+}
+
+/* Submit button */
+.submit-button {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  background: #f8eded;
+  text-transform: uppercase;
+}
+
+/* Transition for login form */
+.login-form {
+  transition-timing-function: ease-out;
+}
+
+.main-container.show-signup .login-form {
+  transition-timing-function: ease-in-out;
+  transition-duration: 1.2s;
+  transform: translate3d(640px, 0, 0);
+}
+
+/* Transition for register form */
+.register-form {
+  transform: translate3d(-900px, 0, 0);
+}
+
+.main-container.show-signup .register-form {
+  transform: translate3d(0, 0, 0);
+}
+
+#homeLink a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#homeLink a:hover {
+  color: #ff8225;
+  background-color: #fff;
+  border: 2px solid #cfcfcf;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateX(-10px);
+}
