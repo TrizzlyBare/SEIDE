@@ -1,6 +1,5 @@
 import React from "react";
 import { Box } from "@chakra-ui/react";
-import CodeEditor from "./components/CodeEditor";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/Header/Header";
 import HomePage from "./pages/Homepage";
