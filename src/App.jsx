@@ -1,11 +1,11 @@
 import React from "react";
+import { Box } from "@chakra-ui/react";
+import CodeEditor from "./components/CodeEditor";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/Header/Header";
 import HomePage from "./pages/Homepage";
 import AuthPage from "./pages/AuthPage";
-<<<<<<< Updated upstream
-=======
-import EditorPage from "./pages/EditorPage";
+import CodeEditorPage from "./pages/CodeEditorPage";
 import styled from "styled-components";
 
 const AppContainer = styled.div`
@@ -14,30 +14,19 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
 `;
->>>>>>> Stashed changes
 
 function App() {
   return (
     <Router>
       <Header />
-<<<<<<< Updated upstream
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/auth" element={<AuthPage />} />
-        </Routes>
-      </div>
-=======
       <AppContainer>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/editor" element={<EditorPage />} />
+          <Route path="/editor" element={<CodeEditorPage />} />
         </Routes>
       </AppContainer>
->>>>>>> Stashed changes
     </Router>
   );
 }
-
 export default App;

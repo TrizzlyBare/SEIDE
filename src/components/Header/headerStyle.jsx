@@ -7,38 +7,18 @@ export const HeaderContainer = styled.header`
   background-color: #2d3748;
   color: white;
   padding: 15px;
-  position: fixed;
 `;
 
 export const NavLinks = styled.nav`
   display: flex;
-  justify-content: flex-end;
-  margin-right: 20px;
-  gap: 10px;
-`;
+  justify-content: space-around;
+  align-items: center;
 
-export const BaseLink = styled(Link)`
-  color: white;
-  text-decoration: none;
-  padding: 10px;
-  font-size: 1.2rem;
-  position: relative;
-  transition: all 0.3s ease-in-out;
-
-  &:hover {
-    background-color: #4a5568; /* Background color change on hover */
-    color: #fbbf24; /* Text color change to yellow on hover */
-    border-radius: 8px; /* Rounded corners on hover */
-
-    &::before {
-      content: "";
-      position: absolute;
-      left: -10px;
-      width: 5px;
-      height: 100%;
-      background-color: #fbbf24; /* Yellow bar on hover */
-      border-radius: 5px 0 0 5px;
-    }
+  a {
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    font-size: 1.2rem;
   }
 `;
 
