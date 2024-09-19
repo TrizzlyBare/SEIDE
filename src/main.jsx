@@ -6,8 +6,8 @@ import theme from "./theme.js";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
+    {/* <ChakraProvider theme={theme}> */}
       <App />
-    </ChakraProvider>
+    {/* </ChakraProvider> */}
   </React.StrictMode>
 );

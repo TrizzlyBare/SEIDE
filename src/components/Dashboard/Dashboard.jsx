@@ -3,9 +3,14 @@ import styled from "styled-components";
 
 const DashboardContainer = styled.div`
   width: 100%;
+  min-height: 100vh;
   padding: 20px;
   background-color: #f4f4f4;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Center content vertically */
 `;
 
 const Title = styled.h1`
