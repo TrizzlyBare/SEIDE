@@ -1,21 +1,12 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Header from "./components/Header/Header";
-import HomePage from "./pages/Homepage";
-import AuthPage from "./pages/AuthPage";
+import React from 'react';
+import {Box} from '@chakra-ui/react';
+import CodeEditor from './components/CodeEditor';
 
 function App() {
   return (
-    <Router>
-      <Header />
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/auth" element={<AuthPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <Box minH="75vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
+      <CodeEditor />
+    </Box>
   );
 }
-
 export default App;
