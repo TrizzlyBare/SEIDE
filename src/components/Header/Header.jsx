@@ -1,13 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { HeaderContainer, NavLinks, ProfileLink } from "./headerStyle"; // Import ProfileLink
+import {
+  HeaderContainer,
+  NavLinks,
+  ProfileLink,
+  BaseLink,
+} from "./headerStyle"; // Import BaseLink
 
 const Header = () => {
   return (
     <HeaderContainer>
       <NavLinks>
-        <Link to="/">Home</Link>
-        <Link to="/auth">Auth</Link>
+        <BaseLink to="/">Home</BaseLink>
+        <BaseLink to="/auth">Auth</BaseLink>
+        <BaseLink to="/editor">IDE</BaseLink>
         <ProfileLink to="/profile">Profile</ProfileLink>
       </NavLinks>
     </HeaderContainer>
