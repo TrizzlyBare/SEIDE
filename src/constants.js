@@ -4,6 +4,10 @@ export const LANGUAGE_VERSIONS = {
     python: "3.10.0",
     java: "15.0.2",
     csharp: "6.12.0",
+    rust: "1.68.2",
+    brainfuck: "2.7.3",
+    cpp: "10.2.0",
+    go: "1.16.2"
   };
   
   export const CODE_SNIPPETS = {
@@ -13,4 +17,8 @@ export const LANGUAGE_VERSIONS = {
     java: `\npublic class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,
     csharp:
       'using System;\n\nnamespace HelloWorld\n{\n\tclass Hello { \n\t\tstatic void Main(string[] args) {\n\t\t\tConsole.WriteLine("Hello World in C#");\n\t\t}\n\t}\n}\n',
+    rust: `\nfn main() {\n\tprintln!("Hello, world!");\n}\n`,
+    brainfuck: `>++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<++.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-]<+.`,
+    cpp: `#include <iostream>\nint main() {\n\t std::cout << "Hello World!";\nreturn 0;\n}`,
+    go: `package main\nimport "fmt"\nfunc main(){\n\tfmt.Println("Hello World!")\n}`
   };
