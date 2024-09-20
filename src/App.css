@@ -14,3 +14,18 @@ body {
   height: 100vh;
   margin: -20px 0 50px;
 }
+
+/* index.css or App.css */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}

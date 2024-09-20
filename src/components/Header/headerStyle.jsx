@@ -1,15 +1,12 @@
-// headerStyle.js
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-
-//The top and left should be 0 and the width should be 100%.
 
 export const HeaderContainer = styled.header`
   width: 100%;
   background-color: #2d3748;
   color: white;
   padding: 15px;
-  position: fixed;
+  position: fixed; /* Fixed position */
   top: 0;
   left: 0;
   z-index: 1000;

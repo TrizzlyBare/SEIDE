@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { Box, HStack } from "@chakra-ui/react";
 import { Editor } from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../../middleware/constants";
@@ -21,9 +20,9 @@ const CodeEditor = () => {
   };
 
   return (
-    <div style={{ width: "800px" }}>
+    <div style={{ width: "100%" }}>
       {" "}
-      {/* Set a fixed width */}
+      {/* Set width to 100% */}
       <div style={{ display: "flex", gap: "16px" }}>
         <div style={{ width: "50%", height: "400px" }}>
           <LanguageSelector language={language} onSelect={onSelect} />
