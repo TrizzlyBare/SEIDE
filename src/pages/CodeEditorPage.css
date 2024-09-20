@@ -1,0 +1,10 @@
+/* CodeEditorPage.css */
+.code-editor-page {
+  min-height: 75vh;
+  background-color: #0f0a19;
+  color: #a0aec0; /* Equivalent to gray.500 */
+  padding: 32px 24px; /* Equivalent to px={6} py={8} */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

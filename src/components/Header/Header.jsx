@@ -7,6 +7,9 @@ import {
   BaseLink,
 } from "./headerStyle"; // Import ProfileLink
 
+//The top and left should be 0 and the width should be 100%.
+
+
 const Header = () => {
   return (
     <HeaderContainer>

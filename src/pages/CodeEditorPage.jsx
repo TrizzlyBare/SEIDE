@@ -1,11 +1,11 @@
 import React from "react";
-import { Box } from "@chakra-ui/react";
 import CodeEditor from "../components/CodeEditor/CodeEditor";
+import "./CodeEditorPage.css"; // Import the CSS file
 
 const CodeEditorPage = () => (
-  <Box minH="75vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
+  <div className="code-editor-page">
     <CodeEditor />
-  </Box>
+  </div>
 );
 
 export default CodeEditorPage;
