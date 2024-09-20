@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Box, Button, Text, useToast } from "@chakra-ui/react";
+import React, { useState } from "react";
 import { executeCode } from "../../middleware/api";
+import RunButton from "./RunButton";
+import OutputDisplay from "./OutputDisplay";
+import "../../styles/Output.css";
 
 const Output = ({ editorRef, language }) => {
-  const toast = useToast();
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -18,33 +19,17 @@ const Output = ({ editorRef, language }) => {
       result.stderr ? setIsError(true) : setIsError(false);
     } catch (error) {
       console.log(error);
-      toast({
-        title: "An error occurred.",
-        description: error.message || "Unable to run code",
-        status: "error",
-        duration: 6000,
-        isClosable: true,
-      });
+      alert("An error occurred: " + (error.message || "Unable to run code"));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Button onClick={runCode} isLoading={isLoading} colorScheme="teal">
-        Run Code
-      </Button>
-      {output && (
-        <Box mt={4}>
-          {output.map((line, index) => (
-            <Text key={index} color={isError ? "red.500" : "green.500"}>
-              {line}
-            </Text>
-          ))}
-        </Box>
-      )}
-    </Box>
+    <div>
+      {output && <OutputDisplay output={output} isError={isError} />}
+      <RunButton runCode={runCode} isLoading={isLoading} />
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./LanguageSelector.css";
+import "../../styles/LanguageSelector.css";
 import { LANGUAGE_VERSIONS } from "../../middleware/constants";
 
 const languages = Object.entries(LANGUAGE_VERSIONS);

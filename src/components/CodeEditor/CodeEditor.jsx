@@ -38,7 +38,7 @@ const CodeEditor = () => {
             onMount={onMount}
           />
         </div>
-        <div style={{ width: "50%" }}>
+        <div className="outputButton">
           <Output editorRef={editorRef} language={language} />
         </div>
       </div>
