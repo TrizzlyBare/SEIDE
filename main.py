@@ -38,6 +38,13 @@ def get_db():
     finally:
         db.close()
 
+def get_dashboard_db():
+    db = DashboardSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_form(request: Request):
@@ -116,91 +123,54 @@ async def get_dashboard_data(request: Request, db: Session = Depends(DashboardSe
         logging.error(f"Error retrieving dashboard data: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
 
-@app.post("/dashboard/subject")
-async def create_subject(subject: SubjectCreate, db: Session = Depends(DashboardSessionLocal)):
+@app.post("/create_subject")
+async def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     try:
+        logging.info(f"Received subject data: {subject}")
+
+        if not subject.name:
+            raise HTTPException(status_code=400, detail="Subject name is required")
+        
         new_subject = Subject(name=subject.name)
         db.add(new_subject)
         db.commit()
         db.refresh(new_subject)
-
+        
         for topic in subject.topics:
+            if not topic.name:
+                raise HTTPException(status_code=400, detail="Topic name is required")
+                
             new_topic = Topic(name=topic.name, subject_id=new_subject.id)
             db.add(new_topic)
             db.commit()
             db.refresh(new_topic)
-
+            
             for question in topic.questions:
+                if not question.text:
+                    raise HTTPException(status_code=400, detail="Question text is required")
+                    
                 new_question = Question(text=question.text, topic_id=new_topic.id)
                 db.add(new_question)
                 db.commit()
                 db.refresh(new_question)
-
+                
                 for answer in question.answers:
+                    if not answer.text:
+                        raise HTTPException(status_code=400, detail="Answer text is required")
+                        
                     new_answer = Answer(text=answer.text, question_id=new_question.id)
                     db.add(new_answer)
                     db.commit()
                     db.refresh(new_answer)
-
+        
         return {"message": "Subject created successfully"}
     except Exception as e:
         logging.error(f"Error creating subject: {e}")
+        db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-# @app.post("/dashboard/subject")
-# async def create_subject(subject_data: Dict[str, Any], db: Session = Depends(get_db)):
-#     try:
-#         subject_name = subject_data.get("subject_name")
-#         topics = subject_data.get("topics", [])
-        
-#         if not subject_name:
-#             raise HTTPException(status_code=400, detail="Subject name is required")
 
-#         # Create and commit the new subject
-#         new_subject = Subject(name=subject_name)
-#         db.add(new_subject)
-#         db.commit()
-#         db.refresh(new_subject)
-
-#         for topic_data in topics:
-#             topic_name = topic_data.get("topic_name")
-#             questions = topic_data.get("questions", [])
-            
-#             if not topic_name:
-#                 raise HTTPException(status_code=400, detail="Topic name is required")
-
-#             new_topic = Topic(name=topic_name, subject_id=new_subject.id)
-#             db.add(new_topic)
-#             db.commit()
-#             db.refresh(new_topic)
-
-#             for question_data in questions:
-#                 question_text = question_data.get("question_text")
-#                 answers = question_data.get("answers", [])
-
-#                 if not question_text:
-#                     raise HTTPException(status_code=400, detail="Question text is required")
-
-#                 new_question = Question(text=question_text, topic_id=new_topic.id)
-#                 db.add(new_question)
-#                 db.commit()
-#                 db.refresh(new_question)
-
-#                 for answer_text in answers:
-#                     if not answer_text:
-#                         raise HTTPException(status_code=400, detail="Answer text is required")
-
-#                     new_answer = Answer(text=answer_text, question_id=new_question.id)
-#                     db.add(new_answer)
-#                     db.commit()
-#                     db.refresh(new_answer)
-
-#         return {"message": "Subject created successfully"}
-#     except Exception as e:
-#         logging.error(f"Error creating subject: {e}")
-#         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
 @app.get("/logout")
 async def logout():
     return {"message": "Logged out"}
