@@ -1,14 +1,26 @@
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+# <<<<<<< Back-end-patch02
 from sqlalchemy.orm import Session
+# =======
+from sqlalchemy.orm import Session, joinedload
+# >>>>>>> ReactUpdate
 from pydantic import BaseModel
 from typing import Optional
 import time
 import logging
 from passlib.context import CryptContext
+# <<<<<<< Back-end-patch02
 
 from database import SessionLocal, User
+# =======
+from typing import Dict, Any
+
+from database import SessionLocal, User
+from dashboard import Subject, Topic, Question, Answer, DashboardSessionLocal, SubjectCreate
+
+# >>>>>>> ReactUpdate
 
 app = FastAPI()
 
@@ -35,6 +47,16 @@ def get_db():
     finally:
         db.close()
 
+# <<<<<<< Back-end-patch02
+# =======
+def get_dashboard_db():
+    db = DashboardSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# >>>>>>> ReactUpdate
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_form(request: Request):
@@ -73,4 +95,99 @@ async def register(username: str = Form(...), email: str = Form(...), password: 
         return {"message": "User created successfully"}
     except Exception as e:
         logging.error(f"Error during registration: {e}")
+# <<<<<<< Back-end-patch02
         raise HTTPException(status_code=500, detail="Internal Server Error")
+# =======
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+@app.get("/dashboard")
+async def get_dashboard_data(request: Request, db: Session = Depends(DashboardSessionLocal)):
+    try:
+        subjects = db.querysubjects = db.query(Subject).options(
+            joinedload(Subject.topics).joinedload(Topic.questions).joinedload(Question.answers)
+        ).all()(Subject).all()
+        dashboard_data = []
+        for subject in subjects:
+            subject_data = {
+                "id": subject.id,
+                "name": subject.name,
+                "topics": []
+            }
+            for topic in subject.topics:
+                topic_data = {
+                    "id": topic.id,
+                    "name": topic.name,
+                    "questions": []
+                }
+                for question in topic.questions:
+                    question_data = {
+                        "id": question.id,
+                        "text": question.text,
+                        "answers": [
+                            {"id": answer.id, "text": answer.text} for answer in question.answers
+                        ]
+                    }
+                    topic_data["questions"].append(question_data)
+                subject_data["topics"].append(topic_data)
+
+            dashboard_data.append(subject_data)
+
+        return {"dashboard": dashboard_data}
+
+    except Exception as e:
+        logging.error(f"Error retrieving dashboard data: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
+
+@app.post("/create_subject")
+async def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    try:
+        logging.info(f"Received subject data: {subject}")
+
+        if not subject.name:
+            raise HTTPException(status_code=400, detail="Subject name is required")
+        
+        new_subject = Subject(name=subject.name)
+        db.add(new_subject)
+        db.commit()
+        db.refresh(new_subject)
+        
+        for topic in subject.topics:
+            if not topic.name:
+                raise HTTPException(status_code=400, detail="Topic name is required")
+                
+            new_topic = Topic(name=topic.name, subject_id=new_subject.id)
+            db.add(new_topic)
+            db.commit()
+            db.refresh(new_topic)
+            
+            for question in topic.questions:
+                if not question.text:
+                    raise HTTPException(status_code=400, detail="Question text is required")
+                    
+                new_question = Question(text=question.text, topic_id=new_topic.id)
+                db.add(new_question)
+                db.commit()
+                db.refresh(new_question)
+                
+                for answer in question.answers:
+                    if not answer.text:
+                        raise HTTPException(status_code=400, detail="Answer text is required")
+                        
+                    new_answer = Answer(text=answer.text, question_id=new_question.id)
+                    db.add(new_answer)
+                    db.commit()
+                    db.refresh(new_answer)
+        
+        return {"message": "Subject created successfully"}
+    except Exception as e:
+        logging.error(f"Error creating subject: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+
+@app.get("/logout")
+async def logout():
+    return {"message": "Logged out"}
+    
+# >>>>>>> ReactUpdate
