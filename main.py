@@ -1,17 +1,26 @@
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+# <<<<<<< Back-end-patch02
+from sqlalchemy.orm import Session
+# =======
 from sqlalchemy.orm import Session, joinedload
+# >>>>>>> ReactUpdate
 from pydantic import BaseModel
 from typing import Optional
 import time
 import logging
 from passlib.context import CryptContext
+# <<<<<<< Back-end-patch02
+
+from database import SessionLocal, User
+# =======
 from typing import Dict, Any
 
 from database import SessionLocal, User
 from dashboard import Subject, Topic, Question, Answer, DashboardSessionLocal, SubjectCreate
 
+# >>>>>>> ReactUpdate
 
 app = FastAPI()
 
@@ -38,6 +47,8 @@ def get_db():
     finally:
         db.close()
 
+# <<<<<<< Back-end-patch02
+# =======
 def get_dashboard_db():
     db = DashboardSessionLocal()
     try:
@@ -45,6 +56,7 @@ def get_dashboard_db():
     finally:
         db.close()
 
+# >>>>>>> ReactUpdate
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_form(request: Request):
@@ -83,6 +95,9 @@ async def register(username: str = Form(...), email: str = Form(...), password: 
         return {"message": "User created successfully"}
     except Exception as e:
         logging.error(f"Error during registration: {e}")
+# <<<<<<< Back-end-patch02
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+# =======
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 @app.get("/dashboard")
@@ -175,3 +190,4 @@ async def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashb
 async def logout():
     return {"message": "Logged out"}
     
+# >>>>>>> ReactUpdate

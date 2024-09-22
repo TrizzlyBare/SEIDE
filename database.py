@@ -3,12 +3,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 DATABASE_URL = "sqlite:///./test.db"
+# <<<<<<< Back-end-patch02
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# =======
 DASHBOARD_DATABASE_URL = "sqlite:///./dashboard.db"
 
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# >>>>>>> ReactUpdate
 Base = declarative_base()
 
 # Example User model
@@ -31,5 +37,9 @@ class Post(Base):
     owner = relationship("User", back_populates="posts")
 
 # Create the database tables
+# <<<<<<< Back-end-patch02
+Base.metadata.create_all(bind=engine)
+# =======
 Base.metadata.create_all(bind=engine)
 
+# >>>>>>> ReactUpdate
