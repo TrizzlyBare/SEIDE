@@ -7,7 +7,6 @@ from typing import Optional
 import time
 import logging
 from passlib.context import CryptContext
-from typing import Dict, Any
 
 from database import SessionLocal, User
 from dashboard import (
@@ -19,7 +18,8 @@ from dashboard import (
     SubjectCreate,
 )
 from editor import EditorSessionLocal, Create_Code_Data, CodeData
-from profile import Profile, ProfileSessionLocal, ProfileCreate
+from user_profile import Profile, ProfileSessionLocal, ProfileCreate
+from authentication import create_access_token, verify_password, get_password_hash
 
 app = FastAPI()
 
@@ -28,7 +28,6 @@ templates = Jinja2Templates(directory="templates")
 
 # Set up password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 # Middleware to log request method and URL
 @app.middleware("http")
@@ -40,7 +39,6 @@ async def log_requests(request: Request, call_next):
         f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds"
     )
     return response
-c
 
 # Dependency to get the database session
 def get_db():
@@ -50,22 +48,12 @@ def get_db():
     finally:
         db.close()
 
-
 def get_dashboard_db():
     db = DashboardSessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-# def get_current_user(request: Request, db: Session = Depends(get_db)):
-#     user = None
-#     if "user" in request.session:
-#         user_id = request.session["user"]
-#         user = db.query(User).filter(User.id == user_id).first()
-#     return user
-
 
 def get_editor_db():
     db = EditorSessionLocal()
@@ -74,26 +62,22 @@ def get_editor_db():
     finally:
         db.close()
 
-
-def get_Profiles_db():
+def get_profiles_db():
     db = ProfileSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-
 # Pydantic model for login data
 class LoginData(BaseModel):
     username: str
     password: str
-
 
 # Handle login form submission
 @app.post("/login")
@@ -108,7 +92,6 @@ async def login(
     except Exception as e:
         logging.error(f"Error during login: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
 
 @app.post("/register")
 async def register(
@@ -133,20 +116,18 @@ async def register(
         logging.error(f"Error during registration: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
 @app.get("/dashboard")
 async def get_dashboard_data(
-    request: Request, db: Session = Depends(DashboardSessionLocal)
+    request: Request, db: Session = Depends(get_dashboard_db)
 ):
     try:
-        subjects = db.querysubjects = (
+        subjects = (
             db.query(Subject)
             .options(
                 joinedload(Subject.topics)
                 .joinedload(Topic.questions)
                 .joinedload(Question.answers)
             )
-            .all()(Subject)
             .all()
         )
         dashboard_data = []
@@ -173,7 +154,6 @@ async def get_dashboard_data(
     except Exception as e:
         logging.error(f"Error retrieving dashboard data: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
-
 
 @app.post("/create_subject")
 async def create_subject(
@@ -227,27 +207,24 @@ async def create_subject(
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
 @app.post("/editor")
 async def get_editor(request: Create_Code_Data, db: Session = Depends(get_editor_db)):
     try:
-        logging.info(f"Received code data: {CodeData}")
+        logging.info(f"Received code data: {request}")
         new_code_data = CodeData(code_data=request.code_data, language=request.language)
         db.add(new_code_data)
         db.commit()
+        db.refresh(new_code_data)
+        return {"message": "Code data saved successfully"}
     except Exception as e:
-        logging.error(f"Error during login: {e}")
+        logging.error(f"Error saving code data: {e}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    finally:
-        db.close()
-        return {"message": "Subject created successfully"}
-
 
 @app.post("/profiles")
-async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profiles_db)):
+async def get_profiles(request: ProfileCreate, db: Session = Depends(get_profiles_db)):
     try:
-        logging.info(f"Received profile data: {Profile}")
+        logging.info(f"Received profile data: {request}")
         new_profile = Profile(
             username=request.username,
             email=request.email,
@@ -257,14 +234,12 @@ async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profile
         )
         db.add(new_profile)
         db.commit()
+        db.refresh(new_profile)
+        return {"message": "Profile created successfully"}
     except Exception as e:
-        logging.error(f"Error during login: {e}")
+        logging.error(f"Error creating profile: {e}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    finally:
-        db.close()
-        return {"message": "Subject created successfully"}
-
 
 @app.get("/logout")
 async def logout():
