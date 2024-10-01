@@ -26,3 +26,29 @@ export const register = async (username, email, password) => {
     throw error.response.data;
   }
 };
+
+export const profile = async (username, email) => {
+  try {
+    const response = await axios.get(`${API_URL}/profile`, {
+      username,
+      email,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const updateProfile = async (username, email, password) => {
+  try {
+    const response = await axios.put(`${API_URL}/profile`, {
+      username,
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+

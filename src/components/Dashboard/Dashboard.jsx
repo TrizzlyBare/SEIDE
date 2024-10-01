@@ -10,7 +10,7 @@ const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Center content vertically */
+  justify-content: flex-start;
 `;
 
 const Title = styled.h1`
@@ -19,18 +19,42 @@ const Title = styled.h1`
   color: #333;
 `;
 
-const Content = styled.p`
-  font-size: 16px;
-  color: #666;
+const Content = styled.div`
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  text-align: left;
 `;
 
-const Dashboard = () => {
+const SubjectList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+`;
+
+const SubjectItem = styled.li`
+  padding: 10px;
+  background-color: #fff;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+`;
+
+const Dashboard = ({ subjects = [] }) => {
+  console.log("Dashboard subjects:", subjects);
+
   return (
     <DashboardContainer>
       <Title>Dashboard</Title>
       <Content>
-        Welcome to your dashboard! Here you can manage your account and
-        settings.
+        <SubjectList>
+          {subjects.map((subject, index) => (
+            <SubjectItem key={index}>{subject}</SubjectItem>
+          ))}
+        </SubjectList>
       </Content>
     </DashboardContainer>
   );
