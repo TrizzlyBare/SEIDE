@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { executeCode } from "../../middleware/api";
 import RunButton from "./RunButton";
-import OutputDisplay from "./OutputDisplay";
 import "../../styles/Output.css";
 
 const Output = ({ editorRef, language }) => {
@@ -16,18 +15,30 @@ const Output = ({ editorRef, language }) => {
       setIsLoading(true);
       const { run: result } = await executeCode(language, sourceCode);
       setOutput(result.output.split("\n"));
-      result.stderr ? setIsError(true) : setIsError(false);
+      setIsError(!!result.stderr);
     } catch (error) {
       console.log(error);
       alert("An error occurred: " + (error.message || "Unable to run code"));
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      {output && <OutputDisplay output={output} isError={isError} />}
+    <div className="output-wrapper">
+      <div
+        className={`output-container ${
+          isError ? "error-text" : "success-text"
+        }`}
+      >
+        {output &&
+          output.map((line, index) => (
+            <p key={index} className="output-text">
+              {line}
+            </p>
+          ))}
+      </div>
       <RunButton runCode={runCode} isLoading={isLoading} />
     </div>
   );

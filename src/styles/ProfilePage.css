@@ -5,7 +5,7 @@
 }
 
 body {
-  background: #f8eded;
+  background: #dbe2ef;
   font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
@@ -196,14 +196,14 @@ body {
   opacity: 0.5;
 }
 .profile-page .content__actions a:first-child {
-  color: #b43f3f;
+  color: #112d4e;
 }
 .profile-page .content__actions a:hover:first-child {
-  background: #ff8225;
+  background: #3f72af;
   color: #fff;
 }
 .profile-page .content__actions a:hover:last-child {
-  background: #ff8225;
+  background: #3f72af;
   color: #fff;
 }
 .profile-page .content__title {
@@ -334,7 +334,7 @@ body {
   left: 0;
   z-index: 1;
   overflow: hidden;
-  background: linear-gradient(150deg, #ff8225 20%, #b43f3f 100%);
+  background: linear-gradient(150deg, #3f72af 20%, #112d4e 100%);
 }
 .profile-page .bg span:nth-child(1) {
   display: block;
@@ -451,7 +451,7 @@ body {
   border-top-left-radius: 1rem;
   border-bottom-left-radius: 1rem;
   font-size: inherit;
-  color: #ff8225;
+  color: #3f72af;
   cursor: pointer;
 }
 .theme-switcher-button svg {
@@ -565,7 +565,7 @@ body {
   margin-bottom: 10px;
 }
 .profile-content li:hover {
-  color: #b43f3f;
+  color: #112d4e;
 }
 .idnum {
   font-weight: bold;

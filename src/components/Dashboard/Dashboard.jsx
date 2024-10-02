@@ -5,7 +5,7 @@ const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #f9f7f7;
   text-align: center;
   display: flex;
   flex-direction: column;
