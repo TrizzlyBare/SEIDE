@@ -51,18 +51,31 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ addSubject }) => {
+const Admin = () => {
   const [newSubject, setNewSubject] = useState("");
 
   const handleInputChange = (e) => {
     setNewSubject(e.target.value);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
-      addSubject(newSubject);
-      setNewSubject("");
+      // Call the API to add the subject to the database
+      const response = await fetch("/api/subjects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newSubject }),
+      });
+
+      if (response.ok) {
+        setNewSubject("");
+        alert("Subject added successfully");
+      } else {
+        console.error("Failed to add subject");
+      }
     }
   };
 

@@ -1,3 +1,4 @@
+from ast import List
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -8,6 +9,8 @@ import time
 import logging
 from passlib.context import CryptContext
 from typing import Dict, Any
+from fastapi.middleware.cors import CORSMiddleware
+from . import models, schemas, crud
 
 from database import SessionLocal, User
 from dashboard import (
@@ -40,6 +43,15 @@ async def log_requests(request: Request, call_next):
         f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds"
     )
     return response
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Dependency to get the database session
@@ -269,3 +281,17 @@ async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profile
 @app.get("/logout")
 async def logout():
     return {"message": "Logged out"}
+
+
+@app.post("/api/subjects", response_model=schemas.Subject)
+def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
+    db_subject = crud.get_subject_by_name(db, name=subject.name)
+    if db_subject:
+        raise HTTPException(status_code=400, detail="Subject already registered")
+    return crud.create_subject(db=db, subject=subject)
+
+
+@app.get("/api/subjects", response_model=List[schemas.Subject])
+def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    subjects = crud.get_subjects(db, skip=skip, limit=limit)
+    return subjects
