@@ -11,6 +11,7 @@ EditorSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -29,7 +30,9 @@ class CodeData(Base):
 
     owner = relationship("User", back_populates="code_data")
 
+
 Base.metadata.create_all(bind=engine)
+
 
 class Create_Code_Data(BaseModel):
     code_data: str

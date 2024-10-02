@@ -10,6 +10,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
 # Example User model
 class User(Base):
     __tablename__ = "users"
@@ -18,6 +19,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     posts = relationship("Post", back_populates="owner")
+
 
 # Corrected Post model
 class Post(Base):
@@ -29,6 +31,6 @@ class Post(Base):
 
     owner = relationship("User", back_populates="posts")
 
+
 # Create the database tables
 Base.metadata.create_all(bind=engine)
-
