@@ -11,14 +11,14 @@
 
 .menu-button {
   padding: 8px 16px;
-  background-color: #3182ce;
+  background-color: #3f72af;
   color: white;
   border: none;
   cursor: pointer;
 }
 
 .menu-list {
-  background-color: #110c1b;
+  background-color: #dbe2ef;
   position: absolute;
   z-index: 1000;
   display: none;
@@ -30,18 +30,18 @@
 
 .menu-item {
   padding: 8px 16px;
-  color: white;
+  color: black;
   cursor: pointer;
 }
 
 .menu-item.active {
-  color: #3182ce;
-  background-color: #2d3748;
+  color: yellowgreen;
+  background-color: #3f72af;
 }
 
 .menu-item:hover {
-  color: #3182ce;
-  background-color: #2d3748;
+  color: white;
+  background-color: #1d386a;
 }
 
 .menu-item span {

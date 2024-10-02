@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  background-color: #fff;
+  background-color: #f9f7f7;
   border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;
@@ -51,7 +51,7 @@ export const SignInContainer = styled.div`
 `;
 
 export const Form = styled.form`
-  background-color: #ffffff;
+  background-color: #f9f7f7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,9 +76,9 @@ export const Input = styled.input`
 
 export const Button = styled.button`
   border-radius: 20px;
-  border: 1px solid #ff4b2b;
-  background-color: #ff4b2b;
-  color: #ffffff;
+  border: 0.5px solid #112d4e;
+  background-color: #3f72af;
+  color: #112d4e;
   font-size: 12px;
   font-weight: bold;
   padding: 12px 45px;
@@ -121,8 +121,8 @@ export const OverlayContainer = styled.div`
 
 export const Overlay = styled.div`
   background: #ff416c;
-  background: -webkit-linear-gradient(to right, #ff4b2b, #ff416c);
-  background: linear-gradient(to right, #ff4b2b, #ff416c);
+  background: -webkit-linear-gradient(to right, #112d4e, #3f72af);
+  background: linear-gradient(to right, #112d4e, #3f72af);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 0;

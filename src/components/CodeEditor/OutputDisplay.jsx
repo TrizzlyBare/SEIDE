@@ -1,13 +1,14 @@
 import React from "react";
+import "../../styles/Output.css";
 
 const OutputDisplay = ({ output, isError }) => {
   return (
-    <div style={{ marginTop: "16px" }}>
-      {output.map((line, index) => (
-        <p key={index} style={{ color: isError ? "red" : "green" }}>
-          {line}
-        </p>
-      ))}
+    <div className="output-container">
+      <div className={isError ? "output-error" : "output-text"}>
+        {output.map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
+      </div>
     </div>
   );
 };

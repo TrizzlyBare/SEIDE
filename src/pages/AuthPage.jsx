@@ -23,6 +23,7 @@ const AuthPage = () => {
         <Form>
           <Title>Create Account</Title>
           <Input type="text" placeholder="Name" />
+          <Input type="text" placeholder="SurName" />
           <Input type="email" placeholder="Email" />
           <Input type="password" placeholder="Password" />
           <Button>Sign Up</Button>

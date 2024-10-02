@@ -2,8 +2,8 @@
 .code-editor-page {
   width: 100%;
   min-height: 100vh;
-  background-color: #0f0a19;
-  color: #a0aec0; /* Equivalent to gray.500 */
+  background-color: #112d4e;
+  color: white; /* Equivalent to gray.500 */
   padding: 32px 24px; /* Equivalent to px={6} py={8} */
   display: flex;
   justify-content: center;
