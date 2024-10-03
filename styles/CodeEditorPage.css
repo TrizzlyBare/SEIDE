@@ -1,0 +1,21 @@
+/* CodeEditorPage.css */
+html, body {
+  height: 100%; /* Ensure the body and html take the full height */
+  margin: 0; /* Remove any default margin from the body */
+  padding: 0; /* Remove any default padding from the body */
+  box-sizing: border-box; /* Ensure padding is included in element width */
+}
+
+.code-editor-page {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: #112d4e;
+  color: white; /* Equivalent to gray.500 */
+  padding: 32px 24px; /* Equivalent to px={6} py={8} */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0; /* Remove auto margin to ensure no space on the sides */
+  box-sizing: border-box; /* Ensure padding is included in the width */
+}
