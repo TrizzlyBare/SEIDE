@@ -1,11 +1,13 @@
 import React from "react";
 import styled from "styled-components";
+import Sidebar from "../Sidebar/Sidebar";
+import { div } from "framer-motion/client";
 
 const DashboardContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f9f7f7;
+  background-color: #dbe2ef;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -43,10 +45,16 @@ const SubjectItem = styled.li`
   }
 `;
 
+const Container = styled.div `
+  display: flex;
+`
+
 const Dashboard = ({ subjects = [] }) => {
   console.log("Dashboard subjects:", subjects);
 
   return (
+    <Container>
+      <Sidebar />
     <DashboardContainer>
       <Title>Dashboard</Title>
       <Content>
@@ -57,6 +65,7 @@ const Dashboard = ({ subjects = [] }) => {
         </SubjectList>
       </Content>
     </DashboardContainer>
+    </Container>
   );
 };
 

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/Sidebar.css";
 import logo from "./se_logo.png";
-import dashboardIcon from "./Dashboard2.png";
+import htmllogo from "./coding.png";
 import profileIcon from "./Profile Icon Design.jpg";
+import logoutlogo from "./Logout.png";
+import dash from "./dashboard.png";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -38,7 +40,7 @@ const Sidebar = () => {
               alt="Software Engineer Logo"
               className="logo-small"
             />
-            <span className="hide">SEIDE</span>
+            <span className="hide seide" id="seide">SEIDE</span>
           </Link>
         </div>
         <div className="expand-btn" onClick={toggleSidebar}>
@@ -55,12 +57,12 @@ const Sidebar = () => {
         <ul>
           <li>
             <Link
-              to="/"
+              to="/dashboard"
               title="Dashboard"
-              className={`tooltip ${activeLink === "/" ? "active" : ""}`}
-              onClick={() => handleLinkClick("/")}
+              className={`tooltip ${activeLink === "/dashboard" ? "active" : ""}`}
+              onClick={() => handleLinkClick("/dashboard")}
             >
-              <img src={dashboardIcon} alt="dash" />
+              <img src={dash} alt="dash" />
               <span className="link hide">Dashboard</span>
               <span className="tooltip-content">Dashboard</span>
             </Link>
@@ -72,43 +74,15 @@ const Sidebar = () => {
               className={`tooltip ${activeLink === "/editor" ? "active" : ""}`}
               onClick={() => handleLinkClick("/editor")}
             >
-              <img src={dashboardIcon} alt="editor" />
+              <img src={htmllogo} alt="editor" />
               <span className="link hide">Code Editor</span>
               <span className="tooltip-content">Code Editor</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/auth"
-              title="Auth"
-              className={`tooltip ${activeLink === "/auth" ? "active" : ""}`}
-              onClick={() => handleLinkClick("/auth")}
-            >
-              <img src={dashboardIcon} alt="auth" />
-              <span className="link hide">Auth</span>
-              <span className="tooltip-content">Auth</span>
             </Link>
           </li>
         </ul>
       </div>
 
       <div className="sidebar-links bottom-links">
-        <h2>Settings</h2>
-        <ul>
-          <li>
-            <Link
-              to="/settings"
-              title="Settings"
-              className={`tooltip ${
-                activeLink === "/settings" ? "active" : ""
-              }`}
-              onClick={() => handleLinkClick("/settings")}
-            >
-              <span className="link hide">Settings</span>
-              <span className="tooltip-content">Settings</span>
-            </Link>
-          </li>
-        </ul>
       </div>
 
       <div className="divider"></div>
@@ -130,11 +104,12 @@ const Sidebar = () => {
           </section>
         </Link>
         <Link
+        
           to="/logout"
           className="logout"
           onClick={() => handleLinkClick("/logout")}
         >
-          <span className="hide">Logout</span>
+          <img src={logoutlogo} alt="dash" className="logout-logo" />
         </Link>
       </div>
     </nav>

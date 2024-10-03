@@ -4,7 +4,7 @@ import { register } from "./api";
 
 const SignUp = ({ signingIn }) => {
   const [name, setName] = useState("");
-  const [Surname, setSurname] = useState("");
+  const [Surname,setSurName] = ustState("")
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,7 +12,7 @@ const SignUp = ({ signingIn }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await register(name, Surname, email, password);
+      const data = await register(name,Surname,email, password);
       console.log("Registration successful:", data);
       // Handle successful registration (e.g., redirect to login)
     } catch (err) {
@@ -36,6 +36,7 @@ const SignUp = ({ signingIn }) => {
           value={Surname}
           onChange={(e) => setSurname(e.target.value)}
         />
+
         <Input
           type="email"
           placeholder="Email"

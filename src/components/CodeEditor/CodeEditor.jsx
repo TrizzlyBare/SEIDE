@@ -3,6 +3,7 @@ import { Editor } from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../../middleware/constants";
 import Output from "./Output";
+import "../../styles/Output.css";
 
 const CodeEditor = () => {
   const editorRef = useRef();
@@ -24,7 +25,7 @@ const CodeEditor = () => {
       {" "}
       {/* Set width to 100% */}
       <div style={{ display: "flex", gap: "16px" }}>
-        <div style={{ width: "50%", height: "400px" }}>
+        <div className="inputcontainer" style={{ width: "50%", height: "400px"  }}>
           <LanguageSelector language={language} onSelect={onSelect} />
           <Editor
             height="100%"

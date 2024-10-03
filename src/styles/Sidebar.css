@@ -7,7 +7,7 @@
   --background: #dbe2ef;
   --text-link: #ffffff;
   --headline: #cbd1d8;
-  --expand-button: #112d4e;
+  --expand-button: white;
   --logout: #fa7575;
 }
 
@@ -119,6 +119,7 @@ body.collapsed .search-wrapper input::-webkit-input-placeholder {
   overflow: hidden;
   height: 4rem;
   padding-bottom: 1rem;
+  margin-left: 15px;
 }
 
 body.collapsed .sidebar-top {
@@ -128,6 +129,7 @@ body.collapsed .sidebar-top {
 }
 
 .logo-wrapper {
+  margin-right: 15px;
   margin-top: 0.25rem;
   display: flex;
   align-items: center;
@@ -140,10 +142,10 @@ body.collapsed .sidebar-top {
 }
 
 .logo-small {
-  height: 40px;
-  width: 40px;
+  width: 50px;
   overflow: hidden;
-  object-fit: cover;
+  /* object-fit: cover; */
+  margin-right: 5%;
 }
 
 .sidebar-links {
@@ -276,8 +278,8 @@ body.collapsed .sidebar-links li {
 
 .avatar {
   display: block;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   cursor: pointer;
   border-radius: 50%;
@@ -350,4 +352,9 @@ body.collapsed .expand-btn svg {
   to {
     opacity: 1;
   }
+}
+
+.logout-logo {
+  width: 30px;
+  height: 30px;
 }

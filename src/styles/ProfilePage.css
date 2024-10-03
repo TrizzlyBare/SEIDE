@@ -61,65 +61,6 @@ body {
   z-index: 1;
   border-radius: 50%;
 }
-.profile-page .content__bull span:nth-child(2) {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  border-radius: 50%;
-}
-.profile-page .content__bull span:nth-child(3) {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  border-radius: 50%;
-}
-.profile-page .content__bull span:nth-child(4) {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  border-radius: 50%;
-}
-.profile-page .content__bull span:nth-child(5) {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  border-radius: 50%;
-}
-.profile-page .content__bull span:nth-child(1) {
-  width: 5rem;
-  height: 5rem;
-  top: -6%;
-  left: -3%;
-  background: rgba(255, 255, 255, 0.12);
-}
-.profile-page .content__bull span:nth-child(2) {
-  width: 8rem;
-  height: 8rem;
-  top: 18%;
-  left: 18%;
-  background: rgba(255, 255, 255, 0.05);
-}
-.profile-page .content__bull span:nth-child(3) {
-  width: 3rem;
-  height: 3rem;
-  top: 8%;
-  right: 2%;
-  background: rgba(255, 255, 255, 0.05);
-}
-.profile-page .content__bull span:nth-child(4) {
-  width: 6rem;
-  height: 6rem;
-  top: 28%;
-  right: 12%;
-  background: rgba(255, 255, 255, 0.1);
-}
-.profile-page .content__bull span:nth-child(5) {
-  width: 4rem;
-  height: 4rem;
-  top: 70%;
-  left: -6%;
-  background: rgba(255, 255, 255, 0.04);
-}
 .profile-page .content__avatar {
   width: 12rem;
   height: 12rem;
@@ -334,51 +275,9 @@ body {
   left: 0;
   z-index: 1;
   overflow: hidden;
-  background: linear-gradient(150deg, #3f72af 20%, #112d4e 100%);
+  background: linear-gradient(150deg, #112d4e 20%, #3f72af 100%);
 }
 .profile-page .bg span:nth-child(1) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(2) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(3) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(4) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(5) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(6) {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  border-radius: 50%;
-  animation: floating 34s infinite;
-}
-.profile-page .bg span:nth-child(7) {
   display: block;
   position: absolute;
   z-index: 2;
@@ -393,54 +292,7 @@ body {
   background: rgba(255, 255, 255, 0.05);
   animation-duration: 34s;
 }
-.profile-page .bg span:nth-child(2) {
-  width: 8rem;
-  height: 8rem;
-  top: 18%;
-  left: 1%;
-  background: rgba(255, 255, 255, 0.12);
-  animation-duration: 40s;
-}
-.profile-page .bg span:nth-child(3) {
-  width: 8rem;
-  height: 8rem;
-  top: 34%;
-  right: 10%;
-  background: rgba(255, 255, 255, 0.1);
-  animation-duration: 38s;
-}
-.profile-page .bg span:nth-child(4) {
-  width: 4rem;
-  height: 4rem;
-  top: 34%;
-  right: 3%;
-  background: rgba(255, 255, 255, 0.2);
-  animation-duration: 34s;
-}
-.profile-page .bg span:nth-child(5) {
-  width: 12rem;
-  height: 12rem;
-  top: 42%;
-  right: 28%;
-  background: rgba(255, 255, 255, 0.1);
-  animation-duration: 40s;
-}
-.profile-page .bg span:nth-child(6) {
-  width: 8rem;
-  height: 8rem;
-  top: 72%;
-  left: 6%;
-  background: rgba(255, 255, 255, 0.05);
-  animation-duration: 38s;
-}
-.profile-page .bg span:nth-child(7) {
-  width: 4rem;
-  height: 4rem;
-  top: 82%;
-  right: 8%;
-  background: rgba(255, 255, 255, 0.05);
-  animation-duration: 34s;
-}
+
 .theme-switcher-button {
   position: fixed;
   top: calc(50% - 3.6rem);
