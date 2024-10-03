@@ -10,7 +10,7 @@ import logging
 from passlib.context import CryptContext
 from typing import Dict, Any
 from fastapi.middleware.cors import CORSMiddleware
-from . import models, schemas, crud
+# from . import schemas, crud
 
 from database import SessionLocal, User
 from dashboard import (
@@ -146,21 +146,19 @@ async def register(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/dashboard")
-async def get_dashboard_data(
-    request: Request, db: Session = Depends(DashboardSessionLocal)
-):
+@app.get("/dashboard", response_model=Dict[str, Any])
+async def get_dashboard_data(request: Request, db: Session = Depends(get_dashboard_db)):
     try:
-        subjects = db.querysubjects = (
+        subjects = (
             db.query(Subject)
             .options(
                 joinedload(Subject.topics)
                 .joinedload(Topic.questions)
                 .joinedload(Question.answers)
             )
-            .all()(Subject)
             .all()
         )
+
         dashboard_data = []
         for subject in subjects:
             subject_data = {"id": subject.id, "name": subject.name, "topics": []}
@@ -185,6 +183,7 @@ async def get_dashboard_data(
     except Exception as e:
         logging.error(f"Error retrieving dashboard data: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
+
 
 
 @app.post("/create_subject")
@@ -265,7 +264,6 @@ async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profile
             email=request.email,
             first_name=request.first_name,
             last_name=request.last_name,
-            Year=request.Year,
         )
         db.add(new_profile)
         db.commit()
@@ -283,15 +281,15 @@ async def logout():
     return {"message": "Logged out"}
 
 
-@app.post("/api/subjects", response_model=schemas.Subject)
-def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
-    db_subject = crud.get_subject_by_name(db, name=subject.name)
-    if db_subject:
-        raise HTTPException(status_code=400, detail="Subject already registered")
-    return crud.create_subject(db=db, subject=subject)
+# @app.post("/api/subjects", response_model=schemas.Subject)
+# def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
+#     db_subject = crud.get_subject_by_name(db, name=subject.name)
+#     if db_subject:
+#         raise HTTPException(status_code=400, detail="Subject already registered")
+#     return crud.create_subject(db=db, subject=subject)
 
 
-@app.get("/api/subjects", response_model=List[schemas.Subject])
-def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    subjects = crud.get_subjects(db, skip=skip, limit=limit)
-    return subjects
+# @app.get("/api/subjects", response_model=List[schemas.Subject])
+# def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+#     subjects = crud.get_subjects(db, skip=skip, limit=limit)
+#     return subjects

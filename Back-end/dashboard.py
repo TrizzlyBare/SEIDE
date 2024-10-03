@@ -8,6 +8,7 @@ from typing import List, Optional
 
 DASHBOARD_DATABASE_URL = "sqlite:///./dashboard.db"
 
+
 dashboard_engine = create_engine(
     DASHBOARD_DATABASE_URL, connect_args={"check_same_thread": False}
 )

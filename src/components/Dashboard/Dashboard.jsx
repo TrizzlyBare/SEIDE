@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import Sidebar from "../Sidebar/Sidebar";
-import { div } from "framer-motion/client";
 
 const DashboardContainer = styled.div`
   width: 100%;
@@ -45,9 +44,9 @@ const SubjectItem = styled.li`
   }
 `;
 
-const Container = styled.div `
+const Container = styled.div`
   display: flex;
-`
+`;
 
 const Dashboard = ({ subjects = [] }) => {
   console.log("Dashboard subjects:", subjects);
@@ -55,16 +54,16 @@ const Dashboard = ({ subjects = [] }) => {
   return (
     <Container>
       <Sidebar />
-    <DashboardContainer>
-      <Title>Dashboard</Title>
-      <Content>
-        <SubjectList>
-          {subjects.map((subject, index) => (
-            <SubjectItem key={index}>{subject}</SubjectItem>
-          ))}
-        </SubjectList>
-      </Content>
-    </DashboardContainer>
+      <DashboardContainer>
+        <Title>Dashboard</Title>
+        <Content>
+          <SubjectList>
+            {subjects.map((subject, index) => (
+              <SubjectItem key={index}>{subject}</SubjectItem>
+            ))}
+          </SubjectList>
+        </Content>
+      </DashboardContainer>
     </Container>
   );
 };
