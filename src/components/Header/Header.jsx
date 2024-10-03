@@ -1,14 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { HeaderContainer, NavLinks, ProfileLink } from "./headerStyle"; // Import ProfileLink
+import {
+  HeaderContainer,
+  NavLinks,
+  ProfileLink,
+  BaseLink,
+} from "./headerStyle"; // Import ProfileLink
+
+//The top and left should be 0 and the width should be 100%.
+
 
 const Header = () => {
   return (
     <HeaderContainer>
       <NavLinks>
-        <Link to="/">Home</Link>
-        <Link to="/auth">Auth</Link>
-        <Link to="/editor">Editor</Link>
+        <BaseLink to="/">Home</BaseLink>
+        <BaseLink to="/auth">Auth</BaseLink>
+        <BaseLink to="/editor">Editor</BaseLink>
         <ProfileLink to="/profile">Profile</ProfileLink>
       </NavLinks>
     </HeaderContainer>
