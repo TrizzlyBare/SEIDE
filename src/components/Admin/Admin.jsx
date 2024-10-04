@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { createSubject } from "../../api";
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -51,7 +52,7 @@ const Button = styled.button`
   }
 `;
 
-const Admin = () => {
+const Admin = ({ addSubject }) => {
   const [newSubject, setNewSubject] = useState("");
 
   const handleInputChange = (e) => {
@@ -61,20 +62,13 @@ const Admin = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
-      // Call the API to add the subject to the database
-      const response = await fetch("/api/subjects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: newSubject }),
-      });
-
-      if (response.ok) {
+      try {
+        await createSubject({ name: newSubject });
         setNewSubject("");
         alert("Subject added successfully");
-      } else {
-        console.error("Failed to add subject");
+        addSubject();
+      } catch (error) {
+        console.error("Failed to add subject", error);
       }
     }
   };

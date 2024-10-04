@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5173/";
+const API_URL = "http://127.0.0.1:8000";
 
 export const login = async (username, password) => {
   try {
@@ -52,3 +52,20 @@ export const updateProfile = async (username, email, password) => {
   }
 };
 
+export const createSubject = async (subject) => {
+  try {
+    const response = await axios.post(`${API_URL}/create_subject`, subject);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getSubjects = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

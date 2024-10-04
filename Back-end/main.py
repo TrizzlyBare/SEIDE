@@ -10,6 +10,7 @@ import logging
 from passlib.context import CryptContext
 from typing import Dict, Any
 from fastapi.middleware.cors import CORSMiddleware
+
 # from . import schemas, crud
 
 from database import SessionLocal, User
@@ -146,44 +147,53 @@ async def register(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/dashboard", response_model=Dict[str, Any])
-async def get_dashboard_data(request: Request, db: Session = Depends(get_dashboard_db)):
-    try:
-        subjects = (
-            db.query(Subject)
-            .options(
-                joinedload(Subject.topics)
-                .joinedload(Topic.questions)
-                .joinedload(Question.answers)
-            )
-            .all()
-        )
+# @app.get("/dashboard", response_model=Dict[str, Any])
+# async def get_dashboard_data(request: Request, db: Session = Depends(get_dashboard_db)):
+#     try:
+#         subjects = (
+#             db.query(Subject)
+#             .options(
+#                 joinedload(Subject.topics)
+#                 .joinedload(Topic.questions)
+#                 .joinedload(Question.answers)
+#             )
+#             .all()
+#         )
 
-        dashboard_data = []
-        for subject in subjects:
-            subject_data = {"id": subject.id, "name": subject.name, "topics": []}
-            for topic in subject.topics:
-                topic_data = {"id": topic.id, "name": topic.name, "questions": []}
-                for question in topic.questions:
-                    question_data = {
-                        "id": question.id,
-                        "text": question.text,
-                        "answers": [
-                            {"id": answer.id, "text": answer.text}
-                            for answer in question.answers
-                        ],
-                    }
-                    topic_data["questions"].append(question_data)
-                subject_data["topics"].append(topic_data)
+#         dashboard_data = []
+#         for subject in subjects:
+#             subject_data = {"id": subject.id, "name": subject.name, "topics": []}
+#             for topic in subject.topics:
+#                 topic_data = {"id": topic.id, "name": topic.name, "questions": []}
+#                 for question in topic.questions:
+#                     question_data = {
+#                         "id": question.id,
+#                         "text": question.text,
+#                         "answers": [
+#                             {"id": answer.id, "text": answer.text}
+#                             for answer in question.answers
+#                         ],
+#                     }
+#                     topic_data["questions"].append(question_data)
+#                 subject_data["topics"].append(topic_data)
 
-            dashboard_data.append(subject_data)
+#             dashboard_data.append(subject_data)
 
-        return {"dashboard": dashboard_data}
+#         return {"dashboard": dashboard_data}
 
-    except Exception as e:
-        logging.error(f"Error retrieving dashboard data: {e}")
-        raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
+#     except Exception as e:
+#         logging.error(f"Error retrieving dashboard data: {e}")
+#         raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
 
+
+@app.get("/dashboard")
+async def get_subjects(db: Session = Depends(get_dashboard_db)):
+    subjects = db.query(Subject).all()
+    return subjects
+
+
+class SubjectCreate(BaseModel):
+    name: str
 
 
 @app.post("/create_subject")
@@ -201,42 +211,50 @@ async def create_subject(
         db.commit()
         db.refresh(new_subject)
 
-        for topic in subject.topics:
-            if not topic.name:
-                raise HTTPException(status_code=400, detail="Topic name is required")
-
-            new_topic = Topic(name=topic.name, subject_id=new_subject.id)
-            db.add(new_topic)
-            db.commit()
-            db.refresh(new_topic)
-
-            for question in topic.questions:
-                if not question.text:
-                    raise HTTPException(
-                        status_code=400, detail="Question text is required"
-                    )
-
-                new_question = Question(text=question.text, topic_id=new_topic.id)
-                db.add(new_question)
-                db.commit()
-                db.refresh(new_question)
-
-                for answer in question.answers:
-                    if not answer.text:
-                        raise HTTPException(
-                            status_code=400, detail="Answer text is required"
-                        )
-
-                    new_answer = Answer(text=answer.text, question_id=new_question.id)
-                    db.add(new_answer)
-                    db.commit()
-                    db.refresh(new_answer)
-
+        # Temorary Testing <----------------
         return {"message": "Subject created successfully"}
     except Exception as e:
         logging.error(f"Error creating subject: {e}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
+        # ------------------------------>
+
+    #     for topic in subject.topics:
+    #         if not topic.name:
+    #             raise HTTPException(status_code=400, detail="Topic name is required")
+
+    #         new_topic = Topic(name=topic.name, subject_id=new_subject.id)
+    #         db.add(new_topic)
+    #         db.commit()
+    #         db.refresh(new_topic)
+
+    #         for question in topic.questions:
+    #             if not question.text:
+    #                 raise HTTPException(
+    #                     status_code=400, detail="Question text is required"
+    #                 )
+
+    #             new_question = Question(text=question.text, topic_id=new_topic.id)
+    #             db.add(new_question)
+    #             db.commit()
+    #             db.refresh(new_question)
+
+    #             for answer in question.answers:
+    #                 if not answer.text:
+    #                     raise HTTPException(
+    #                         status_code=400, detail="Answer text is required"
+    #                     )
+
+    #                 new_answer = Answer(text=answer.text, question_id=new_question.id)
+    #                 db.add(new_answer)
+    #                 db.commit()
+    #                 db.refresh(new_answer)
+
+    #     return {"message": "Subject created successfully"}
+    # except Exception as e:
+    #     logging.error(f"Error creating subject: {e}")
+    #     db.rollback()
+    #     raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.post("/editor")
