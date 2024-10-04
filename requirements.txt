@@ -1,0 +1,8 @@
+fastapi[standard]
+uvicorn
+sqlalchemy
+passlib
+jwt
+jose
+pydantic
+typing
