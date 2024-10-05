@@ -218,44 +218,55 @@ async def create_subject(
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
         # ------------------------------>
+        
+#############################################################################################################
 
-    #     for topic in subject.topics:
-    #         if not topic.name:
-    #             raise HTTPException(status_code=400, detail="Topic name is required")
-
-    #         new_topic = Topic(name=topic.name, subject_id=new_subject.id)
-    #         db.add(new_topic)
-    #         db.commit()
-    #         db.refresh(new_topic)
-
-    #         for question in topic.questions:
-    #             if not question.text:
-    #                 raise HTTPException(
-    #                     status_code=400, detail="Question text is required"
-    #                 )
-
-    #             new_question = Question(text=question.text, topic_id=new_topic.id)
-    #             db.add(new_question)
-    #             db.commit()
-    #             db.refresh(new_question)
-
-    #             for answer in question.answers:
-    #                 if not answer.text:
-    #                     raise HTTPException(
-    #                         status_code=400, detail="Answer text is required"
-    #                     )
-
-    #                 new_answer = Answer(text=answer.text, question_id=new_question.id)
-    #                 db.add(new_answer)
-    #                 db.commit()
-    #                 db.refresh(new_answer)
-
-    #     return {"message": "Subject created successfully"}
-    # except Exception as e:
-    #     logging.error(f"Error creating subject: {e}")
-    #     db.rollback()
-    #     raise HTTPException(status_code=500, detail="Internal Server Error")
-
+@app.post("/create_topic")
+async def create_topic(request: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    try:
+        logging.info(f"Received topic data: {Subject}")
+        new_subject = Subject(name=request.name)
+        db.add(new_subject)
+        db.commit()
+    except Exception as e:
+        logging.error(f"Error during login: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        db.close()
+        return {"message": "Subject created successfully"}
+    
+@app.post("/create_question")   
+async def create_question(request: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    try:
+        logging.info(f"Received question data: {Subject}")
+        new_subject = Subject(name=request.name)
+        db.add(new_subject)
+        db.commit()
+    except Exception as e:
+        logging.error(f"Error during login: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        db.close()
+        return {"message": "Subject created successfully"}
+    
+@app.post("/create_answer")
+async def create_answer(request: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    try:
+        logging.info(f"Received answer data: {Subject}")
+        new_subject = Subject(name=request.name)
+        db.add(new_subject)
+        db.commit()
+    except Exception as e:
+        logging.error(f"Error during login: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        db.close()
+        return {"message": "Subject created successfully"}
+    
+#############################################################################################################
 
 @app.post("/editor")
 async def get_editor(request: Create_Code_Data, db: Session = Depends(get_editor_db)):
