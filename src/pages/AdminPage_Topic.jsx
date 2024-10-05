@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Admin from "../components/Admin/Admin_Topic";
+import Admin from "../components/Admin/Admin";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import { getTopics } from "../api";
 
