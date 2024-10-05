@@ -61,6 +61,33 @@ export const createSubject = async (subject) => {
   }
 };
 
+export const createTopic = async (topic) => {
+  try {
+    const response = await axios.post(`${API_URL}/create_topic`, topic);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+
+export const createQuestion = async (question) => {
+  try {
+    const response = await axios.post(`${API_URL}/create_question`, question);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+
+export const createAnswer = async (answer) => {
+  try {
+    const response = await axios.post(`${API_URL}/create_answer`, answer);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+
 export const getSubjects = async () => {
   try {
     const response = await axios.get(`${API_URL}/dashboard`);
@@ -69,3 +96,30 @@ export const getSubjects = async () => {
     throw error.response.data;
   }
 };
+
+export const getTopics = async () => {  
+  try {
+    const response = await axios.get(`${API_URL}/dashboard`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+
+export const getQuestions = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+
+export const getAnswers = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}

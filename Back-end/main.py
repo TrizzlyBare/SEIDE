@@ -71,15 +71,6 @@ def get_dashboard_db():
     finally:
         db.close()
 
-
-# def get_current_user(request: Request, db: Session = Depends(get_db)):
-#     user = None
-#     if "user" in request.session:
-#         user_id = request.session["user"]
-#         user = db.query(User).filter(User.id == user_id).first()
-#     return user
-
-
 def get_editor_db():
     db = EditorSessionLocal()
     try:
@@ -146,46 +137,6 @@ async def register(
         logging.error(f"Error during registration: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
-# @app.get("/dashboard", response_model=Dict[str, Any])
-# async def get_dashboard_data(request: Request, db: Session = Depends(get_dashboard_db)):
-#     try:
-#         subjects = (
-#             db.query(Subject)
-#             .options(
-#                 joinedload(Subject.topics)
-#                 .joinedload(Topic.questions)
-#                 .joinedload(Question.answers)
-#             )
-#             .all()
-#         )
-
-#         dashboard_data = []
-#         for subject in subjects:
-#             subject_data = {"id": subject.id, "name": subject.name, "topics": []}
-#             for topic in subject.topics:
-#                 topic_data = {"id": topic.id, "name": topic.name, "questions": []}
-#                 for question in topic.questions:
-#                     question_data = {
-#                         "id": question.id,
-#                         "text": question.text,
-#                         "answers": [
-#                             {"id": answer.id, "text": answer.text}
-#                             for answer in question.answers
-#                         ],
-#                     }
-#                     topic_data["questions"].append(question_data)
-#                 subject_data["topics"].append(topic_data)
-
-#             dashboard_data.append(subject_data)
-
-#         return {"dashboard": dashboard_data}
-
-#     except Exception as e:
-#         logging.error(f"Error retrieving dashboard data: {e}")
-#         raise HTTPException(status_code=500, detail="Error retrieving dashboard data")
-
-
 @app.get("/dashboard")
 async def get_subjects(db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).all()
@@ -218,7 +169,7 @@ async def create_subject(
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
         # ------------------------------>
-        
+
 #############################################################################################################
 
 @app.post("/create_topic")

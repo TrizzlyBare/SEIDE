@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from "react";
-import Admin from "../components/Admin/Admin";
+import Admin from "../components/Admin/Admin_Topic";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
-import { getSubjects } from "../api";
+import { getTopics } from "../api";
 
 const AdminPage = () => {
-  const [subjects, setSubjects] = useState([]);
+  const [topics, setTopics] = useState([]);
 
-  const fetchSubjects = async () => {
+  const fetchTopics = async () => {
     try {
-      const data = await getSubjects();
+      const data = await getTopics();
       if (Array.isArray(data)) {
-        setSubjects(data);
+        setTopics(data);
       } else {
         console.error("Fetched data is not an array", data);
-        setSubjects([]);
+        setTopics([]);
       }
     } catch (error) {
-      console.error("Failed to fetch subjects", error);
-      setSubjects([]);
+      console.error("Failed to fetch topics", error);
+      setTopics([]);
     }
   };
 
-  const refreshSubjects = () => {
-    fetchSubjects();
+  const refreshTopics = () => {
+    fetchTopics();
   };
 
   useEffect(() => { 
-    fetchSubjects();
+    fetchTopics();
   }, []);
 
   return (
     <div className="sidebar-container">
       <AdminSidebar />
-      <Admin addSubject={refreshSubjects}/>
+      <Admin addSubject={refreshSubjects} />
       <div>
         <h2>Subjects List</h2>
         <ul>
