@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Admin from "../components/Admin/Admin";
+import CreateTopic from "../components/Admin/create_topic";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import { getTopics } from "../api";
 
@@ -32,14 +32,14 @@ const AdminPage = () => {
   return (
     <div className="sidebar-container">
       <AdminSidebar />
-      <Admin addSubject={refreshSubjects} />
+      <CreateTopic refreshTopics={refreshTopics} />
       <div>
-        <h2>Subjects List</h2>
+        <h2>Topics List</h2>
         <ul>
-          {subjects.map((subject) => (
-            <li key={subject.id}>{subject.name}</li>
+          {topics.map((topic) => (
+            <li key={topic.id}>{topic.name}</li>
           ))}
-        </ul> 
+        </ul>
       </div>
     </div>
   );
