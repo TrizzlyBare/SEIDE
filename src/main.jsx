@@ -7,6 +7,7 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
+import CreateTopic from "./components/Admin/create_topic";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -19,6 +20,7 @@ root.render(
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dashboard" element={<HomePage />} />
       <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin/create_topic" element={<CreateTopic />} />
     </Routes>
   </BrowserRouter>
 );
