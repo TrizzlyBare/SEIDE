@@ -52,74 +52,252 @@ export const updateProfile = async (username, email, password) => {
   }
 };
 
-export const createSubject = async (subject) => {
-  try {
-    const response = await axios.post(`${API_URL}/create_subject`, subject);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-export const createTopic = async (topic) => {
-  try {
-    const response = await axios.post(`${API_URL}/create_topic`, topic);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-}
-
-export const createQuestion = async (question) => {
-  try {
-    const response = await axios.post(`${API_URL}/create_question`, question);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-}
-
-export const createAnswer = async (answer) => {
-  try {
-    const response = await axios.post(`${API_URL}/create_answer`, answer);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-}
-
+// Function to fetch all subjects
 export const getSubjects = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/dashboard`);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
+  const response = await fetch(`${API_URL}/subjects/`);
+  if (!response.ok) {
+      throw new Error('Failed to fetch subjects');
   }
+  return await response.json();
 };
 
-export const getTopics = async () => {  
-  try {
-    const response = await axios.get(`${API_URL}/dashboard`);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
+// Function to create a new subject
+export const createSubject = async (subject) => {
+  const response = await fetch(`${API_URL}/subjects/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(subject),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to create subject');
   }
-}
+  return await response.json();
+};
 
+// Function to update a subject
+export const updateSubject = async (subjectId, subject) => {
+  const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(subject),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to update subject');
+  }
+  return await response.json();
+};
+
+// Function to delete a subject
+export const deleteSubject = async (subjectId) => {
+  const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
+      method: 'DELETE',
+  });
+  if (!response.ok) {
+      throw new Error('Failed to delete subject');
+  }
+  return await response.json();
+};
+
+// Function to fetch all topics
+export const getTopics = async () => {
+  const response = await fetch(`${API_URL}/topics/`);
+  if (!response.ok) {
+      throw new Error('Failed to fetch topics');
+  }
+  return await response.json();
+};
+
+// Function to create a new topic
+export const createTopic = async (topic) => {
+  const response = await fetch(`${API_URL}/topics/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(topic),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to create topic');
+  }
+  return await response.json();
+};
+
+// Function to update a topic
+export const updateTopic = async (topicId, topic) => {
+  const response = await fetch(`${API_URL}/topics/${topicId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(topic),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to update topic');
+  }
+  return await response.json();
+};
+
+// Function to delete a topic
+export const deleteTopic = async (topicId) => {
+  const response = await fetch(`${API_URL}/topics/${topicId}`, {
+      method: 'DELETE',
+  });
+  if (!response.ok) {
+      throw new Error('Failed to delete topic');
+  }
+  return await response.json();
+};
+
+// Function to fetch all questions
 export const getQuestions = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/dashboard`);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
+  const response = await fetch(`${API_URL}/questions/`);
+  if (!response.ok) {
+      throw new Error('Failed to fetch questions');
   }
-}
+  return await response.json();
+};
 
-export const getAnswers = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/dashboard`);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
+// Function to create a new question
+export const createQuestion = async (question) => {
+  const response = await fetch(`${API_URL}/questions/`, {
+    method: 'POST',
+    headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(question),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to create question');
   }
-}
+  return await response.json();
+};
+
+// Function to update a question
+export const updateQuestion = async (questionId, question) => {
+  const response = await fetch(`${API_URL}/questions/${questionId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(question),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to update question');
+  }
+  return await response.json();
+};
+
+// Function to delete a question
+export const deleteQuestion = async (questionId) => {
+  const response = await fetch(`${API_URL}/questions/${questionId}`, {
+      method: 'DELETE',
+  });
+  if (!response.ok) {
+      throw new Error('Failed to delete question');
+  }
+  return await response.json();
+};
+
+// Function to fetch all answers
+export const getAnswers = async () => {
+  const response = await fetch(`${API_URL}/answers/`);
+  if (!response.ok) {
+      throw new Error('Failed to fetch answers');
+  }
+  return await response.json();
+};
+
+// Function to create a new answer
+export const createAnswer = async (answer) => {
+  const response = await fetch(`${API_URL}/answers/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(answer),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to create answer');
+  }
+  return await response.json();
+};
+
+// Function to update an answer
+export const updateAnswer = async (answerId, answer) => {
+  const response = await fetch(`${API_URL}/answers/${answerId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(answer),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to update answer');
+  }
+  return await response.json();
+};
+
+// Function to delete an answer
+export const deleteAnswer = async (answerId) => {
+  const response = await fetch(`${API_URL}/answers/${answerId}`, {
+      method: 'DELETE',
+  });
+  if (!response.ok) {
+      throw new Error('Failed to delete answer');
+  }
+  return await response.json();
+};
+
+// Function to fetch all test cases
+export const getTestCases = async () => {
+  const response = await fetch(`${API_URL}/testcases/`);
+  if (!response.ok) {
+      throw new Error('Failed to fetch test cases');
+  }
+  return await response.json();
+};
+
+// Function to create a new test case
+export const createTestCase = async (testCase) => {
+  const response = await fetch(`${API_URL}/testcases/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(testCase),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to create test case');
+  }
+  return await response.json();
+};
+
+// Function to update a test case
+export const updateTestCase = async (testCaseId, testCase) => {
+  const response = await fetch(`${API_URL}/testcases/${testCaseId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(testCase),
+  });
+  if (!response.ok) {
+      throw new Error('Failed to update test case');
+  }
+  return await response.json();
+};
+
+// Function to delete a test case
+export const deleteTestCase = async (testCaseId) => {
+  const response = await fetch(`${API_URL}/testcases/${testCaseId}`, {
+      method: 'DELETE',
+  });
+  if (!response.ok) {
+      throw new Error('Failed to delete test case');
+  }
+  return await response.json();
+};
