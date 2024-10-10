@@ -35,11 +35,11 @@ const AdminPage = () => {
       <Admin addSubject={refreshSubjects}/>
       <div>
         <h2>Subjects List</h2>
-        <ul>
+        {/* <ul>
           {subjects.map((subject) => (
             <li key={subject.id}>{subject.name}</li>
           ))}
-        </ul> 
+        </ul>  */}
       </div>
     </div>
   );
