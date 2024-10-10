@@ -25,21 +25,21 @@ const AdminPage = () => {
     fetchSubjects();
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchSubjects();
   }, []);
 
   return (
     <div className="sidebar-container">
-      <AdminSidebar />
-      <Admin addSubject={refreshSubjects}/>
+      <AdminSidebar subjects={subjects} addSubject={refreshSubjects} />
+      <Admin addSubject={refreshSubjects} />
       <div>
         <h2>Subjects List</h2>
         <ul>
           {subjects.map((subject) => (
             <li key={subject.id}>{subject.name}</li>
           ))}
-        </ul> 
+        </ul>
       </div>
     </div>
   );
