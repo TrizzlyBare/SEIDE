@@ -53,12 +53,53 @@ export const updateProfile = async (username, email, password) => {
 };
 
 // Subject functions
+// export const getSubjects = async () => {
+//   try {
+//     const response = await fetch(`${API_URL}/subjects/`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(
+//         `Failed to fetch subjects: ${response.status} ${response.statusText}`
+//       );
+//     }
+
+//     return response.json();
+//   } catch (error) {
+//     console.error("Error fetching subjects:", error);
+//     throw error;
+//   }
+// };
+
+// export const createSubject = async (subject) => {
+//   console.log("Sending payload:", subject); // Log the payload
+//   const response = await fetch(`${API_URL}/subjects/`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(subject),
+//   });
+//   if (!response.ok) {
+//     const errorText = await response.text();
+//     console.error("Error response:", errorText); // Log the error response
+//     throw new Error("Failed to create subject");
+//   }
+//   return await response.json();
+// };
+
+// Subject functions
 export const getSubjects = async () => {
   const response = await fetch(`${API_URL}/subjects/`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
+    mode: "cors",
   });
   if (!response.ok) {
     throw new Error("Failed to fetch subjects");
@@ -74,6 +115,7 @@ export const createSubject = async (subject) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(subject),
+    mode: "cors",
   });
   if (!response.ok) {
     const errorText = await response.text();

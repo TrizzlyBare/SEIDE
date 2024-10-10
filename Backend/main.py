@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import time
 import logging
 from passlib.context import CryptContext
@@ -19,12 +19,13 @@ QuestionBase, AnswerBase, TestCaseBase, TopicCreate, QuestionCreate, AnswerCreat
 SubjectCreate)
 from editor import EditorSessionLocal, Create_Code_Data, CodeData
 from user_profile import Profile, ProfileSessionLocal, ProfileCreate
-from schemas import SubjectBase, SubjectCreate
+from schemas import SubjectBase, SubjectCreate, Subject
 
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
 
 # Set up templates directory
