@@ -108,35 +108,57 @@ export const getSubjects = async () => {
 };
 
 export const createSubject = async (subject) => {
-  console.log("Sending payload:", subject); // Log the payload
-  const response = await fetch(`${API_URL}/subjects/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(subject),
-    mode: "cors",
-  });
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Error response:", errorText); // Log the error response
-    throw new Error("Failed to create subject");
+  try {
+    console.log("Sending payload:", subject); // Log the payload for debugging
+
+    const response = await fetch(`${API_URL}/subjects/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(subject),
+      mode: "cors", // Ensure CORS mode is used
+    });
+
+    // Check for errors
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error response:", errorText); // Log the error
+      throw new Error("Failed to create subject");
+    }
+
+    // Return the response data
+    return await response.json();
+  } catch (error) {
+    console.error("Create subject error:", error);
+    throw error;
   }
-  return await response.json();
 };
 
 export const updateSubject = async (subjectId, subject) => {
-  const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(subject),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update subject");
+  try {
+    const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(subject),
+      mode: "cors", // Explicitly set CORS mode
+    });
+
+    // Check for errors
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error response:", errorText); // Log the error
+      throw new Error("Failed to update subject");
+    }
+
+    // Return the response data
+    return await response.json();
+  } catch (error) {
+    console.error("Update subject error:", error);
+    throw error;
   }
-  return await response.json();
 };
 
 export const deleteSubject = async (subjectId) => {
