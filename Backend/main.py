@@ -23,6 +23,10 @@ from schemas import SubjectBase, SubjectCreate
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:5173",
+]
+
 # Set up templates directory
 templates = Jinja2Templates(directory="templates")
 
@@ -44,7 +48,7 @@ async def log_requests(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -138,7 +142,7 @@ async def get_subjects(db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).all()
     return subjects
 
-@app.post("/subjects/", response_model=SubjectBase)
+@app.post("/subjects/", response_model=Subject)
 def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     try:
         logging.info(f"Received payload: {subject.dict()}") # Log the received payload
@@ -155,12 +159,12 @@ def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_d
         logging.error(f"Error creating subject: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.get("/subjects/", response_model=List[SubjectBase])
+@app.get("/subjects/", response_model=List[Subject])
 def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).offset(skip).limit(limit).all()
     return subjects
 
-@app.get("/subjects/{subject_id}", response_model=SubjectBase)
+@app.get("/subjects/{subject_id}", response_model=Subject)
 def read_subject(subject_id: int, db: Session = Depends(get_dashboard_db)):
     subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if subject is None:

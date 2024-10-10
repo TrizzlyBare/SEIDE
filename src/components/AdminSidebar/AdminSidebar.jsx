@@ -6,7 +6,7 @@ import dash from "./dashboard.png"; // Ensure this path is correct
 import profileIcon from "./Profile Icon Design.jpg"; // Ensure this path is correct
 import logoutlogo from "./Logout.png"; // Ensure this path is correct
 
-const AdminSidebar = ({ subjects }) => {
+const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeLink, setActiveLink] = useState("");
 
@@ -83,14 +83,6 @@ const AdminSidebar = ({ subjects }) => {
               <span className="link hide">Code Editor</span>
               <span className="tooltip-content">Code Editor</span>
             </Link>
-          </li>
-          <li>
-            <h2>Subjects</h2>
-            <ul>
-              {subjects.map((subject) => (
-                <li key={subject.id}>{subject.name}</li>
-              ))}
-            </ul>
           </li>
         </ul>
       </div>

@@ -54,7 +54,12 @@ export const updateProfile = async (username, email, password) => {
 
 // Subject functions
 export const getSubjects = async () => {
-  const response = await fetch(`${API_URL}/subjects/`);
+  const response = await fetch(`${API_URL}/subjects/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch subjects");
   }

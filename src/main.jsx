@@ -6,7 +6,7 @@ import AuthPage from "./pages/AuthPage"; // Import AuthPage
 import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/Homepage";
 import CreateTopic from "./components/Admin/create_topic";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

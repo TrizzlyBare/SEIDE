@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { createSubject } from "../../api";
+import { createSubject, getSubjects } from "../../api";
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -54,6 +54,7 @@ const Button = styled.button`
 
 const Admin = ({ addSubject }) => {
   const [newSubject, setNewSubject] = useState("");
+  const [subjects, setSubjects] = useState([]);
 
   const handleInputChange = (e) => {
     setNewSubject(e.target.value);
@@ -67,11 +68,25 @@ const Admin = ({ addSubject }) => {
         setNewSubject("");
         alert("Subject added successfully");
         addSubject();
+        fetchSubjects(); // Refresh subjects after adding a new one
       } catch (error) {
         console.error("Failed to add subject", error);
       }
     }
   };
+
+  const fetchSubjects = async () => {
+    try {
+      const data = await getSubjects();
+      setSubjects(data);
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
 
   return (
     <AdminContainer>
@@ -86,6 +101,13 @@ const Admin = ({ addSubject }) => {
           />
           <Button type="submit">Add Subject</Button>
         </Form>
+
+        <h2>Subjects List</h2>
+        <ul>
+          {subjects.map((subject) => (
+            <li key={subject.id}>{subject.name}</li>
+          ))}
+        </ul>
       </Content>
     </AdminContainer>
   );
