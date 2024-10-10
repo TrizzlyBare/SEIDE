@@ -62,6 +62,7 @@ export const getSubjects = async () => {
 };
 
 export const createSubject = async (subject) => {
+  console.log("Sending payload:", subject); // Log the payload
   const response = await fetch(`${API_URL}/subjects/`, {
     method: "POST",
     headers: {
@@ -70,6 +71,8 @@ export const createSubject = async (subject) => {
     body: JSON.stringify(subject),
   });
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Error response:", errorText); // Log the error response
     throw new Error("Failed to create subject");
   }
   return await response.json();

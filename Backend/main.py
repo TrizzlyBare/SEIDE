@@ -19,6 +19,7 @@ QuestionBase, AnswerBase, TestCaseBase, TopicCreate, QuestionCreate, AnswerCreat
 SubjectCreate)
 from editor import EditorSessionLocal, Create_Code_Data, CodeData
 from user_profile import Profile, ProfileSessionLocal, ProfileCreate
+from schemas import SubjectBase, SubjectCreate
 
 app = FastAPI()
 
@@ -140,12 +141,16 @@ async def get_subjects(db: Session = Depends(get_dashboard_db)):
 @app.post("/subjects/", response_model=SubjectBase)
 def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     try:
+        logging.info(f"Received payload: {subject.dict()}") # Log the received payload
         db_subject = Subject(**subject.dict())
         db.add(db_subject)
         db.commit()
         db.refresh(db_subject)
         logging.info(f"Subject created: {db_subject}")
         return db_subject
+    except ValidationError as e: # type: ignore
+        logging.error(f"Validation error: {e.errors()}") # Log validation errors
+        raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:
         logging.error(f"Error creating subject: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
