@@ -138,7 +138,7 @@ async def get_subjects(db: Session = Depends(get_dashboard_db)):
     return subjects
 
 @app.post("/subjects/", response_model=SubjectBase)
-def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
+def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     try:
         db_subject = Subject(**subject.dict())
         db.add(db_subject)
@@ -151,19 +151,19 @@ def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.get("/subjects/", response_model=List[SubjectBase])
-def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).offset(skip).limit(limit).all()
     return subjects
 
 @app.get("/subjects/{subject_id}", response_model=SubjectBase)
-def read_subject(subject_id: int, db: Session = Depends(get_db)):
+def read_subject(subject_id: int, db: Session = Depends(get_dashboard_db)):
     subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
     return subject
 
 @app.put("/subjects/{subject_id}", response_model=SubjectBase)
-def update_subject(subject_id: int, subject: SubjectCreate, db: Session = Depends(get_db)):
+def update_subject(subject_id: int, subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     db_subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if db_subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
@@ -177,7 +177,7 @@ def update_subject(subject_id: int, subject: SubjectCreate, db: Session = Depend
     return db_subject
 
 @app.delete("/subjects/{subject_id}")
-def delete_subject(subject_id: int, db: Session = Depends(get_db)):
+def delete_subject(subject_id: int, db: Session = Depends(get_dashboard_db)):
     db_subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if db_subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
@@ -187,7 +187,7 @@ def delete_subject(subject_id: int, db: Session = Depends(get_db)):
 
 # CRUD for Topics
 @app.post("/topics/{subject_id}/", response_model=TopicBase)
-def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_db)):
+def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_dashboard_db)):
     db_topic = Topic(**topic.dict(), subject_id=subject_id)
     db.add(db_topic)
     db.commit()
@@ -195,19 +195,19 @@ def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_
     return db_topic
 
 @app.get("/topics/", response_model=List[TopicBase])
-def read_topics(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_topics(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     topics = db.query(Topic).offset(skip).limit(limit).all()
     return topics
 
 @app.get("/topics/{topic_id}", response_model=TopicBase)
-def read_topic(topic_id: int, db: Session = Depends(get_db)):
+def read_topic(topic_id: int, db: Session = Depends(get_dashboard_db)):
     topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
 
 @app.put("/topics/{topic_id}", response_model=TopicBase)
-def update_topic(topic_id: int, topic: TopicCreate, db: Session = Depends(get_db)):
+def update_topic(topic_id: int, topic: TopicCreate, db: Session = Depends(get_dashboard_db)):
     db_topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if db_topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
@@ -221,7 +221,7 @@ def update_topic(topic_id: int, topic: TopicCreate, db: Session = Depends(get_db
     return db_topic
 
 @app.delete("/topics/{topic_id}")
-def delete_topic(topic_id: int, db: Session = Depends(get_db)):
+def delete_topic(topic_id: int, db: Session = Depends(get_dashboard_db)):
     db_topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if db_topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
@@ -231,7 +231,7 @@ def delete_topic(topic_id: int, db: Session = Depends(get_db)):
 
 # CRUD for Questions
 @app.post("/topics/{topic_id}/questions/", response_model=QuestionBase)
-def create_question(topic_id: int, question: QuestionCreate, db: Session = Depends(get_db)):
+def create_question(topic_id: int, question: QuestionCreate, db: Session = Depends(get_dashboard_db)):
     db_question = Question(**question.dict(), topic_id=topic_id)
     db.add(db_question)
     db.commit()
@@ -239,19 +239,19 @@ def create_question(topic_id: int, question: QuestionCreate, db: Session = Depen
     return db_question
 
 @app.get("/questions/", response_model=List[QuestionBase])
-def read_questions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_questions(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     questions = db.query(Question).offset(skip).limit(limit).all()
     return questions
 
 @app.get("/questions/{question_id}", response_model=QuestionBase)
-def read_question(question_id: int, db: Session = Depends(get_db)):
+def read_question(question_id: int, db: Session = Depends(get_dashboard_db)):
     question = db.query(Question).filter(Question.question_id == question_id).first()
     if question is None:
         raise HTTPException(status_code=404, detail="Question not found")
     return question
 
 @app.put("/questions/{question_id}", response_model=QuestionBase)
-def update_question(question_id: int, question: QuestionCreate, db: Session = Depends(get_db)):
+def update_question(question_id: int, question: QuestionCreate, db: Session = Depends(get_dashboard_db)):
     db_question = db.query(Question).filter(Question.question_id == question_id).first()
     if db_question is None:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -265,7 +265,7 @@ def update_question(question_id: int, question: QuestionCreate, db: Session = De
     return db_question
 
 @app.delete("/questions/{question_id}")
-def delete_question(question_id: int, db: Session = Depends(get_db)):
+def delete_question(question_id: int, db: Session = Depends(get_dashboard_db)):
     db_question = db.query(Question).filter(Question.question_id == question_id).first()
     if db_question is None:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -275,7 +275,7 @@ def delete_question(question_id: int, db: Session = Depends(get_db)):
 
 # CRUD for Answers
 @app.post("/questions/{question_id}/answers/", response_model=AnswerBase)
-def create_answer(question_id: int, answer: AnswerCreate, db: Session = Depends(get_db)):
+def create_answer(question_id: int, answer: AnswerCreate, db: Session = Depends(get_dashboard_db)):
     db_answer = Answer(**answer.dict(), question_id=question_id)
     db.add(db_answer)
     db.commit()
@@ -283,19 +283,19 @@ def create_answer(question_id: int, answer: AnswerCreate, db: Session = Depends(
     return db_answer
 
 @app.get("/answers/", response_model=List[AnswerBase])
-def read_answers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_answers(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     answers = db.query(Answer).offset(skip).limit(limit).all()
     return answers
 
 @app.get("/answers/{answer_id}", response_model=AnswerBase)
-def read_answer(answer_id: int, db: Session = Depends(get_db)):
+def read_answer(answer_id: int, db: Session = Depends(get_dashboard_db)):
     answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if answer is None:
         raise HTTPException(status_code=404, detail="Answer not found")
     return answer
 
 @app.put("/answers/{answer_id}", response_model=AnswerBase)
-def update_answer(answer_id: int, answer: AnswerCreate, db: Session = Depends(get_db)):
+def update_answer(answer_id: int, answer: AnswerCreate, db: Session = Depends(get_dashboard_db)):
     db_answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if db_answer is None:
         raise HTTPException(status_code=404, detail="Answer not found")
@@ -309,7 +309,7 @@ def update_answer(answer_id: int, answer: AnswerCreate, db: Session = Depends(ge
     return db_answer
 
 @app.delete("/answers/{answer_id}")
-def delete_answer(answer_id: int, db: Session = Depends(get_db)):
+def delete_answer(answer_id: int, db: Session = Depends(get_dashboard_db)):
     db_answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if db_answer is None:
         raise HTTPException(status_code=404, detail="Answer not found")
@@ -319,7 +319,7 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db)):
 
 # CRUD for Test Cases
 @app.post("/questions/{question_id}/test_cases/", response_model=TestCaseBase)
-def create_test_case(question_id: int, test_case: TestCaseCreate, db: Session = Depends(get_db)):
+def create_test_case(question_id: int, test_case: TestCaseCreate, db: Session = Depends(get_dashboard_db)):
     db_test_case = TestCase(**test_case.dict(), question_id=question_id)
     db.add(db_test_case)
     db.commit()
@@ -327,19 +327,19 @@ def create_test_case(question_id: int, test_case: TestCaseCreate, db: Session = 
     return db_test_case
 
 @app.get("/test_cases/", response_model=List[TestCaseBase])
-def read_test_cases(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_test_cases(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     test_cases = db.query(TestCase).offset(skip).limit(limit).all()
     return test_cases
 
 @app.get("/test_cases/{test_case_id}", response_model=TestCaseBase)
-def read_test_case(test_case_id: int, db: Session = Depends(get_db)):
+def read_test_case(test_case_id: int, db: Session = Depends(get_dashboard_db)):
     test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if test_case is None:
         raise HTTPException(status_code=404, detail="Test Case not found")
     return test_case
 
 @app.put("/test_cases/{test_case_id}", response_model=TestCaseBase)
-def update_test_case(test_case_id: int, test_case: TestCaseCreate, db: Session = Depends(get_db)):
+def update_test_case(test_case_id: int, test_case: TestCaseCreate, db: Session = Depends(get_dashboard_db)):
     db_test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if db_test_case is None:
         raise HTTPException(status_code=404, detail="Test Case not found")
@@ -353,7 +353,7 @@ def update_test_case(test_case_id: int, test_case: TestCaseCreate, db: Session =
     return db_test_case
 
 @app.delete("/test_cases/{test_case_id}")
-def delete_test_case(test_case_id: int, db: Session = Depends(get_db)):
+def delete_test_case(test_case_id: int, db: Session = Depends(get_dashboard_db)):
     db_test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if db_test_case is None:
         raise HTTPException(status_code=404, detail="Test Case not found")
@@ -361,22 +361,6 @@ def delete_test_case(test_case_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"detail": "Test Case deleted"}
 
-
-
 @app.get("/logout")
 async def logout():
     return {"message": "Logged out"}
-
-
-# @app.post("/api/subjects", response_model=schemas.Subject)
-# def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
-#     db_subject = crud.get_subject_by_name(db, name=subject.name)
-#     if db_subject:
-#         raise HTTPException(status_code=400, detail="Subject already registered")
-#     return crud.create_subject(db=db, subject=subject)
-
-
-# @app.get("/api/subjects", response_model=List[schemas.Subject])
-# def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-#     subjects = crud.get_subjects(db, skip=skip, limit=limit)
-#     return subjects
