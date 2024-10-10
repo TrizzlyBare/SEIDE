@@ -1,20 +1,21 @@
 from ast import List
+import logging
+import time
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 from typing import Optional
-import time
-import logging
 from passlib.context import CryptContext
 from typing import Dict, Any
 from fastapi.middleware.cors import CORSMiddleware
 
-# from . import schemas, crud
+# Import authentication functions using absolute imports
+from Backend.authentication import get_current_user, create_access_token, verify_password, get_password_hash
 
-from database import SessionLocal, User
-from dashboard import (
+from Backend.database import SessionLocal, User, get_db
+from Backend.dashboard import (
     Subject,
     Topic,
     Question,
@@ -22,8 +23,8 @@ from dashboard import (
     DashboardSessionLocal,
     SubjectCreate,
 )
-from editor import EditorSessionLocal, Create_Code_Data, CodeData
-from user_profile import Profile, ProfileSessionLocal, ProfileCreate
+from Backend.editor import EditorSessionLocal, Create_Code_Data, CodeData
+from Backend.user_profile import Profile, ProfileSessionLocal, ProfileCreate
 
 app = FastAPI()
 
@@ -33,18 +34,14 @@ templates = Jinja2Templates(directory="templates")
 # Set up password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
 # Middleware to log request method and URL
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    print(
-        f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds"
-    )
+    print(f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds")
     return response
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,16 +51,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Dependency to get the database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 def get_dashboard_db():
     db = DashboardSessionLocal()
     try:
@@ -78,7 +66,6 @@ def get_editor_db():
     finally:
         db.close()
 
-
 def get_Profiles_db():
     db = ProfileSessionLocal()
     try:
@@ -86,18 +73,17 @@ def get_Profiles_db():
     finally:
         db.close()
 
+def get_profile_db():
+    db = ProfileSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
-
-
-# Pydantic model for login data
-class LoginData(BaseModel):
-    username: str
-    password: str
-
 
 # Handle login form submission
 @app.post("/login")
@@ -106,46 +92,67 @@ async def login(
 ):
     try:
         user = db.query(User).filter(User.username == username).first()
-        if user and pwd_context.verify(password, user.hashed_password):
-            return {"message": "Login successful"}
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        if not user or not verify_password(password, user.hashed_password):
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        
+        access_token = create_access_token(data={"sub": user.username})
+        profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+        return {"access_token": access_token, "profile": profile}
     except Exception as e:
         logging.error(f"Error during login: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
+# Handle user registration
 @app.post("/register")
 async def register(
     username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db),
+    profile_db: Session = Depends(get_profile_db)
 ):
     try:
         logging.info(f"Registering user: {username}, {email}")
-        user = db.query(User).filter(User.username == username).first()
-        if user:
-            logging.warning(f"Username already registered: {username}")
+        existing_user = db.query(User).filter(User.username == username).first()
+        if existing_user:
             raise HTTPException(status_code=400, detail="Username already registered")
-        hashed_password = pwd_context.hash(password)
+        
+        hashed_password = get_password_hash(password)
         new_user = User(username=username, email=email, hashed_password=hashed_password)
         db.add(new_user)
         db.commit()
-        logging.info(f"User created successfully: {username}")
-        return {"message": "User created successfully"}
+        db.refresh(new_user)
+        
+        profile = Profile(user_id=new_user.id, username=username, email=email)
+        profile_db.add(profile)
+        profile_db.commit()
+        profile_db.refresh(profile)
+        
+        return {"message": "User registered successfully"}
     except Exception as e:
         logging.error(f"Error during registration: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+# Example protected route
+@app.get("/profile")
+async def get_profile(user: User = Depends(get_current_user), db: Session = Depends(get_profile_db)):
+    profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return profile
+
+# Example logout route
+@app.get("/logout")
+async def logout():
+    return {"message": "Logged out"}
 
 @app.get("/dashboard")
 async def get_subjects(db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).all()
     return subjects
 
-
 class SubjectCreate(BaseModel):
     name: str
-
 
 @app.post("/create_subject")
 async def create_subject(
@@ -162,15 +169,11 @@ async def create_subject(
         db.commit()
         db.refresh(new_subject)
 
-        # Temorary Testing <----------------
         return {"message": "Subject created successfully"}
     except Exception as e:
         logging.error(f"Error creating subject: {e}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
-        # ------------------------------>
-
-#############################################################################################################
 
 @app.post("/create_topic")
 async def create_topic(request: SubjectCreate, db: Session = Depends(get_dashboard_db)):
@@ -216,8 +219,6 @@ async def create_answer(request: SubjectCreate, db: Session = Depends(get_dashbo
     finally:
         db.close()
         return {"message": "Subject created successfully"}
-    
-#############################################################################################################
 
 @app.post("/editor")
 async def get_editor(request: Create_Code_Data, db: Session = Depends(get_editor_db)):
@@ -233,7 +234,6 @@ async def get_editor(request: Create_Code_Data, db: Session = Depends(get_editor
     finally:
         db.close()
         return {"message": "Subject created successfully"}
-
 
 @app.post("/profiles")
 async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profiles_db)):
@@ -255,21 +255,6 @@ async def get_profiles(request: ProfileCreate, db: Session = Depends(get_Profile
         db.close()
         return {"message": "Subject created successfully"}
 
-
 @app.get("/logout")
 async def logout():
     return {"message": "Logged out"}
-
-
-# @app.post("/api/subjects", response_model=schemas.Subject)
-# def create_subject(subject: schemas.SubjectCreate, db: Session = Depends(get_db)):
-#     db_subject = crud.get_subject_by_name(db, name=subject.name)
-#     if db_subject:
-#         raise HTTPException(status_code=400, detail="Subject already registered")
-#     return crud.create_subject(db=db, subject=subject)
-
-
-# @app.get("/api/subjects", response_model=List[schemas.Subject])
-# def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-#     subjects = crud.get_subjects(db, skip=skip, limit=limit)
-#     return subjects
