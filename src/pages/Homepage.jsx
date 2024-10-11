@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Dashboard from "../components/Dashboard/Dashboard";
-import { getSubjects } from "../api"; // Import the getSubjects function
+import Sidebar from "../components/Sidebar/Sidebar";
+import "../styles/Dashboard.css";
+import { getSubjects } from "../api";
 
 const HomePage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -18,7 +20,12 @@ const HomePage = () => {
     fetchSubjects();
   }, []);
 
-  return <Dashboard subjects={subjects} />;
+  return (
+    <div className="Dashboard-page">
+      <Sidebar />
+      <Dashboard subjects={subjects} />
+    </div>
+  );
 };
 
 export default HomePage;

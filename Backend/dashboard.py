@@ -23,7 +23,7 @@ class Subject(Base):
     __tablename__ = 'subjects'
     
     subject_id = Column(Integer, primary_key=True, index=True)
-    subject_name = Column(String, nullable=False)
+    subject_name = Column(String, nullable=False, index=True)
     topics = relationship("Topic", back_populates="subject")
 
 class Topic(Base):

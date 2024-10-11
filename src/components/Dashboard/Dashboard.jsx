@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Sidebar from "../Sidebar/Sidebar";
 import { getSubjects } from "../../api";
 
 const Container = styled.div`
@@ -10,12 +9,6 @@ const Container = styled.div`
 const DashboardContainer = styled.div`
   flex: 1;
   padding: 20px;
-  background-color: #f9f7f7;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
 `;
 
 const Title = styled.h1`
@@ -70,7 +63,6 @@ const Dashboard = () => {
 
   return (
     <Container>
-      <Sidebar />
       <DashboardContainer>
         <Title>Dashboard</Title>
         <Content>

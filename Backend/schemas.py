@@ -1,22 +1,18 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-
 class UserBase(BaseModel):
     username: str
     email: str
 
-
 class UserCreate(UserBase):
     password: str
-
 
 class User(UserBase):
     id: int
 
     class Config:
         orm_mode = True
-
 
 class ProfileBase(BaseModel):
     username: str
@@ -25,10 +21,8 @@ class ProfileBase(BaseModel):
     last_name: str
     year: int
 
-
 class ProfileCreate(ProfileBase):
     password: str
-
 
 class Profile(ProfileBase):
     id: int
@@ -36,29 +30,23 @@ class Profile(ProfileBase):
     class Config:
         orm_mode = True
 
-
 class SubjectBase(BaseModel):
-    name: str
-
+    subject_name: str
 
 class SubjectCreate(SubjectBase):
     pass
 
-
-class Subject(SubjectBase):
-    id: int
+class SubjectResponse(SubjectBase):
+    subject_id: int
 
     class Config:
         orm_mode = True
 
-
 class TopicBase(BaseModel):
     name: str
 
-
 class TopicCreate(TopicBase):
     subject_id: int
-
 
 class Topic(TopicBase):
     id: int
@@ -66,14 +54,11 @@ class Topic(TopicBase):
     class Config:
         orm_mode = True
 
-
 class QuestionBase(BaseModel):
     text: str
 
-
 class QuestionCreate(QuestionBase):
     topic_id: int
-
 
 class Question(QuestionBase):
     id: int
@@ -81,14 +66,11 @@ class Question(QuestionBase):
     class Config:
         orm_mode = True
 
-
 class AnswerBase(BaseModel):
     text: str
 
-
 class AnswerCreate(AnswerBase):
     question_id: int
-
 
 class Answer(AnswerBase):
     id: int

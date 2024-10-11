@@ -1,4 +1,3 @@
-from ast import List
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -6,9 +5,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 import logging
 import time
-from typing import List
 
 from database import SessionLocal, User
 from dashboard import (Subject, Topic, Question, Answer, TestCase, 
@@ -17,13 +16,13 @@ from dashboard import (Subject, Topic, Question, Answer, TestCase,
                        AnswerCreate, TestCaseCreate, AnswerBase, TestCaseBase, QuestionBase, TopicBase, SubjectBase)    
 from editor import EditorSessionLocal
 from user_profile import ProfileSessionLocal
-from schemas import Subject, SubjectCreate
+from schemas import SubjectResponse, SubjectCreate, SubjectBase
 
 # Initialize the FastAPI application
 app = FastAPI()
 
 # CORS configuration
-origins = ["http://localhost:5174"]
+origins = ["http://localhost:5173", "http://localhost:5174"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -56,7 +55,7 @@ def get_db():
         db.close()
 
 def get_dashboard_db():
-    db = DashboardSessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
@@ -116,31 +115,39 @@ async def get_subjects(db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).all()
     return subjects
 
-@app.post("/subjects/", response_model=Subject)
-async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
-    db_subject = Subject(**subject.dict())
-    db.add(db_subject)
-    db.commit()
-    db.refresh(db_subject)
-    return db_subject
+logging.basicConfig(level=logging.INFO)
 
-@app.get("/subjects/", response_model=List[Subject])
-def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
+@app.post("/subjects/", response_model=SubjectResponse)
+async def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    try:
+        logging.info(f"Creating subject with data: {subject.dict()}")
+        db_subject = Subject(**subject.dict())
+        db.add(db_subject)
+        db.commit()
+        db.refresh(db_subject)
+        logging.info(f"Subject created with ID: {db_subject.subject_id}")
+        return db_subject
+    except Exception as e:
+        logging.error(f"Error creating subject: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.get("/subjects/", response_model=List[SubjectResponse])
+async def read_subjects(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashboard_db)):
     subjects = db.query(Subject).offset(skip).limit(limit).all()
     return subjects
 
-@app.get("/subjects/{subject_id}", response_model=Subject)
+@app.get("/subjects/{subject_id}", response_model=SubjectResponse)
 def read_subject(subject_id: int, db: Session = Depends(get_dashboard_db)):
     subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if subject is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subject not found")
+        raise HTTPException(status_code=404, detail="Subject not found")
     return subject
 
-@app.put("/subjects/{subject_id}", response_model=Subject)
+@app.put("/subjects/{subject_id}", response_model=SubjectResponse)
 def update_subject(subject_id: int, subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
     db_subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if db_subject is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subject not found")
+        raise HTTPException(status_code=404, detail="Subject not found")
     
     for key, value in subject.dict().items():
         setattr(db_subject, key, value)
@@ -153,7 +160,7 @@ def update_subject(subject_id: int, subject: SubjectCreate, db: Session = Depend
 def delete_subject(subject_id: int, db: Session = Depends(get_dashboard_db)):
     db_subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if db_subject is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subject not found")
+        raise HTTPException(status_code=404, detail="Subject not found")
     db.delete(db_subject)
     db.commit()
     return {"detail": "Subject deleted"}
@@ -176,14 +183,14 @@ def read_topics(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashbo
 def read_topic(topic_id: int, db: Session = Depends(get_dashboard_db)):
     topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if topic is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
+        raise HTTPException(status_code=404, detail="Topic not found")
     return topic
 
 @app.put("/topics/{topic_id}", response_model=TopicBase)
 def update_topic(topic_id: int, topic: TopicCreate, db: Session = Depends(get_dashboard_db)):
     db_topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if db_topic is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
+        raise HTTPException(status_code=404, detail="Topic not found")
     
     for key, value in topic.dict().items():
         setattr(db_topic, key, value)
@@ -196,7 +203,7 @@ def update_topic(topic_id: int, topic: TopicCreate, db: Session = Depends(get_da
 def delete_topic(topic_id: int, db: Session = Depends(get_dashboard_db)):
     db_topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
     if db_topic is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
+        raise HTTPException(status_code=404, detail="Topic not found")
     db.delete(db_topic)
     db.commit()
     return {"detail": "Topic deleted"}
@@ -219,14 +226,14 @@ def read_questions(skip: int = 0, limit: int = 10, db: Session = Depends(get_das
 def read_question(question_id: int, db: Session = Depends(get_dashboard_db)):
     question = db.query(Question).filter(Question.question_id == question_id).first()
     if question is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+        raise HTTPException(status_code=404, detail="Question not found")
     return question
 
 @app.put("/questions/{question_id}", response_model=QuestionBase)
 def update_question(question_id: int, question: QuestionCreate, db: Session = Depends(get_dashboard_db)):
     db_question = db.query(Question).filter(Question.question_id == question_id).first()
     if db_question is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+        raise HTTPException(status_code=404, detail="Question not found")
     
     for key, value in question.dict().items():
         setattr(db_question, key, value)
@@ -239,7 +246,7 @@ def update_question(question_id: int, question: QuestionCreate, db: Session = De
 def delete_question(question_id: int, db: Session = Depends(get_dashboard_db)):
     db_question = db.query(Question).filter(Question.question_id == question_id).first()
     if db_question is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+        raise HTTPException(status_code=404, detail="Question not found")
     db.delete(db_question)
     db.commit()
     return {"detail": "Question deleted"}
@@ -262,14 +269,14 @@ def read_answers(skip: int = 0, limit: int = 10, db: Session = Depends(get_dashb
 def read_answer(answer_id: int, db: Session = Depends(get_dashboard_db)):
     answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if answer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Answer not found")
+        raise HTTPException(status_code=404, detail="Answer not found")
     return answer
 
 @app.put("/answers/{answer_id}", response_model=AnswerBase)
 def update_answer(answer_id: int, answer: AnswerCreate, db: Session = Depends(get_dashboard_db)):
     db_answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if db_answer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Answer not found")
+        raise HTTPException(status_code=404, detail="Answer not found")
     
     for key, value in answer.dict().items():
         setattr(db_answer, key, value)
@@ -282,7 +289,7 @@ def update_answer(answer_id: int, answer: AnswerCreate, db: Session = Depends(ge
 def delete_answer(answer_id: int, db: Session = Depends(get_dashboard_db)):
     db_answer = db.query(Answer).filter(Answer.answer_id == answer_id).first()
     if db_answer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Answer not found")
+        raise HTTPException(status_code=404, detail="Answer not found")
     db.delete(db_answer)
     db.commit()
     return {"detail": "Answer deleted"}
@@ -305,14 +312,14 @@ def read_test_cases(skip: int = 0, limit: int = 10, db: Session = Depends(get_da
 def read_test_case(test_case_id: int, db: Session = Depends(get_dashboard_db)):
     test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if test_case is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Test case not found")
+        raise HTTPException(status_code=404, detail="Test case not found")
     return test_case
 
 @app.put("/testcases/{test_case_id}", response_model=TestCaseBase)
 def update_test_case(test_case_id: int, test_case: TestCaseCreate, db: Session = Depends(get_dashboard_db)):
     db_test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if db_test_case is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Test case not found")
+        raise HTTPException(status_code=404, detail="Test case not found")
     
     for key, value in test_case.dict().items():
         setattr(db_test_case, key, value)
@@ -325,7 +332,7 @@ def update_test_case(test_case_id: int, test_case: TestCaseCreate, db: Session =
 def delete_test_case(test_case_id: int, db: Session = Depends(get_dashboard_db)):
     db_test_case = db.query(TestCase).filter(TestCase.test_case_id == test_case_id).first()
     if db_test_case is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Test case not found")
+        raise HTTPException(status_code=404, detail="Test case not found")
     db.delete(db_test_case)
     db.commit()
     return {"detail": "Test case deleted"}

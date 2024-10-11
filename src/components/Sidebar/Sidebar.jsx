@@ -40,7 +40,9 @@ const Sidebar = () => {
               alt="Software Engineer Logo"
               className="logo-small"
             />
-            <span className="hide seide" id="seide">SEIDE</span>
+            <span className="hide seide" id="seide">
+              SEIDE
+            </span>
           </Link>
         </div>
         <div className="expand-btn" onClick={toggleSidebar}>
@@ -59,7 +61,9 @@ const Sidebar = () => {
             <Link
               to="/dashboard"
               title="Dashboard"
-              className={`tooltip ${activeLink === "/dashboard" ? "active" : ""}`}
+              className={`tooltip ${
+                activeLink === "/dashboard" ? "active" : ""
+              }`}
               onClick={() => handleLinkClick("/dashboard")}
             >
               <img src={dash} alt="dash" />
@@ -82,8 +86,7 @@ const Sidebar = () => {
         </ul>
       </div>
 
-      <div className="sidebar-links bottom-links">
-      </div>
+      <div className="sidebar-links bottom-links"></div>
 
       <div className="divider"></div>
 
@@ -104,7 +107,6 @@ const Sidebar = () => {
           </section>
         </Link>
         <Link
-        
           to="/logout"
           className="logout"
           onClick={() => handleLinkClick("/logout")}
