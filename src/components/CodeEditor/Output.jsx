@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { executeCode } from "../../middleware/api";
+import { executeCode } from "../../middleware/Editorapi";
 import RunButton from "./RunButton";
 import "../../styles/Output.css";
 
@@ -20,6 +20,11 @@ const Output = ({ editorRef, language }) => {
       console.log(error);
       alert("An error occurred: " + (error.message || "Unable to run code"));
       setIsError(true); // Error state
+      setIsError(!!result.stderr);
+    } catch (error) {
+      console.log(error);
+      alert("An error occurred: " + (error.message || "Unable to run code"));
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -31,6 +36,17 @@ const Output = ({ editorRef, language }) => {
         {output && output.map((line, index) => (
           <p key={index} className="output-text">{line}</p>
         ))}
+      <div
+        className={`output-container ${
+          isError ? "error-text" : "success-text"
+        }`}
+      >
+        {output &&
+          output.map((line, index) => (
+            <p key={index} className="output-text">
+              {line}
+            </p>
+          ))}
       </div>
       <RunButton runCode={runCode} isLoading={isLoading} />
     </div>

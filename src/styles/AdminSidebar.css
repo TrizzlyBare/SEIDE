@@ -1,14 +1,12 @@
 :root {
   --primary-color: #3f72af;
   --white: #ffffff;
-  --sideber-primary:#6ca9f3 ;
   --sideber-primary: #6ca9f3;
   --sidebar-primary-hover: #6ca9f3;
   --sidebar-background: #3f72af;
   --background: #dbe2ef;
   --text-link: #ffffff;
   --headline: #cbd1d8;
-  --expand-button: #112d4e;
   --expand-button: white;
   --logout: #fa7575;
 }
@@ -31,6 +29,10 @@ html {
   box-sizing: border-box;
 }
 
+.sidebar-container {
+  display: flex;
+}
+
 .sidebar {
   position: sticky;
   top: 50px;
@@ -45,7 +47,7 @@ html {
   background-color: var(--sidebar-background);
   flex-direction: column;
   transition: max-width 0.1s ease-in-out;
-  z-index: 1000; /* Ensure sidebar is on top */
+  z-index: 1000;
 }
 
 body.collapsed .sidebar {
@@ -258,8 +260,8 @@ body.collapsed .sidebar-links li {
 }
 
 /* .collapsed .tooltip:hover .tooltip-content {
-  visibility: visible;
-} */
+    visibility: visible;
+  } */
 
 .sidebar-profile {
   margin: 1rem;

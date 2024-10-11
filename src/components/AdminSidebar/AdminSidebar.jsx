@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../../styles/Sidebar.css";
+import "../../styles/AdminSidebar.css";
 import logo from "./se_logo.png";
-import htmllogo from "./coding.png";
-import profileIcon from "./Profile Icon Design.jpg";
-import logoutlogo from "./Logout.png";
-import dash from "./dashboard.png";
+import dash from "./dashboard.png"; // Ensure this path is correct
+import profileIcon from "./Profile Icon Design.jpg"; // Ensure this path is correct
+import logoutlogo from "./Logout.png"; // Ensure this path is correct
 
-const Sidebar = () => {
+const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeLink, setActiveLink] = useState("");
 
@@ -40,7 +39,9 @@ const Sidebar = () => {
               alt="Software Engineer Logo"
               className="logo-small"
             />
-            <span className="hide seide" id="seide">SEIDE</span>
+            <span className="hide seide" id="seide">
+              SEIDE
+            </span>
           </Link>
         </div>
         <div className="expand-btn" onClick={toggleSidebar}>
@@ -59,9 +60,12 @@ const Sidebar = () => {
             <Link
               to="/dashboard"
               title="Dashboard"
-              className={`tooltip ${activeLink === "/dashboard" ? "active" : ""}`}
+              className={`tooltip ${
+                activeLink === "/dashboard" ? "active" : ""
+              }`}
               onClick={() => handleLinkClick("/dashboard")}
             >
+              {/* Dashboard icon */}
               <img src={dash} alt="dash" />
               <span className="link hide">Dashboard</span>
               <span className="tooltip-content">Dashboard</span>
@@ -74,7 +78,8 @@ const Sidebar = () => {
               className={`tooltip ${activeLink === "/editor" ? "active" : ""}`}
               onClick={() => handleLinkClick("/editor")}
             >
-              <img src={htmllogo} alt="editor" />
+              {/* Code Editor icon */}
+              {/* <img src={htmllogo} alt="editor" /> */}
               <span className="link hide">Code Editor</span>
               <span className="tooltip-content">Code Editor</span>
             </Link>
@@ -82,8 +87,7 @@ const Sidebar = () => {
         </ul>
       </div>
 
-      <div className="sidebar-links bottom-links">
-      </div>
+      <div className="sidebar-links bottom-links"></div>
 
       <div className="divider"></div>
 
@@ -95,7 +99,7 @@ const Sidebar = () => {
           onClick={() => handleLinkClick("/profile")}
         >
           <div className="avatar-wrapper">
-            <img className="avatar" src={profileIcon} alt="Profile Icon" />
+            {/* <img className="avatar" src={profileIcon} alt="Profile Icon" /> */}
             <div className="online-status"></div>
           </div>
           <section className="avatar-name hide">
@@ -104,16 +108,15 @@ const Sidebar = () => {
           </section>
         </Link>
         <Link
-        
           to="/logout"
           className="logout"
           onClick={() => handleLinkClick("/logout")}
         >
-          <img src={logoutlogo} alt="dash" className="logout-logo" />
+          {/* <img src={logoutlogo} alt="dash" className="logout-logo" /> */}
         </Link>
       </div>
     </nav>
   );
 };
 
-export default Sidebar;
+export default AdminSidebar;

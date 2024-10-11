@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import {
   Container,
   SignUpContainer,
@@ -16,6 +17,11 @@ import {
 
 const AuthPage = () => {
   const [signingIn, setSigningIn] = useState(true);
+  const navigate = useNavigate();
+
+  const handleSignIn = () => {
+    navigate("/app"); // Navigate to App component
+  };
 
   return (
     <Container>
@@ -35,7 +41,7 @@ const AuthPage = () => {
           <Title>Sign In</Title>
           <Input type="email" placeholder="Email" />
           <Input type="password" placeholder="Password" />
-          <Button>Sign In</Button>
+          <Button onClick={handleSignIn}>Sign In</Button>
         </Form>
       </SignInContainer>
 

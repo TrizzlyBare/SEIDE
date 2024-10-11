@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import Sidebar from "../Sidebar/Sidebar";
+import { getSubjects } from "../../api";
+
+const Container = styled.div`
+  display: flex;
+`;
 
 const DashboardContainer = styled.div`
-  width: 100%;
-  min-height: 100vh;
+  flex: 1;
   padding: 20px;
   background-color: #f9f7f7;
   text-align: center;
@@ -14,20 +19,18 @@ const DashboardContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  color: #333;
+  margin-bottom: 20px;
 `;
 
 const Content = styled.div`
-  width: 100%;
-  max-width: 600px;
-  margin-top: 20px;
-  text-align: left;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const SubjectList = styled.ul`
-  list-style-type: none;
+  list-style: none;
   padding: 0;
 `;
 
@@ -43,20 +46,42 @@ const SubjectItem = styled.li`
   }
 `;
 
-const Dashboard = ({ subjects = [] }) => {
-  console.log("Dashboard subjects:", subjects);
+const Dashboard = () => {
+  const [subjects, setSubjects] = useState([]);
+
+  const fetchSubjects = async () => {
+    try {
+      const data = await getSubjects();
+      if (Array.isArray(data)) {
+        setSubjects(data);
+      } else {
+        console.error("Fetched data is not an array", data);
+        setSubjects([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+      setSubjects([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
 
   return (
-    <DashboardContainer>
-      <Title>Dashboard</Title>
-      <Content>
-        <SubjectList>
-          {subjects.map((subject, index) => (
-            <SubjectItem key={index}>{subject}</SubjectItem>
-          ))}
-        </SubjectList>
-      </Content>
-    </DashboardContainer>
+    <Container>
+      <Sidebar />
+      <DashboardContainer>
+        <Title>Dashboard</Title>
+        <Content>
+          <SubjectList>
+            {subjects.map((subject, index) => (
+              <SubjectItem key={index}>{subject.name}</SubjectItem>
+            ))}
+          </SubjectList>
+        </Content>
+      </DashboardContainer>
+    </Container>
   );
 };
 
