@@ -275,7 +275,6 @@ body {
   left: 0;
   z-index: 1;
   overflow: hidden;
-  background: linear-gradient(150deg, #3f72af 20%, #112d4e 100%);
   background: linear-gradient(150deg, #112d4e 20%, #3f72af 100%);
 }
 .profile-page .bg span:nth-child(1) {
