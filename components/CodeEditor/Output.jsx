@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { executeCode } from "../../middleware/api";
+import { executeCode } from "../../middleware/Editorapi";
 import RunButton from "./RunButton";
 import "../../styles/Output.css";
-
 const Output = ({ editorRef, language }) => {
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

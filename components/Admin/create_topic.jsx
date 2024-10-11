@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { createSubject } from "../../api";
+import { createTopic } from "../../api";  // Assuming the API method for topics is createTopic
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -52,23 +52,23 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ addSubject }) => {
-  const [newSubject, setNewSubject] = useState("");
+const Admin = ({ addTopic }) => {
+  const [newTopic, setNewTopic] = useState("");
 
   const handleInputChange = (e) => {
-    setNewSubject(e.target.value);
+    setNewTopic(e.target.value);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (newSubject.trim() !== "") {
+    if (newTopic.trim() !== "") {
       try {
-        await createSubject({ name: newSubject });
-        setNewSubject("");
-        alert("Subject added successfully");
-        addSubject();
+        await createTopic({ name: newTopic });
+        setNewTopic("");
+        alert("Topic added successfully");
+        addTopic(); // Refresh topics list after adding
       } catch (error) {
-        console.error("Failed to add subject", error);
+        console.error("Failed to add topic", error);
       }
     }
   };
@@ -80,11 +80,11 @@ const Admin = ({ addSubject }) => {
         <Form onSubmit={handleFormSubmit}>
           <Input
             type="text"
-            placeholder="Enter new subject"
-            value={newSubject}
+            placeholder="Enter new topic"
+            value={newTopic}
             onChange={handleInputChange}
           />
-          <Button type="submit">Add Subject</Button>
+          <Button type="submit">Add Topic</Button>
         </Form>
       </Content>
     </AdminContainer>

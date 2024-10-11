@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from "react";
 import Dashboard from "../components/Dashboard/Dashboard";
+import Sidebar from "../components/Sidebar/Sidebar";
+import "../styles/Dashboard.css"; 
+import { getSubjects } from "../api";
 
 const HomePage = () => {
   const [subjects, setSubjects] = useState([]);
 
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      const response = await fetch("/api/subjects");
-      const data = await response.json();
+  const fetchSubjects = async () => {
+    try {
+      const data = await getSubjects();
       setSubjects(data);
-    };
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+    }
+  };
 
+  useEffect(() => {
     fetchSubjects();
   }, []);
 
-  return <Dashboard subjects={subjects} />;
+  return (
+    <div className="Dashboard-page">
+      <Sidebar />
+      <Dashboard subjects={subjects} />
+    </div>
+  );
 };
 
 export default HomePage;
