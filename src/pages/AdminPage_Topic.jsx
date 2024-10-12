@@ -8,7 +8,9 @@ const AdminPage = () => {
 
   const fetchTopics = async () => {
     try {
+      console.log("Fetching topics...");
       const data = await getTopics();
+      console.log("Fetched data:", data);
       if (Array.isArray(data)) {
         setTopics(data);
       } else {

@@ -1,4 +1,3 @@
-# dashboard.py
 from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -7,7 +6,6 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 DASHBOARD_DATABASE_URL = "sqlite:///./dashboard.db"
-
 
 dashboard_engine = create_engine(
     DASHBOARD_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -18,55 +16,52 @@ DashboardSessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
+# Subject Model
 class Subject(Base):
     __tablename__ = 'subjects'
     
     subject_id = Column(Integer, primary_key=True, index=True)
     subject_name = Column(String, nullable=False, index=True)
-    topics = relationship("Topic", back_populates="subject")
 
+# Topic Model
 class Topic(Base):
     __tablename__ = 'topics'
     
     topic_id = Column(Integer, primary_key=True, index=True)
-    subject_id = Column(Integer, ForeignKey('subjects.subject_id'))
+    subject_id = Column(Integer, ForeignKey('subjects.subject_id', ondelete="CASCADE"))
     topic_name = Column(String, nullable=False)
-    questions = relationship("Question", back_populates="topic")
-    subject = relationship("Subject", back_populates="topics")
 
+# Question Model
 class Question(Base):
     __tablename__ = 'questions'
     
     question_id = Column(Integer, primary_key=True, index=True)
-    topic_id = Column(Integer, ForeignKey('topics.topic_id'))
+    topic_id = Column(Integer, ForeignKey('topics.topic_id', ondelete="CASCADE"))
     question_text = Column(Text, nullable=False)
-    test_cases = relationship("TestCase", back_populates="question")
-    answers = relationship("Answer", back_populates="question")
-    topic = relationship("Topic", back_populates="questions")
 
+# Answer Model
 class Answer(Base):
     __tablename__ = 'answers'
     
     answer_id = Column(Integer, primary_key=True, index=True)
-    question_id = Column(Integer, ForeignKey('questions.question_id'))
+    question_id = Column(Integer, ForeignKey('questions.question_id', ondelete="CASCADE"))
     answer_text = Column(Text, nullable=False)
     is_correct = Column(Boolean, default=False)
-    question = relationship("Question", back_populates="answers")
 
+# TestCase Model
 class TestCase(Base):
     __tablename__ = 'test_cases'
     
     test_case_id = Column(Integer, primary_key=True, index=True)
-    question_id = Column(Integer, ForeignKey('questions.question_id'))
+    question_id = Column(Integer, ForeignKey('questions.question_id', ondelete="CASCADE"))
     input_data = Column(Text, nullable=False)
     expected_output = Column(Text, nullable=False)
-    question = relationship("Question", back_populates="test_cases")
-
 
 # Create the dashboard database tables
 print("Creating database tables...")
 Base.metadata.create_all(bind=dashboard_engine)
+
+# Pydantic Models for Validation
 
 class AnswerBase(BaseModel):
     answer_text: str

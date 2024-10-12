@@ -12,7 +12,7 @@ class User(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProfileBase(BaseModel):
     username: str
@@ -28,7 +28,7 @@ class Profile(ProfileBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SubjectBase(BaseModel):
     subject_name: str
@@ -40,7 +40,7 @@ class SubjectResponse(SubjectBase):
     subject_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TopicBase(BaseModel):
     name: str
@@ -52,7 +52,7 @@ class Topic(TopicBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class QuestionBase(BaseModel):
     text: str
@@ -64,7 +64,7 @@ class Question(QuestionBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class AnswerBase(BaseModel):
     text: str
@@ -76,4 +76,4 @@ class Answer(AnswerBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

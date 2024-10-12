@@ -93,268 +93,112 @@ export const updateProfile = async (username, email, password) => {
 // };
 
 // Subject functions
+
 export const getSubjects = async () => {
-  const response = await fetch(`${API_URL}/subjects/`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    mode: "cors",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch subjects");
+  try {
+    const response = await axios.get(`${API_URL}/dashboard/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching subjects:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
+// Create a new subject
 export const createSubject = async (subject) => {
   try {
-    console.log("Sending payload:", subject); // Log the payload for debugging
-
-    const response = await fetch(`${API_URL}/subjects/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(subject),
-      mode: "cors", // Ensure CORS mode is used
-    });
-
-    // Check for errors
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error response:", errorText); // Log the error
-      throw new Error("Failed to create subject");
-    }
-
-    // Return the response data
-    return await response.json();
+    const response = await axios.post(`${API_URL}/dashboard/subjects`, subject);
+    return response.data;
   } catch (error) {
-    console.error("Create subject error:", error);
-    throw error;
+    console.error("Error creating subject:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
 };
 
-export const updateSubject = async (subjectId, subject) => {
+// Fetch a specific topic by subject ID
+export const getTopics = async (subjectId) => {
   try {
-    const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(subject),
-      mode: "cors", // Explicitly set CORS mode
-    });
-
-    // Check for errors
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error response:", errorText); // Log the error
-      throw new Error("Failed to update subject");
-    }
-
-    // Return the response data
-    return await response.json();
+    const response = await axios.get(`${API_URL}/dashboard/subjects/${subjectId}/topics`);
+    return response.data;
   } catch (error) {
-    console.error("Update subject error:", error);
-    throw error;
+    console.error("Error fetching topics:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
 };
 
-export const deleteSubject = async (subjectId) => {
-  const response = await fetch(`${API_URL}/subjects/${subjectId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete subject");
+// Create a new topic under a specific subject
+export const createTopic = async (subjectId, topic) => {
+  try {
+    const response = await axios.post(`${API_URL}/dashboard/subjects/${subjectId}/topics`, topic);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating topic:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-// Topic functions
-export const getTopics = async () => {
-  const response = await fetch(`${API_URL}/topics/`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch topics");
+// Fetch a specific question by topic ID
+export const getQuestions = async (topicId) => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard/topics/${topicId}/questions`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching questions:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-export const createTopic = async (topic) => {
-  const response = await fetch(`${API_URL}/topics/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(topic),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to create topic");
+// Create a new question under a specific topic
+export const createQuestion = async (topicId, question) => {
+  try {
+    const response = await axios.post(`${API_URL}/dashboard/topics/${topicId}/questions`, question);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating question:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-export const updateTopic = async (topicId, topic) => {
-  const response = await fetch(`${API_URL}/topics/${topicId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(topic),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update topic");
+// Fetch answers for a specific question by question ID
+export const getAnswers = async (questionId) => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard/questions/${questionId}/answers`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching answers:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-export const deleteTopic = async (topicId) => {
-  const response = await fetch(`${API_URL}/topics/${topicId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete topic");
+// Create a new answer under a specific question
+export const createAnswer = async (questionId, answer) => {
+  try {
+    const response = await axios.post(`${API_URL}/dashboard/questions/${questionId}/answers`, answer);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating answer:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-// Question functions
-export const getQuestions = async () => {
-  const response = await fetch(`${API_URL}/questions/`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch questions");
+// Fetch test cases for a specific question by question ID
+export const getTestCases = async (questionId) => {
+  try {
+    const response = await axios.get(`${API_URL}/dashboard/questions/${questionId}/testcases`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching test cases:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
 };
 
-export const createQuestion = async (question) => {
-  const response = await fetch(`${API_URL}/questions/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(question),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to create question");
+// Create a new test case under a specific question
+export const createTestCase = async (questionId, testCase) => {
+  try {
+    const response = await axios.post(`${API_URL}/dashboard/questions/${questionId}/testcases`, testCase);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating test case:", error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : new Error("Unknown error occurred");
   }
-  return await response.json();
-};
-
-export const updateQuestion = async (questionId, question) => {
-  const response = await fetch(`${API_URL}/questions/${questionId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(question),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update question");
-  }
-  return await response.json();
-};
-
-export const deleteQuestion = async (questionId) => {
-  const response = await fetch(`${API_URL}/questions/${questionId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete question");
-  }
-  return await response.json();
-};
-
-// Answer functions
-export const getAnswers = async () => {
-  const response = await fetch(`${API_URL}/answers/`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch answers");
-  }
-  return await response.json();
-};
-
-export const createAnswer = async (answer) => {
-  const response = await fetch(`${API_URL}/answers/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(answer),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to create answer");
-  }
-  return await response.json();
-};
-
-export const updateAnswer = async (answerId, answer) => {
-  const response = await fetch(`${API_URL}/answers/${answerId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(answer),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update answer");
-  }
-  return await response.json();
-};
-
-export const deleteAnswer = async (answerId) => {
-  const response = await fetch(`${API_URL}/answers/${answerId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete answer");
-  }
-  return await response.json();
-};
-
-// Test Case functions
-export const getTestCases = async () => {
-  const response = await fetch(`${API_URL}/testcases/`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch test cases");
-  }
-  return await response.json();
-};
-
-export const createTestCase = async (testCase) => {
-  const response = await fetch(`${API_URL}/testcases/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(testCase),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to create test case");
-  }
-  return await response.json();
-};
-
-export const updateTestCase = async (testCaseId, testCase) => {
-  const response = await fetch(`${API_URL}/testcases/${testCaseId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(testCase),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to update test case");
-  }
-  return await response.json();
-};
-
-export const deleteTestCase = async (testCaseId) => {
-  const response = await fetch(`${API_URL}/testcases/${testCaseId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete test case");
-  }
-  return await response.json();
 };
