@@ -13,7 +13,7 @@ from database import SessionLocal, User
 from dashboard import (Subject, Topic, Question, Answer, TestCase, 
                        DashboardSessionLocal, SubjectCreate, 
                        TopicCreate, QuestionCreate, 
-                       AnswerCreate, TestCaseCreate, AnswerBase, TestCaseBase, QuestionBase, TopicBase, SubjectBase)    
+                       AnswerCreate, TestCaseCreate, AnswerBase, TestCaseBase, QuestionBase, TopicBase, SubjectBase, Base as DashboardBase, dashboard_engine)    
 from editor import EditorSessionLocal
 from user_profile import ProfileSessionLocal
 from schemas import SubjectResponse, SubjectCreate, SubjectBase
@@ -55,7 +55,7 @@ def get_db():
         db.close()
 
 def get_dashboard_db():
-    db = SessionLocal()
+    db = DashboardSessionLocal()
     try:
         yield db
     finally:
@@ -74,6 +74,9 @@ def get_profiles_db():
         yield db
     finally:
         db.close()
+
+# Create the dashboard database tables
+DashboardBase.metadata.create_all(bind=dashboard_engine)
 
 # Serve the login.html file
 @app.get("/login", response_class=HTMLResponse)
@@ -119,6 +122,7 @@ logging.basicConfig(level=logging.INFO)
 
 @app.post("/dashboard/subjects")
 async def create_subject(subject: SubjectCreate, db: Session = Depends(get_dashboard_db)):
+    logging.info(f"Creating subject with data: {subject}")
     new_subject = Subject(subject_name=subject.subject_name)
     db.add(new_subject)
     db.commit()
@@ -139,6 +143,7 @@ async def get_topics(subject_id: int, db: Session = Depends(get_dashboard_db)):
 
 @app.post("/dashboard/subjects/{subject_id}/topics")
 async def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_dashboard_db)):
+    logging.info(f"Creating topic with data: {topic}")
     new_topic = Topic(subject_id=subject_id, topic_name=topic.topic_name)
     db.add(new_topic)
     db.commit()
@@ -159,6 +164,7 @@ async def get_questions(topic_id: int, db: Session = Depends(get_dashboard_db)):
 
 @app.post("/dashboard/topics/{topic_id}/questions")
 async def create_question(topic_id: int, question: QuestionCreate, db: Session = Depends(get_dashboard_db)):
+    logging.info(f"Creating question with data: {question}")
     new_question = Question(topic_id=topic_id, question_text=question.question_text)
     db.add(new_question)
     db.commit()
@@ -179,6 +185,7 @@ async def get_answers(question_id: int, db: Session = Depends(get_dashboard_db))
 
 @app.post("/dashboard/questions/{question_id}/answers")
 async def create_answer(question_id: int, answer: AnswerCreate, db: Session = Depends(get_dashboard_db)):
+    logging.info(f"Creating answer with data: {answer}")
     new_answer = Answer(question_id=question_id, answer_text=answer.answer_text, is_correct=answer.is_correct)
     db.add(new_answer)
     db.commit()
@@ -192,14 +199,12 @@ async def get_testcases(question_id: int, db: Session = Depends(get_dashboard_db
 
 @app.post("/dashboard/questions/{question_id}/testcases")
 async def create_testcase(question_id: int, testcase: TestCaseCreate, db: Session = Depends(get_dashboard_db)):
+    logging.info(f"Creating testcase with data: {testcase}")
     new_testcase = TestCase(question_id=question_id, input_data=testcase.input_data, expected_output=testcase.expected_output)
     db.add(new_testcase)
     db.commit()
     db.refresh(new_testcase)
     return new_testcase
-
-
-
 
 @app.get("/logout")
 async def logout():
