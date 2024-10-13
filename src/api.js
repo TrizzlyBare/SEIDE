@@ -5,11 +5,24 @@ const API_URL = "http://127.0.0.1:8000";
 // Utility function for making API calls
 const apiCall = async (method, url, data = null) => {
   try {
+    console.log(`Making ${method.toUpperCase()} request to ${url} with data:`, data);
     const response = await axios({ method, url, data });
+    console.log(`Response from ${url}:`, response.data);
     return response.data;
   } catch (error) {
-    console.error("Error during API call:", error.response ? error.response.data : error.message);
-    throw error.response ? error.response.data : new Error("Unknown error occurred");
+    if (error.response) {
+      // Server responded with a status other than 200 range
+      console.error("Error during API call:", error.response.data);
+      throw error.response.data;
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error("No response received:", error.request);
+      throw new Error("No response received from server");
+    } else {
+      // Something else happened while setting up the request
+      console.error("Error setting up request:", error.message);
+      throw new Error("Error setting up request: " + error.message);
+    }
   }
 };
 
