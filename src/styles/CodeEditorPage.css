@@ -106,7 +106,7 @@ body {
 }
 
 .editor {
-  width: 100%; /* Full width of the container */
+  width: 40%; /* Full width of the container */
   height: 400px; /* Adjust as needed */
   border: 1px solid #ddd; /* Border around the text area */
   border-radius: 4px; /* Rounded corners */
@@ -128,3 +128,4 @@ body {
   display: flex;
   flex-direction: column; /* Keep everything aligned vertically */
 }
+
