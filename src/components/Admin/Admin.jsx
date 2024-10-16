@@ -52,7 +52,7 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ addSubject }) => {
+const Admin = ({ createSubject }) => {
   const [newSubject, setNewSubject] = useState("");
 
   const handleInputChange = (e) => {
@@ -63,7 +63,7 @@ const Admin = ({ addSubject }) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
       try {
-        await addSubject({ name: newSubject });
+        await createSubject({ name: newSubject });
         setNewSubject("");
         alert("Subject added successfully");
       } catch (error) {
