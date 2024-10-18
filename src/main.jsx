@@ -7,7 +7,8 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/Homepage";
-import CreateTopic from "./components/Admin/create_topic";
+import CreateSubject from "./pages/AdminPage_Subject";
+import CreateTopic from "./pages/AdminPage_Topic";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -20,7 +21,9 @@ root.render(
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dashboard" element={<HomePage />} />
       <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin/create_subject" element={<CreateSubject />} />
       <Route path="/admin/create_topic" element={<CreateTopic />} />
     </Routes>
   </BrowserRouter>
 );
+  

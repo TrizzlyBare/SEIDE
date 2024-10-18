@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CreateTopic from "../components/Admin/create_topic";
+import CreateTopic from "../components/Admin/CreateTopic";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import { getTopics } from "../api";
 

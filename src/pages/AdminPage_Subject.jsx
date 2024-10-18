@@ -1,29 +1,26 @@
 import React, { useState, useEffect } from "react";
-import Admin from "../components/Admin/Admin";
+import Admin from "../components/Admin/CreateSubject";
 import { getSubjects, createSubject } from "../api";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
-import DonutChart from "../components/Admin/DonutChart";
 
 const AdminPage = () => {
   const [subjects, setSubjects] = useState([]);
-  const [completionData, setCompletionData] = useState({
-    labels: ['Completed', 'Incomplete'],
-    datasets: [
-      {
-        label: 'Work Completion',
-        data: [70, 30], // Example data, replace with actual data
-        backgroundColor: ['#36A2EB', '#FF6384'],
-        hoverBackgroundColor: ['#36A2EB', '#FF6384'],
-      },
-    ],
-  });
 
-  const fetchSubjects = async () => {
+  const fetchSubjects = async (subjects) => {
     try {
       const data = await getSubjects();
       setSubjects(data);
     } catch (error) {
       console.error("Error fetching subjects:", error);
+    }
+  };
+
+  const handleCreateSubject = async (subject) => {
+    try {
+      await createSubject(subject);
+      fetchSubjects(); // Refresh subjects after creating a new one
+    } catch (error) {
+      console.error("Error creating subject:", error);
     }
   };
 
@@ -34,9 +31,14 @@ const AdminPage = () => {
   return (
     <div className="sidebar-container">
       <AdminSidebar subjects={subjects} addSubject={createSubject} />
+      <Admin addSubject={handleCreateSubject} />
       <div>
-        <h2>Overall Work Completion</h2>
-        <DonutChart data={completionData} />
+        <h2>Subjects List</h2>
+        <ul>
+          {subjects.map((subject) => (
+            <li key={subject.id}>{subject.name}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
