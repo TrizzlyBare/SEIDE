@@ -18,7 +18,7 @@ const AdminPage = () => {
   const handleCreateSubject = async (subject) => {
     try {
       await createSubject(subject);
-      fetchSubjects(); // Refresh subjects after creating a new one
+      fetchSubjects();
     } catch (error) {
       console.error("Error creating subject:", error);
     }

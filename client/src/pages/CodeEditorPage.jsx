@@ -6,7 +6,6 @@ import Sidebar from "../components/Sidebar/Sidebar";
 
 const CodeEditorPage = () => (
   <div className="code-editor-page">
-    <Sidebar />
     <div className="code-editor-content">
       <CodeEditor />
     </div>

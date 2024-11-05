@@ -4,7 +4,6 @@ import Sidebar from "../Sidebar/Sidebar";
 const ProfilePage = () => {
   return (
     <div className="profile-page">
-      <Sidebar />
       <div className="content">
         <div className="content__cover">
           <div className="content__avatar"></div>

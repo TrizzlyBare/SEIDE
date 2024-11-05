@@ -22,7 +22,6 @@ const HomePage = () => {
 
   return (
     <div className="Dashboard-page">
-      <Sidebar />
       <Dashboard subjects={subjects} />
     </div>
   );
