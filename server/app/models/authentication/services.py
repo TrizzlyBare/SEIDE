@@ -5,7 +5,9 @@ import datetime as _dt
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
 
-import app.models.authentication.au_database as _database, app.models.authentication.models as _models, app.models.authentication.schemas as _schemas
+import app.models.authentication.au_database as _database
+import app.models.authentication.models as _models
+import app.models.authentication.schemas as _schemas
 
 oauth2schema = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
 
