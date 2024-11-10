@@ -2,10 +2,13 @@ from fastapi import FastAPI, Depends, HTTPException
 import fastapi as _fastapi
 from app.routers import authentication as _authentication
 from app.routers import home as _home
+from app.routers import subjects as _subjects
+from app.routers import questions as _questions
 from sqlalchemy.orm import Session
 import logging  
 from app.models.dashboard.db_config import get_db, engine  
 from app.models.dashboard.models import Base, User, Subject, Topic, Question  
+
 
 app = _fastapi.FastAPI()
 
@@ -43,3 +46,5 @@ async def read_users(db: Session = Depends(get_db)):
 
 app.include_router(_authentication.router)
 app.include_router(_home.router)
+app.include_router(_subjects.router)
+app.include_router(_questions.router)

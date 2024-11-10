@@ -136,3 +136,12 @@ async def create_donequestion(donequestion: DoneQuestionCreate, db: Session = De
 @router.get("/donequestions/")
 async def read_donequestions(db: Session = Depends(get_db)):
     return db.query(DoneQuestion).all()
+
+@router.get("users/{user_id}/donequestions/")
+async def read_donequestions(user_id: int, db: Session = Depends(get_db)):
+    return db.query(DoneQuestion).filter(DoneQuestion.user_id == user_id).all()
+
+@router.get("users/{user_id}/donequestions/{question_id}/is_correct")
+async def read_donequestions(user_id: int, question_id: int, db: Session = Depends(get_db)):
+    return db.query(DoneQuestion).filter(DoneQuestion.user_id == user_id, DoneQuestion.question_id == question_id).first().is_correct
+
