@@ -1,19 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import logging
 from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion
-from app.models.dashboard.createtable import create_tables
+from app.models.dashboard.models import User, Subject, Topic, Question, Answer, TestCase
+import os
+import subprocess
 
 router = APIRouter()
-
-# Create tables on startup
-@router.on_event("startup")
-async def startup():
-    logging.info("Creating tables...")
-    create_tables()
-    logging.info("Tables created successfully.")
 
 # Basic endpoint to test the server
 @router.get("/")
@@ -47,10 +40,20 @@ class TestCaseCreate(BaseModel):
     expected_output: str
     question_id: int
 
-class DoneQuestionCreate(BaseModel):
+class DoneQuestion(BaseModel):
     question_id: int
     user_id: int
     is_correct: bool
+
+class DoneQuestionCreate(BaseModel):
+    question_id: int
+    user_id: int
+    is_correct: bool    
+    
+class UserCode(BaseModel):
+    user_id: int
+    question_id: int
+    user_code: str
 
 # Endpoints
 @router.post("/users/", response_model=UserCreate)
@@ -115,7 +118,13 @@ async def read_answers(db: Session = Depends(get_db)):
 
 @router.post("/testcases/", response_model=TestCaseCreate)
 async def create_testcase(testcase: TestCaseCreate, db: Session = Depends(get_db)):
-    db_testcase = TestCase(input_data=testcase.input_data, expected_output=testcase.expected_output, question_id=testcase.question_id)
+    # Write the input data to a bash file
+    bash_file_path = f"./testcases/testcase_{testcase.question_id}.sh"
+    os.makedirs(os.path.dirname(bash_file_path), exist_ok=True)
+    with open(bash_file_path, "w") as bash_file:
+        bash_file.write(testcase.input_data)
+    
+    db_testcase = TestCase(input_data=bash_file_path, expected_output=testcase.expected_output, question_id=testcase.question_id)
     db.add(db_testcase)
     db.commit()
     db.refresh(db_testcase)
@@ -124,6 +133,30 @@ async def create_testcase(testcase: TestCaseCreate, db: Session = Depends(get_db
 @router.get("/testcases/")
 async def read_testcases(db: Session = Depends(get_db)):
     return db.query(TestCase).all()
+
+
+
+@router.post("/run_code/")
+async def run_code(question_id: int, user_code: str, db: Session = Depends(get_db)):
+    # Get the test case for the question
+    test_case = db.query(TestCase).filter(TestCase.question_id == question_id).first()
+    if not test_case:
+        raise HTTPException(status_code=404, detail="Test case not found")
+
+    # Write the user's code to a temporary file
+    user_code_file = f"./temp/user_code_{question_id}.py"
+    os.makedirs(os.path.dirname(user_code_file), exist_ok=True)
+    with open(user_code_file, "w") as code_file:
+        code_file.write(user_code)
+
+    # Run the user's code with the input data from the bash file
+    result = subprocess.run(["python3", user_code_file], input=test_case.input_data, text=True, capture_output=True)
+
+    # Compare the output with the expected output
+    if result.stdout.strip() == test_case.expected_output.strip():
+        return {"message": "Success", "output": result.stdout}
+    else:
+        return {"message": "Failure", "output": result.stdout, "expected": test_case.expected_output}
 
 @router.post("/donequestions/", response_model=DoneQuestionCreate)
 async def create_donequestion(donequestion: DoneQuestionCreate, db: Session = Depends(get_db)):
@@ -145,3 +178,18 @@ async def read_donequestions(user_id: int, db: Session = Depends(get_db)):
 async def read_donequestions(user_id: int, question_id: int, db: Session = Depends(get_db)):
     return db.query(DoneQuestion).filter(DoneQuestion.user_id == user_id, DoneQuestion.question_id == question_id).first().is_correct
 
+@router.post("users/{user_id}/user_code/", response_model=UserCode)
+async def create_user_code(user_code: UserCode, db: Session = Depends(get_db)):
+    db_user_code = UserCode(user_id=user_code.user_id, question_id=user_code.question_id, user_code=user_code.user_code)
+    db.add(db_user_code)
+    db.commit()
+    db.refresh(db_user_code)
+    return db_user_code
+
+@router.get("users/{user_id}/user_code/")
+async def read_user_code(user_id: int, db: Session = Depends(get_db)):
+    return db.query(UserCode).filter(UserCode.user_id == user_id).all()
+
+@router.get("users/{user_id}/user_code/{question_id}")
+async def read_user_code(user_id: int, question_id: int, db: Session = Depends(get_db)):
+    return db.query(UserCode).filter(UserCode.user_id == user_id, UserCode.question_id == question_id).first().user_code
