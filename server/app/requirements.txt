@@ -6,3 +6,5 @@ jwt
 jose
 pydantic
 typing
+bcrypt
+pyjwt
