@@ -54,9 +54,8 @@ const AdminPage = () => {
         ) : (
           <ul>
             {subjects.map((subject, index) => (
-              // Adjust access based on actual data structure
               <li key={subject.id || index}>
-                {subject.name || subject.subject?.name} {/* Use proper property based on your data */}
+                {subject.subject_name} {/* Display the subject name correctly */}
               </li>
             ))}
           </ul>
