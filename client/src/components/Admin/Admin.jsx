@@ -52,8 +52,14 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ createSubject }) => {
+const FeedbackMessage = styled.p`
+  font-size: 14px;
+  color: ${({ isError }) => (isError ? "red" : "green")};
+`;
+
+const Admin = () => {
   const [newSubject, setNewSubject] = useState("");
+  const [feedback, setFeedback] = useState({ message: "", isError: false });
 
   const handleInputChange = (e) => {
     setNewSubject(e.target.value);
@@ -63,11 +69,22 @@ const Admin = ({ createSubject }) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
       try {
-        await createSubject({ name: newSubject });
+        const subjectData = {
+          subject_name: newSubject, // Use the exact field name expected by the backend
+          user_id: 1, // Set user_id to the appropriate value; replace 1 with the actual user ID
+        };
+        console.log("Submitting subjectData:", subjectData);
+        await createSubject(subjectData);
         setNewSubject("");
         alert("Subject added successfully");
       } catch (error) {
-        console.error("Failed to add subject", error);
+        console.error("Failed to add subject:", error);
+        if (error.detail) {
+          console.error("Validation issues:", error.detail);
+          alert("Failed to add subject due to validation errors: " + JSON.stringify(error.detail));
+        } else {
+          alert("Failed to add subject: " + JSON.stringify(error));
+        }
       }
     }
   };
@@ -85,6 +102,11 @@ const Admin = ({ createSubject }) => {
           />
           <Button type="submit">Add Subject</Button>
         </Form>
+        {feedback.message && (
+          <FeedbackMessage isError={feedback.isError}>
+            {feedback.message}
+          </FeedbackMessage>
+        )}
       </Content>
     </AdminContainer>
   );
