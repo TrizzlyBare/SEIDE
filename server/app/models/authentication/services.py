@@ -50,15 +50,23 @@ async def get_current_user(
     db: _orm.Session = _fastapi.Depends(get_db),
     token: str = _fastapi.Depends(oauth2schema),
 ):
+    credentials_exception = _fastapi.HTTPException(
+        status_code=_fastapi.status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = _jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user = db.query(_models.User).get(payload["id"])
-    except:
-        raise _fastapi.HTTPException(
-            status_code=_fastapi.status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Email or Password",
-        )
-    return _schemas.User.from_orm(user)
+        user_id: str = payload.get("id")
+        if user_id is None:
+            raise credentials_exception
+        token_data = _schemas.User(id=user_id)
+    except _jwt.JWTError:
+        raise credentials_exception
+    user = db.query(_models.User).filter(_models.User.id == token_data.id).first()
+    if user is None:
+        raise credentials_exception
+    return user
 
 async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.LeadCreate):
     lead = _models.Lead(**lead.dict(), owner_id=user.id)
@@ -66,6 +74,7 @@ async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.Lead
     db.commit()
     db.refresh(lead)
     return _schemas.Lead.from_orm(lead)
+    
 
 async def get_leads(user: _schemas.User, db: _orm.Session):
     leads = db.query(_models.Lead).filter_by(owner_id=user.id)
