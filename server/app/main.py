@@ -22,6 +22,13 @@ async def startup():
     AuthBase.metadata.create_all(bind=auth_engine)
     logging.info("Tables created successfully.")
 
+
+app.include_router(_authentication.router)
+app.include_router(_home.router)
+app.include_router(_subjects.router)
+app.include_router(_questions.router)
+
+
 # Basic endpoint to test the server
 @app.get("/")
 async def root():
@@ -50,8 +57,3 @@ async def create_user(user: UserCreate, db: Session = Depends(get_auth_db)):
 @app.get("/users/")
 async def read_users(db: Session = Depends(get_auth_db)):
     return db.query(AuthUser).all()
-
-app.include_router(_authentication.router)
-app.include_router(_home.router)
-app.include_router(_subjects.router)
-app.include_router(_questions.router)

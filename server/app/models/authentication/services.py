@@ -25,26 +25,22 @@ async def get_user_by_email(email: str, db: _orm.Session):
 
 async def create_user(user: _schemas.UserCreate, db: _orm.Session):
     hashed_password = _hash.bcrypt.hash(user.password)
-    user_obj = _models.User(
-        email=user.email, hashed_password=hashed_password
-    )
-    db.add(user_obj)
+    db_user = _models.User(email=user.email, hashed_password=hashed_password)
+    db.add(db_user)
     db.commit()
-    db.refresh(user_obj)
-    return user_obj
+    db.refresh(db_user)
+    return db_user
 
 async def authenticate_user(email: str, password: str, db: _orm.Session):
     user = await get_user_by_email(email, db)
-    if not user:
-        return False
-    if not _hash.bcrypt.verify(password, user.hashed_password):
+    if not user or not _hash.bcrypt.verify(password, user.hashed_password):
         return False
     return user
 
 async def create_token(user: _models.User):
     user_obj = _schemas.User.from_orm(user)
     token = _jwt.encode(user_obj.dict(), JWT_SECRET, algorithm="HS256")
-    return dict(access_token=token, token_type="bearer")
+    return {"access_token": token, "token_type": "bearer"}
 
 async def get_current_user(
     db: _orm.Session = _fastapi.Depends(get_db),
@@ -57,13 +53,12 @@ async def get_current_user(
     )
     try:
         payload = _jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user_id: str = payload.get("id")
+        user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-        token_data = _schemas.User(id=user_id)
     except _jwt.JWTError:
         raise credentials_exception
-    user = db.query(_models.User).filter(_models.User.id == token_data.id).first()
+    user = db.query(_models.User).filter(_models.User.id == user_id).first()
     if user is None:
         raise credentials_exception
     return user

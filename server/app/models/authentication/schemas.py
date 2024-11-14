@@ -1,10 +1,8 @@
 import datetime as _dt
+from pydantic import BaseModel, EmailStr
 
-import pydantic as _pydantic
-
-
-class _UserBase(_pydantic.BaseModel):
-    email: str
+class _UserBase(BaseModel):
+    email: EmailStr
 
 class UserCreate(_UserBase):
     password: str
@@ -16,18 +14,19 @@ class User(_UserBase):
         orm_mode = True
         from_attributes = True
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-class _LeadBase(_pydantic.BaseModel):
+class _LeadBase(BaseModel):
     first_name: str
     last_name: str
-    email: str
+    email: EmailStr
     company: str
     note: str
 
-
 class LeadCreate(_LeadBase):
     pass
-
 
 class Lead(_LeadBase):
     id: int

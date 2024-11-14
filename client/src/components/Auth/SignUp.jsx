@@ -1,42 +1,54 @@
-import React, { useState } from "react";
-import { SignUpContainer, Form, Title, Input, Button } from "./Components";
-import { register } from "./api";
+import React, { useState, useContext } from "react";
+import {
+  SignInContainer,
+  Form,
+  Title,
+  Input,
+  Button,
+  Anchor,
+} from "./Components";
+import { UserContext } from "../Context/UserContext";
 
-const SignUp = ({ signingIn }) => {
-  const [name, setName] = useState("");
-  const [Surname,setSurName] = ustState("")
+const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [, setToken] = useContext(UserContext);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitSignUp = async () => {
     try {
-      const data = await register(name,Surname,email, password);
-      console.log("Registration successful:", data);
-      // Handle successful registration (e.g., redirect to login)
-    } catch (err) {
-      setError(err.detail);
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setErrorMessage(data.detail);
+      } else {
+        const data = await response.json();
+        setToken(data.access_token); // Save the token on successful signup
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      setErrorMessage("An error occurred during sign up.");
     }
   };
 
-  return (
-    <SignUpContainer signingIn={signingIn}>
-      <Form onSubmit={handleSubmit}>
-        <Title>Create Account</Title>
-        <Input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          type="text"
-          placeholder="SurName"
-          value={Surname}
-          onChange={(e) => setSurname(e.target.value)}
-        />
+  const handleSubmit = (e) => {
+    console.log("Signup Button clicked!"); // Log to confirm button click
+    e.preventDefault();
+    submitSignUp();
+  };
 
+  return (
+    <SignInContainer>
+      <Form onSubmit={handleSubmit}>
+        <Title>Sign Up</Title>
         <Input
           type="email"
           placeholder="Email"
@@ -49,10 +61,10 @@ const SignUp = ({ signingIn }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
         <Button type="submit">Sign Up</Button>
       </Form>
-    </SignUpContainer>
+    </SignInContainer>
   );
 };
 
