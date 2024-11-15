@@ -5,8 +5,9 @@ from app.models.dashboard.db_config import get_db
 from app.models.dashboard.models import User, Subject, Topic, Question, Answer, TestCase
 import os
 import subprocess
+import fastapi as _fastapi
 
-router = APIRouter()
+router = _fastapi.APIRouter(tags=["Home"]) 
 
 # Basic endpoint to test the server
 @router.get("/")

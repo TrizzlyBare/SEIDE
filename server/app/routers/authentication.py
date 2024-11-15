@@ -5,22 +5,19 @@ import sqlalchemy.orm as _orm
 from app.models.authentication import services as _services
 import app.models.authentication.schemas as _schemas
 
-router = _fastapi.APIRouter()
+router = _fastapi.APIRouter(tags=["Authentication"])
 
-@router.post("/api/users", response_model=_schemas.Token)
-async def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
-    try:
-        db_user = await _services.get_user_by_email(user.email, db)
-        if db_user:
-            raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
+@router.post("/api/users")
+async def create_user(
+    user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)
+):
+    db_user = await _services.get_user_by_email(user.email, db)
+    if db_user:
+        raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
 
-        new_user = await _services.create_user(user, db)
-        token = await _services.create_token(new_user)
+    user = await _services.create_user(user, db)
 
-        return token
-    except Exception as e:
-        _logging.error(f"Error creating user: {str(e)}")  # Log error details
-        raise _fastapi.HTTPException(status_code=500, detail=f"Error creating user: {str(e)}")
+    return await _services.create_token(user)
 
 
 @router.post("/api/token")
@@ -29,10 +26,8 @@ async def generate_token(
     db: _orm.Session = _fastapi.Depends(_services.get_db),
 ):
     user = await _services.authenticate_user(form_data.username, form_data.password, db)
-
     if not user:
-        raise _fastapi.HTTPException(status_code=401, detail="Invalid Credentials")
-
+        raise _fastapi.HTTPException(status_code=400, detail="Invalid credentials")
     return await _services.create_token(user)
 
 @router.get("/api/users/me", response_model=_schemas.User)

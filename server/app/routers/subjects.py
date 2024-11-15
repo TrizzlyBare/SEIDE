@@ -5,8 +5,9 @@ import logging
 from app.models.dashboard.db_config import get_db
 from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion
 from app.models.dashboard.createtable import create_tables
+import fastapi as _fastapi
 
-router = APIRouter()
+router = _fastapi.APIRouter(tags=["Subjects"])
 
 class SubjectCreate(BaseModel):
     subject_name: str
