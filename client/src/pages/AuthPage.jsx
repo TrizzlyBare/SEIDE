@@ -20,7 +20,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   const handleSignIn = () => {
-    navigate("/app"); // Navigate to App component
+    navigate("/app");
   };
 
   return (
