@@ -24,7 +24,8 @@ async def get_user_by_email(email: str, db: _orm.Session):
     return db.query(_models.User).filter(_models.User.email == email).first()
 
 async def create_user(user: _schemas.UserCreate, db: _orm.Session):
-    hashed_password = _hash.bcrypt.hash(user.password)
+    # Ensure the user gets added to the database (handling password hashing)
+    hashed_password = _hash.bcrypt.hash(user.password)  # Hash the password with bcrypt
     db_user = _models.User(email=user.email, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
@@ -33,13 +34,14 @@ async def create_user(user: _schemas.UserCreate, db: _orm.Session):
 
 async def authenticate_user(email: str, password: str, db: _orm.Session):
     user = await get_user_by_email(email, db)
-    if not user or not _hash.bcrypt.verify(password, user.hashed_password):
+    if not user or not _hash.bcrypt.verify(password, user.hashed_password):  # Verify password hash
         return False
     return user
 
 async def create_token(user: _models.User):
-    user_obj = _schemas.User.from_orm(user)
-    token = _jwt.encode(user_obj.dict(), JWT_SECRET, algorithm="HS256")
+    # Generate JWT token
+    token_data = {"sub": user.email}
+    token = _jwt.encode(token_data, JWT_SECRET, algorithm="HS256")  # Use the correct JWT_SECRET
     return {"access_token": token, "token_type": "bearer"}
 
 async def get_current_user(

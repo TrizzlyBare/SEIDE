@@ -12,7 +12,24 @@ from app.models.authentication.au_database import engine as auth_engine, Base as
 from app.models.authentication.models import User as AuthUser
 from app.models.authentication.services import get_db as get_auth_db
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.models.authentication import router as auth_router
+
 app = FastAPI()
+
+# Enable CORS for React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React app's default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include your authentication router
+app.include_router(auth_router)
+
 
 # Create tables on startup
 @app.on_event("startup")

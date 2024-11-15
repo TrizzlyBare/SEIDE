@@ -9,12 +9,18 @@ router = _fastapi.APIRouter()
 
 @router.post("/api/users", response_model=_schemas.Token)
 async def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
-    db_user = await _services.get_user_by_email(user.email, db)
-    if db_user:
-        raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
+    try:
+        db_user = await _services.get_user_by_email(user.email, db)
+        if db_user:
+            raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
 
-    user = await _services.create_user(user, db)
-    return await _services.create_token(user)
+        new_user = await _services.create_user(user, db)
+        token = await _services.create_token(new_user)
+
+        return token
+    except Exception as e:
+        _logging.error(f"Error creating user: {str(e)}")  # Log error details
+        raise _fastapi.HTTPException(status_code=500, detail=f"Error creating user: {str(e)}")
 
 
 @router.post("/api/token")
