@@ -45,3 +45,15 @@ async def create_question(topic_id: int, question: QuestionCreate, db: Session =
 @router.get("subjects/topics/{topic_id}/questions/")
 async def read_questions(topic_id: int, db: Session = Depends(get_db)):
     return db.query(Question).filter(Question.topic_id == topic_id).all()
+
+@router.get("/subjects/")
+async def read_subjects(db: Session = Depends(get_db)):
+    return db.query(Subject).all()
+
+@router.post("/subjects/", response_model=SubjectCreate)
+async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
+    db_subject = Subject(subject_name=subject.subject_name, user_id=subject.user_id)
+    db.add(db_subject)
+    db.commit()
+    db.refresh(db_subject)
+    return db_subject
