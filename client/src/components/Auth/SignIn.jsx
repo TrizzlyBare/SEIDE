@@ -20,7 +20,7 @@ const SignIn = () => {
 
   const submitLogin = async () => {
     try {
-      const response = await fetch("/api/token", {
+      const response = await fetch("http://localhost:8000/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -28,23 +28,47 @@ const SignIn = () => {
           password: password,
         }).toString(),
       });
-
+  
       if (!response.ok) {
         const data = await response.json();
         setErrorMessage(data.detail);
       } else {
         const data = await response.json();
-        setToken(data.access_token);
+        setToken(data.access_token); // Store JWT token in context
       }
     } catch (error) {
       console.error("Login error:", error);
       setErrorMessage("An error occurred during login.");
     }
   };
+  
 
   const handleSubmit = (e) => {
     console.log("Login button clicked");
-    e.preventDefault();
+    e.preventDefault();const submitLogin = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            username: email,
+            password: password,
+          }).toString(),
+        });
+    
+        if (!response.ok) {
+          const data = await response.json();
+          setErrorMessage(data.detail);
+        } else {
+          const data = await response.json();
+          setToken(data.access_token); // Store JWT token in context
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        setErrorMessage("An error occurred during login.");
+      }
+    };
+    
     submitLogin();
   };
 

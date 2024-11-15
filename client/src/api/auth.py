@@ -44,7 +44,6 @@ async def register(username: str = Form(...), email: str = Form(...), password: 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    logging.info(f"User created successfully: {username}")
     return {"message": "User created successfully"}
 
 @router.get("/logout")

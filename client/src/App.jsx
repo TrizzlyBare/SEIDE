@@ -7,7 +7,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
 import CreateTopic from "./components/Admin/create_topic";
-import "./App.css";
+import "./App.css"; // Import the CSS file
 
 function App() {
   return (
