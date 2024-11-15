@@ -8,7 +8,9 @@ from app.routers import home as _home
 from app.routers import subjects as _subjects
 from app.routers import questions as _questions
 from app.models.dashboard.db_config import get_db, engine  
-from app.models.dashboard.models import Base, User
+from app.models.dashboard.models import Base, User 
+from app.models.authentication.models import Base  
+from app.models.authentication.au_database import engine 
 
 app = FastAPI()
 
@@ -24,9 +26,8 @@ app.add_middleware(
 # Setup on startup: create tables
 @app.on_event("startup")
 async def startup():
-    logging.info("Creating tables...")
+    # Create tables if they don't exist
     Base.metadata.create_all(bind=engine)
-    logging.info("Tables created successfully.")
 
 # Basic endpoint to test the server
 @app.get("/")
