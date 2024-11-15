@@ -31,16 +31,17 @@ const SignUp = () => {
         setErrorMessage(data.detail);
       } else {
         const data = await response.json();
-        setToken(data.access_token); // Save the token on successful signup
+        setToken(data.access_token); 
       }
     } catch (error) {
       console.error("Signup error:", error);
       setErrorMessage("An error occurred during sign up.");
+      
     }
   };
 
   const handleSubmit = (e) => {
-    console.log("Signup Button clicked!"); // Log to confirm button click
+    console.log("Signup Button clicked!");
     e.preventDefault();
     submitSignUp();
   };
