@@ -7,16 +7,25 @@ import passlib.hash as _hash
 import app.models.authentication.au_database as _database
 
 
-class User(_database.Base):
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from passlib.context import CryptContext
+
+Base = declarative_base()
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# User model
+class User(Base):
     __tablename__ = "users"
-    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
-    email = _sql.Column(_sql.String, unique=True, index=True)
-    hashed_password = _sql.Column(_sql.String)
 
-    leads = _orm.relationship("Lead", back_populates="owner")
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
 
-    def verify_password(self, password: str):
-        return _hash.bcrypt.verify(password, self.hashed_password)
+    def verify_password(self, password: str) -> bool:
+        return pwd_context.verify(password, self.hashed_password)
 
 
 class Lead(_database.Base):
