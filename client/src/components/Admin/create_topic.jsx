@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { createTopic } from "../../api";  // Assuming the API method for topics is createTopic
+import { createTopic } from "../../api";  // AssuminTg the API method for topics is createTopic
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -66,7 +66,7 @@ const Admin = ({ addTopic }) => {
         await createTopic({ name: newTopic });
         setNewTopic("");
         alert("Topic added successfully");
-        addTopic(); // Refresh topics list after adding
+        addTopic();
       } catch (error) {
         console.error("Failed to add topic", error);
       }
