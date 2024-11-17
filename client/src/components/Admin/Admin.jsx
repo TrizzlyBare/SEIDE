@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import axios from "axios";
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -21,27 +20,58 @@ const Title = styled.h1`
 `;
 
 const SubjectsGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
   margin-top: 20px;
-  justify-content: flex-start; /* Ensure content starts from the left */
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
 `;
 
 const SubjectBox = styled.div`
-  width: 150px;
-  height: 150px;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #333;
+  border: 2px solid #e0e0e0;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   color: #333;
+  background: white;
+  transition: all 0.2s ease;
+  position: relative;
 
   &:hover {
-    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  ${SubjectBox}:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: #ff0000;
   }
 `;
 
@@ -55,34 +85,50 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 `;
 
 const ModalContent = styled.div`
   background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 700px;
-  text-align: center;
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
   font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #333;
+    outline: none;
+  }
 `;
 
 const Button = styled.button`
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   background-color: #333;
   color: #fff;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   width: 100%;
+  transition: background-color 0.2s;
 
   &:hover {
     background-color: #555;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 
@@ -90,13 +136,26 @@ const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
   const [subjects, setSubjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Assume we have the user's ID from authentication
+  const currentUserId = 1; // Replace with actual user ID from your auth system
 
   const fetchSubjects = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/subjects/");
-      setSubjects(response.data);
+      setIsLoading(true);
+      const response = await fetch("http://localhost:8000/subjects/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch subjects");
+      }
+      const data = await response.json();
+      setSubjects(data);
     } catch (error) {
+      setError(error.message);
       console.error("Error fetching subjects:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,66 +163,92 @@ const Admin = () => {
     fetchSubjects();
   }, []);
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setNewSubject("");
-  };
-
-  const handleInputChange = (e) => {
-    setNewSubject(e.target.value);
+  const handleDeleteSubject = async (subjectId, e) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this subject?")) {
+      try {
+        const response = await fetch(`http://localhost:8000/subjects/${subjectId}`, {
+          method: "DELETE",
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to delete subject");
+        }
+        
+        await fetchSubjects();
+      } catch (error) {
+        console.error("Error deleting subject:", error);
+        alert("Failed to delete subject");
+      }
+    }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
       try {
+        setIsLoading(true);
         const response = await fetch("http://localhost:8000/subjects/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: newSubject }),
+          body: JSON.stringify({
+            subject_name: newSubject,
+            user_id: currentUserId
+          }),
         });
 
         if (!response.ok) {
-          throw new Error("Failed to add subject");
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Failed to add subject");
         }
 
         setNewSubject("");
         setIsModalOpen(false);
-        alert("Subject added successfully");
-        fetchSubjects();
+        await fetchSubjects();
       } catch (error) {
-        console.error("Failed to add subject", error);
+        console.error("Failed to add subject:", error);
+        alert(error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <AdminContainer>
-      <Title>Admin Page</Title>
+      <Title>Subject Management</Title>
       <SubjectsGrid>
-        {subjects.map((subject, index) => (
-          <SubjectBox key={index}>{subject.name}</SubjectBox>
+        {subjects.map((subject) => (
+          <SubjectBox key={subject.subject_id}>
+            {subject.subject_name}
+            <DeleteButton 
+              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            >
+              ×
+            </DeleteButton>
+          </SubjectBox>
         ))}
-        <SubjectBox>Subject 1</SubjectBox>
-        <SubjectBox>Subject 2</SubjectBox>
-        <SubjectBox onClick={handleOpenModal}>+</SubjectBox>
+        <SubjectBox onClick={() => setIsModalOpen(true)}>+ Add Subject</SubjectBox>
       </SubjectsGrid>
 
       {isModalOpen && (
-        <ModalOverlay onClick={handleCloseModal}>
+        <ModalOverlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <form onSubmit={handleFormSubmit}>
               <Input
                 type="text"
-                placeholder="Enter new subject"
+                placeholder="Enter subject name"
                 value={newSubject}
-                onChange={handleInputChange}
+                onChange={(e) => setNewSubject(e.target.value)}
+                autoFocus
               />
-              <Button type="submit">Add Subject</Button>
+              <Button type="submit" disabled={isLoading || newSubject.trim() === ""}>
+                {isLoading ? "Adding..." : "Add Subject"}
+              </Button>
             </form>
           </ModalContent>
         </ModalOverlay>
