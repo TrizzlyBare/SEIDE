@@ -195,7 +195,7 @@ const Admin = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (newSubject.trim() !== "" && year.trim() !== "") {
+    if (newSubject.trim() !== "") {
       // Check if year is not empty
       try {
         setIsLoading(true);
@@ -204,7 +204,6 @@ const Admin = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             subject_name: newSubject,
-            year: year,
             user_id: currentUserId,
           }),
         });
@@ -215,7 +214,6 @@ const Admin = () => {
         }
 
         setNewSubject("");
-        setYear(""); // Reset year input
         setIsModalOpen(false);
         await fetchSubjects();
       } catch (error) {
@@ -237,17 +235,16 @@ const Admin = () => {
       <SubjectsGrid>
         {subjects.map((subject) => (
           <SubjectBox
-          key={subject.subject_id}
-          onClick={() => handleSubjectClick(subject.subject_id)}
-        >
-          {subject.subject_name}
-          <DeleteButton
-            onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            key={subject.subject_id}
+            onClick={() => handleSubjectClick(subject.subject_id)}
           >
-            ×
-          </DeleteButton>
-        </SubjectBox>
-        
+            {subject.subject_name}
+            <DeleteButton
+              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            >
+              ×
+            </DeleteButton>
+          </SubjectBox>
         ))}
         <SubjectBox onClick={() => setIsModalOpen(true)}>
           + Add Subject
@@ -267,9 +264,7 @@ const Admin = () => {
               />
               <Button
                 type="submit"
-                disabled={
-                  isLoading || newSubject.trim() === "" || year.trim() === ""
-                }
+                disabled={isLoading || newSubject.trim() === ""}
               >
                 {isLoading ? "Adding..." : "Add Subject"}
               </Button>
