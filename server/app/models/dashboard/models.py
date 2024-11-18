@@ -15,11 +15,12 @@ class User(Base):
     subjects: Mapped[List["Subject"]] = relationship("Subject", back_populates="user")
     done_questions: Mapped[List["DoneQuestion"]] = relationship("DoneQuestion", back_populates="user")
 
-class Subject(Base):   
+class Subject(Base):
     __tablename__ = 'subject_table'
 
     subject_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     subject_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    year: Mapped[str] = mapped_column(String, nullable=False)
     topics: Mapped[List["Topic"]] = relationship("Topic", back_populates="subject")
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"))
@@ -37,7 +38,7 @@ class Topic(Base):
     questions: Mapped[List["Question"]] = relationship("Question", back_populates="topic")
 
 class Question(Base):
-    __tablename__ = 'question_table'
+    __tablename__ = 'questions_table'
 
     question_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     question_text: Mapped[str] = mapped_column(String, nullable=False)
@@ -47,35 +48,34 @@ class Question(Base):
 
     answers: Mapped[List["Answer"]] = relationship("Answer", back_populates="question")
     test_cases: Mapped[List["TestCase"]] = relationship("TestCase", back_populates="question")
-    done_questions: Mapped[List["DoneQuestion"]] = relationship("DoneQuestion", back_populates="question")
 
 class Answer(Base):
-    __tablename__ = 'answer_table'
+    __tablename__ = 'answers_table'
 
     answer_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     answer_text: Mapped[str] = mapped_column(String, nullable=False)
-    is_correct: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
-    question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
+    question_id: Mapped[int] = mapped_column(ForeignKey("questions_table.question_id"))
     question: Mapped["Question"] = relationship("Question", back_populates="answers")
 
 class TestCase(Base):
-    __tablename__ = 'test_case_table'
+    __tablename__ = 'test_cases_table'
 
     test_case_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     input_data: Mapped[str] = mapped_column(String, nullable=False)
     expected_output: Mapped[str] = mapped_column(String, nullable=False)
 
-    question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
+    question_id: Mapped[int] = mapped_column(ForeignKey("questions_table.question_id"))
     question: Mapped["Question"] = relationship("Question", back_populates="test_cases")
 
 class DoneQuestion(Base):
-    __tablename__ = 'done_question_table'
+    __tablename__ = 'done_questions_table'
 
     done_question_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"))
-    is_correct: Mapped[bool] = mapped_column(Boolean, default=False)  
 
-    question: Mapped["Question"] = relationship("Question", back_populates="done_questions")
+    question_id: Mapped[int] = mapped_column(ForeignKey("questions_table.question_id"))
+    question: Mapped["Question"] = relationship("Question")
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"))
     user: Mapped["User"] = relationship("User", back_populates="done_questions")

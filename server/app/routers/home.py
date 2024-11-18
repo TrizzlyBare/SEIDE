@@ -6,6 +6,7 @@ from app.models.dashboard.models import User, Subject, Topic, Question, Answer, 
 import os
 import subprocess
 import fastapi as _fastapi
+from typing import List
 
 router = _fastapi.APIRouter(tags=["Home"]) 
 
@@ -21,6 +22,7 @@ class UserCreate(BaseModel):
 
 class SubjectCreate(BaseModel):
     subject_name: str
+    year: str
     user_id: int
 
 class TopicCreate(BaseModel):
@@ -69,9 +71,10 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 async def read_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 
-@router.get("/subjects/")
+@router.get("/subjects/", response_model=List[SubjectCreate])
 async def read_subjects(db: Session = Depends(get_db)):
-    return db.query(Subject).all()
+    subjects = db.query(Subject).all()
+    return subjects
 
 @router.post("/topics/", response_model=TopicCreate)
 async def create_topic(topic: TopicCreate, db: Session = Depends(get_db)):

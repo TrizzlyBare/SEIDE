@@ -34,6 +34,7 @@ router = APIRouter(tags=["Subjects"])
 # Pydantic models for request/response
 class SubjectBase(BaseModel):
     subject_name: str
+    year: str
 
 class SubjectCreate(SubjectBase):
     user_id: int

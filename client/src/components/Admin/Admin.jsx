@@ -1,137 +1,18 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-
-const AdminContainer = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  padding: 20px;
-  background-color: #f4f4f4;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-`;
-
-const Title = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  color: #333;
-`;
-
-const SubjectsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 1200px;
-  padding: 20px;
-`;
-
-const SubjectBox = styled.div`
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #333;
-  background: white;
-  transition: all 0.2s ease;
-  position: relative;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const DeleteButton = styled.button`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-
-  ${SubjectBox}:hover & {
-    opacity: 1;
-  }
-
-  &:hover {
-    background: #ff0000;
-  }
-`;
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 20px;
-  font-size: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  transition: border-color 0.2s;
-
-  &:focus {
-    border-color: #333;
-    outline: none;
-  }
-`;
-
-const Button = styled.button`
-  padding: 12px;
-  font-size: 16px;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #555;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
+import {
+  AdminContainer,
+  Title,
+  SubjectsGrid,
+  SubjectBox,
+  DeleteButton,
+  ModalOverlay,
+  ModalContent,
+  Input,
+  Button,
+  YearSelection,
+} from "./admin_styles";
 
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,8 +20,9 @@ const Admin = () => {
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedYear, setSelectedYear] = useState("Year 1");
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const currentUserId = 1;
 
@@ -152,6 +34,7 @@ const Admin = () => {
         throw new Error("Failed to fetch subjects");
       }
       const data = await response.json();
+      console.log("Fetched subjects:", data); // Check the API response here
       setSubjects(data);
     } catch (error) {
       setError(error.message);
@@ -203,6 +86,7 @@ const Admin = () => {
           body: JSON.stringify({
             subject_name: newSubject,
             user_id: currentUserId,
+            year: selectedYear,
           }),
         });
 
@@ -223,6 +107,14 @@ const Admin = () => {
     }
   };
 
+  const handleYearChange = (e) => {
+    setSelectedYear(e.target.value);
+  };
+
+  const subjectsByYear = (year) => {
+    return subjects.filter((subject) => subject.year === year);
+  };
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -230,11 +122,13 @@ const Admin = () => {
   return (
     <AdminContainer>
       <Title>Subject Management</Title>
+
+      <h2>Year 1</h2>
       <SubjectsGrid>
-        {subjects.map((subject) => (
+        {subjectsByYear("Year 1").map((subject) => (
           <SubjectBox
             key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)} // Navigate on click
+            onClick={() => handleSubjectClick(subject.subject_name)}
           >
             {subject.subject_name}
             <DeleteButton
@@ -244,10 +138,62 @@ const Admin = () => {
             </DeleteButton>
           </SubjectBox>
         ))}
-        <SubjectBox onClick={() => setIsModalOpen(true)}>
-          + Add Subject
-        </SubjectBox>
       </SubjectsGrid>
+
+      <h2>Year 2</h2>
+      <SubjectsGrid>
+        {subjectsByYear("Year 2").map((subject) => (
+          <SubjectBox
+            key={subject.subject_id}
+            onClick={() => handleSubjectClick(subject.subject_name)}
+          >
+            {subject.subject_name}
+            <DeleteButton
+              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            >
+              ×
+            </DeleteButton>
+          </SubjectBox>
+        ))}
+      </SubjectsGrid>
+
+      <h2>Year 3</h2>
+      <SubjectsGrid>
+        {subjectsByYear("Year 3").map((subject) => (
+          <SubjectBox
+            key={subject.subject_id}
+            onClick={() => handleSubjectClick(subject.subject_name)}
+          >
+            {subject.subject_name}
+            <DeleteButton
+              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            >
+              ×
+            </DeleteButton>
+          </SubjectBox>
+        ))}
+      </SubjectsGrid>
+
+      <h2>Year 4</h2>
+      <SubjectsGrid>
+        {subjectsByYear("Year 4").map((subject) => (
+          <SubjectBox
+            key={subject.subject_id}
+            onClick={() => handleSubjectClick(subject.subject_name)}
+          >
+            {subject.subject_name}
+            <DeleteButton
+              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+            >
+              ×
+            </DeleteButton>
+          </SubjectBox>
+        ))}
+      </SubjectsGrid>
+
+      <SubjectBox onClick={() => setIsModalOpen(true)}>
+        + Add Subject
+      </SubjectBox>
 
       {isModalOpen && (
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
@@ -260,6 +206,42 @@ const Admin = () => {
                 onChange={(e) => setNewSubject(e.target.value)}
                 autoFocus
               />
+
+              <YearSelection>
+                <input
+                  type="radio"
+                  value="Year 1"
+                  name="Year"
+                  checked={selectedYear === "Year 1"}
+                  onChange={handleYearChange}
+                />{" "}
+                Year 1
+                <input
+                  type="radio"
+                  value="Year 2"
+                  name="Year"
+                  checked={selectedYear === "Year 2"}
+                  onChange={handleYearChange}
+                />{" "}
+                Year 2
+                <input
+                  type="radio"
+                  value="Year 3"
+                  name="Year"
+                  checked={selectedYear === "Year 3"}
+                  onChange={handleYearChange}
+                />{" "}
+                Year 3
+                <input
+                  type="radio"
+                  value="Year 4"
+                  name="Year"
+                  checked={selectedYear === "Year 4"}
+                  onChange={handleYearChange}
+                />{" "}
+                Year 4
+              </YearSelection>
+
               <Button
                 type="submit"
                 disabled={isLoading || newSubject.trim() === ""}
