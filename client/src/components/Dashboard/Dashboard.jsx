@@ -1,50 +1,28 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { getSubjects } from "../../api";
-
-const Container = styled.div`
-  display: flex;
-`;
-
-const DashboardContainer = styled.div`
-  flex: 1;
-  padding: 20px;
-`;
-
-const Title = styled.h1`
-  margin-bottom: 20px;
-`;
-
-const Content = styled.div`
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const SubjectList = styled.ul`
-  list-style: none;
-  padding: 0;
-`;
-
-const SubjectItem = styled.li`
-  padding: 10px;
-  background-color: #fff;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #f9f9f9;
-  }
-`;
+import {
+  Container,
+  DashboardContainer,
+  Title,
+  Content,
+  SubjectsGrid,
+  SubjectBox,
+} from "./dashboard_styles";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [subjects, setSubjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const fetchSubjects = async () => {
     try {
-      const data = await getSubjects();
+      setIsLoading(true);
+      const response = await fetch("http://localhost:8000/subjects/", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
       if (Array.isArray(data)) {
         setSubjects(data);
       } else {
@@ -54,6 +32,8 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Failed to fetch subjects", error);
       setSubjects([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,16 +41,29 @@ const Dashboard = () => {
     fetchSubjects();
   }, []);
 
+  const handleSubjectClick = (subjectName) => {
+    navigate(`/${subjectName}`);
+  };
+
   return (
     <Container>
       <DashboardContainer>
-        <Title>Dashboard</Title>
+        <Title>Home</Title>
         <Content>
-          <SubjectList>
-            {subjects.map((subject, index) => (
-              <SubjectItem key={index}>{subject.name}</SubjectItem>
-            ))}
-          </SubjectList>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <SubjectsGrid>
+              {subjects.map((subject, index) => (
+                <SubjectBox
+                  key={index}
+                  onClick={() => handleSubjectClick(subject.subject_name)}
+                >
+                  {subject.subject_name}
+                </SubjectBox>
+              ))}
+            </SubjectsGrid>
+          )}
         </Content>
       </DashboardContainer>
     </Container>
@@ -78,3 +71,7 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+{
+  /* <SubjectItem key={index}>{subject.subject_name}</SubjectItem> */
+}

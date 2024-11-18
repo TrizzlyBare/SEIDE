@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -45,7 +46,7 @@ const SubjectBox = styled.div`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -93,7 +94,7 @@ const ModalContent = styled.div`
   padding: 30px;
   border-radius: 12px;
   width: 400px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 `;
 
 const Input = styled.input`
@@ -139,8 +140,9 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Assume we have the user's ID from authentication
-  const currentUserId = 1; // Replace with actual user ID from your auth system
+  const navigate = useNavigate(); 
+
+  const currentUserId = 1;
 
   const fetchSubjects = async () => {
     try {
@@ -167,20 +169,27 @@ const Admin = () => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this subject?")) {
       try {
-        const response = await fetch(`http://localhost:8000/subjects/${subjectId}`, {
-          method: "DELETE",
-        });
-        
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subjectId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
         if (!response.ok) {
           throw new Error("Failed to delete subject");
         }
-        
+
         await fetchSubjects();
       } catch (error) {
         console.error("Error deleting subject:", error);
         alert("Failed to delete subject");
       }
     }
+  };
+
+  const handleSubjectClick = (subjectName) => {
+    navigate(`/admin/${subjectName}`);
   };
 
   const handleFormSubmit = async (e) => {
@@ -193,7 +202,7 @@ const Admin = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             subject_name: newSubject,
-            user_id: currentUserId
+            user_id: currentUserId,
           }),
         });
 
@@ -223,16 +232,21 @@ const Admin = () => {
       <Title>Subject Management</Title>
       <SubjectsGrid>
         {subjects.map((subject) => (
-          <SubjectBox key={subject.subject_id}>
+          <SubjectBox
+            key={subject.subject_id}
+            onClick={() => handleSubjectClick(subject.subject_name)} // Navigate on click
+          >
             {subject.subject_name}
-            <DeleteButton 
+            <DeleteButton
               onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
             >
               ×
             </DeleteButton>
           </SubjectBox>
         ))}
-        <SubjectBox onClick={() => setIsModalOpen(true)}>+ Add Subject</SubjectBox>
+        <SubjectBox onClick={() => setIsModalOpen(true)}>
+          + Add Subject
+        </SubjectBox>
       </SubjectsGrid>
 
       {isModalOpen && (
@@ -246,7 +260,10 @@ const Admin = () => {
                 onChange={(e) => setNewSubject(e.target.value)}
                 autoFocus
               />
-              <Button type="submit" disabled={isLoading || newSubject.trim() === ""}>
+              <Button
+                type="submit"
+                disabled={isLoading || newSubject.trim() === ""}
+              >
                 {isLoading ? "Adding..." : "Add Subject"}
               </Button>
             </form>

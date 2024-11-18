@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { createTopic } from "../../api";  // AssuminTg the API method for topics is createTopic
+import { createTopic } from "../../api";
 
 const AdminContainer = styled.div`
   width: 100%;

@@ -6,7 +6,7 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
-import CreateTopic from "./components/Admin/create_topic";
+import AddTopics from "./components/Admin/create_topic";
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
           <Route path="/editor" element={<CodeEditorPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/create_topic" element={<CreateTopic />} />
+          <Route path="/admin/:subjectName" element={<AddTopics />} />
         </Routes>
       </div>
     </div>
