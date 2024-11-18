@@ -1,37 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import logging
+from typing import List
 from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion
-from app.models.dashboard.createtable import create_tables
-import fastapi as _fastapi
-
-router = _fastapi.APIRouter(tags=["Subjects"])
-
-class SubjectCreate(BaseModel):
-    subject_name: str
-    user_id: int
-
-class TopicCreate(BaseModel):
-    topic_name: str
-    subject_id: int
-
-class QuestionCreate(BaseModel):
-    question_text: str
-    topic_id: int
-
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from typing import List, Optional
-from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import Subject
+from app.models.dashboard.models import Subject, Topic
 
 router = APIRouter(tags=["Subjects"])
 
-# Pydantic models for request/response
 class SubjectBase(BaseModel):
     subject_name: str
 
@@ -43,9 +18,20 @@ class SubjectResponse(SubjectBase):
     user_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
-# Routes
+class TopicCreate(BaseModel):
+    topic_name: str
+    subject_id: int
+
+class TopicResponse(BaseModel):
+    topic_id: int
+    topic_name: str
+    subject_id: int
+
+    class Config:
+        orm_mode = True
+
 @router.post("/subjects/", response_model=SubjectResponse)
 async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
     db_subject = Subject(
@@ -76,3 +62,15 @@ async def delete_subject(subject_id: int, db: Session = Depends(get_db)):
     db.delete(subject)
     db.commit()
     return {"message": "Subject deleted successfully"}
+
+@router.post("/subjects/{subject_id}/topics", response_model=TopicResponse)
+async def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_db)):
+    db_topic = Topic(topic_name=topic.topic_name, subject_id=subject_id)
+    db.add(db_topic)
+    db.commit()
+    db.refresh(db_topic)
+    return db_topic
+
+@router.get("/subjects/{subject_id}/topics", response_model=List[TopicResponse])
+async def read_topics(subject_id: int, db: Session = Depends(get_db)):
+    return db.query(Topic).filter(Topic.subject_id == subject_id).all()

@@ -6,12 +6,11 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
-import CreateTopic from "./components/Admin/create_topic";
+import TopicsManager from "./components/Admin/topics_manager"; // Import the TopicsManager component
 import "./App.css"; // Import the CSS file
 
 function App() {
   return (
-    <Router>
       <div className="app-container">
         <NavBar />
         <div className="content-container">
@@ -22,13 +21,17 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route
-              path="/admin/:subjectName/topics/create"
-              element={<CreateTopic />}
+              path="/admin/:subject_id/create"
+              element={<TopicsManager />}
             />
+            <Route
+              path="/subjects/:subject_id/topics"
+              element={<TopicsManager />}
+            />{" "}
+            {/* Add this route */}
           </Routes>
         </div>
       </div>
-    </Router>
   );
 }
 

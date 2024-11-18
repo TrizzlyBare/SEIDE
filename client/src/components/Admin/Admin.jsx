@@ -136,6 +136,7 @@ const Button = styled.button`
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
+  const [year, setYear] = useState(""); // Add state for year
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -170,7 +171,7 @@ const Admin = () => {
     if (window.confirm("Are you sure you want to delete this subject?")) {
       try {
         const response = await fetch(
-          `http://localhost:8000/subjects/${subjectId}/create`,
+          `http://localhost:8000/subjects/${subjectId}`,
           {
             method: "DELETE",
           }
@@ -188,13 +189,14 @@ const Admin = () => {
     }
   };
 
-  const handleSubjectClick = (subjectName) => {
-    navigate(`/admin/${subjectName}/create`);
+  const handleSubjectClick = (subjectId) => {
+    navigate(`/admin/${subjectId}/create`);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (newSubject.trim() !== "") {
+    if (newSubject.trim() !== "" && year.trim() !== "") {
+      // Check if year is not empty
       try {
         setIsLoading(true);
         const response = await fetch("http://localhost:8000/subjects/", {
@@ -202,6 +204,7 @@ const Admin = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             subject_name: newSubject,
+            year: year,
             user_id: currentUserId,
           }),
         });
@@ -212,6 +215,7 @@ const Admin = () => {
         }
 
         setNewSubject("");
+        setYear(""); // Reset year input
         setIsModalOpen(false);
         await fetchSubjects();
       } catch (error) {
@@ -234,7 +238,7 @@ const Admin = () => {
         {subjects.map((subject) => (
           <SubjectBox
             key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)} // Navigate on click
+            onClick={() => handleSubjectClick(subject.subject_id)}
           >
             {subject.subject_name}
             <DeleteButton
@@ -262,7 +266,9 @@ const Admin = () => {
               />
               <Button
                 type="submit"
-                disabled={isLoading || newSubject.trim() === ""}
+                disabled={
+                  isLoading || newSubject.trim() === "" || year.trim() === ""
+                }
               >
                 {isLoading ? "Adding..." : "Add Subject"}
               </Button>

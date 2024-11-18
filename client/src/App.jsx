@@ -6,7 +6,7 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
-import CreateTopic from "./components/Admin/create_topic";
+import TopicsManager from "./components/Admin/topics_manager"; // Import the TopicsManager component
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -20,7 +20,12 @@ function App() {
           <Route path="/editor" element={<CodeEditorPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:subjectName/create" element={<CreateTopic />} />
+          <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
+          <Route
+            path="/subjects/:subject_id/topics"
+            element={<TopicsManager />}
+          />{" "}
+          {/* Add this route */}
         </Routes>
       </div>
     </div>

@@ -27,8 +27,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     # Create tables if they don't exist
-    DashboardBase.metadata.create_all(bind=engine)
     AuthBase.metadata.create_all(bind=auth_engine)
+    DashboardBase.metadata.create_all(bind=engine)
 
 # Basic endpoint to test the server
 @app.get("/")
@@ -37,26 +37,22 @@ async def root():
 
 # Pydantic model for request body
 class UserCreate(BaseModel):
-    username: str
+    email: str
     password: str
 
 # Endpoint to create a new user
 @app.post("/users/")
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(DashboardUser).filter(DashboardUser.username == user.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already taken")
-    
-    new_user = DashboardUser(username=user.username, password=user.password)
-    db.add(new_user)
+    db_user = AuthUser(email=user.email, hashed_password=user.password)
+    db.add(db_user)
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    db.refresh(db_user)
+    return db_user
 
 # Endpoint to retrieve all users
 @app.get("/users/")
 async def read_users(db: Session = Depends(get_db)):
-    return db.query(DashboardUser).all()
+    return db.query(AuthUser).all()
 
 # Include other routers
 app.include_router(_authentication.router)
