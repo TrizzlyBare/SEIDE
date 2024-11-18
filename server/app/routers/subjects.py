@@ -51,7 +51,8 @@ class SubjectResponse(SubjectBase):
 async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
     db_subject = Subject(
         subject_name=subject.subject_name,
-        user_id=subject.user_id
+        user_id=subject.user_id,
+        year=subject.year
     )
     db.add(db_subject)
     db.commit()

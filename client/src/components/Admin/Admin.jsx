@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import {
   AdminContainer,
@@ -14,27 +13,26 @@ import {
   YearSelection,
 } from "./admin_styles";
 
+const YEARS = ["Year 1", "Year 2", "Year 3", "Year 4"];
+const CURRENT_USER_ID = 1;
+
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedYear, setSelectedYear] = useState("Year 1");
+  const [selectedYear, setSelectedYear] = useState(YEARS[0]);
 
   const navigate = useNavigate();
-
-  const currentUserId = 1;
 
   const fetchSubjects = async () => {
     try {
       setIsLoading(true);
       const response = await fetch("http://localhost:8000/subjects/");
-      if (!response.ok) {
-        throw new Error("Failed to fetch subjects");
-      }
+      if (!response.ok) throw new Error("Failed to fetch subjects");
+      
       const data = await response.json();
-      console.log("Fetched subjects:", data); // Check the API response here
       setSubjects(data);
     } catch (error) {
       setError(error.message);
@@ -52,17 +50,11 @@ const Admin = () => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this subject?")) {
       try {
-        const response = await fetch(
-          `http://localhost:8000/subjects/${subjectId}`,
-          {
-            method: "DELETE",
-          }
-        );
+        const response = await fetch(`http://localhost:8000/subjects/${subjectId}`, {
+          method: "DELETE",
+        });
 
-        if (!response.ok) {
-          throw new Error("Failed to delete subject");
-        }
-
+        if (!response.ok) throw new Error("Failed to delete subject");
         await fetchSubjects();
       } catch (error) {
         console.error("Error deleting subject:", error);
@@ -85,7 +77,7 @@ const Admin = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             subject_name: newSubject,
-            user_id: currentUserId,
+            user_id: CURRENT_USER_ID,
             year: selectedYear,
           }),
         });
@@ -107,89 +99,39 @@ const Admin = () => {
     }
   };
 
-  const handleYearChange = (e) => {
-    setSelectedYear(e.target.value);
-  };
-
-  const subjectsByYear = (year) => {
-    return subjects.filter((subject) => subject.year === year);
-  };
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <AdminContainer>
       <Title>Subject Management</Title>
 
-      <h2>Year 1</h2>
-      <SubjectsGrid>
-        {subjectsByYear("Year 1").map((subject) => (
-          <SubjectBox
-            key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)}
-          >
-            {subject.subject_name}
-            <DeleteButton
-              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
-            >
-              ×
-            </DeleteButton>
-          </SubjectBox>
-        ))}
-      </SubjectsGrid>
+      {YEARS.map((year, yearIndex) => {
+        const yearSubjects = subjects.filter((subject) => subject.year === year);
+        
+        // Only render year section if there are subjects for that year
+        if (yearSubjects.length === 0) return null;
 
-      <h2>Year 2</h2>
-      <SubjectsGrid>
-        {subjectsByYear("Year 2").map((subject) => (
-          <SubjectBox
-            key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)}
-          >
-            {subject.subject_name}
-            <DeleteButton
-              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
-            >
-              ×
-            </DeleteButton>
-          </SubjectBox>
-        ))}
-      </SubjectsGrid>
-
-      <h2>Year 3</h2>
-      <SubjectsGrid>
-        {subjectsByYear("Year 3").map((subject) => (
-          <SubjectBox
-            key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)}
-          >
-            {subject.subject_name}
-            <DeleteButton
-              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
-            >
-              ×
-            </DeleteButton>
-          </SubjectBox>
-        ))}
-      </SubjectsGrid>
-
-      <h2>Year 4</h2>
-      <SubjectsGrid>
-        {subjectsByYear("Year 4").map((subject) => (
-          <SubjectBox
-            key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_name)}
-          >
-            {subject.subject_name}
-            <DeleteButton
-              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
-            >
-              ×
-            </DeleteButton>
-          </SubjectBox>
-        ))}
-      </SubjectsGrid>
+        return (
+          <div key={`year-section-${yearIndex}`}>
+            <h2>{year}</h2>
+            <SubjectsGrid>
+              {yearSubjects.map((subject) => (
+                <SubjectBox
+                  key={`subject-${subject.subject_id}`}
+                  onClick={() => handleSubjectClick(subject.subject_name)}
+                >
+                  {subject.subject_name}
+                  <DeleteButton
+                    onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+                  >
+                    ×
+                  </DeleteButton>
+                </SubjectBox>
+              ))}
+            </SubjectsGrid>
+          </div>
+        );
+      })}
 
       <SubjectBox onClick={() => setIsModalOpen(true)}>
         + Add Subject
@@ -208,38 +150,18 @@ const Admin = () => {
               />
 
               <YearSelection>
-                <input
-                  type="radio"
-                  value="Year 1"
-                  name="Year"
-                  checked={selectedYear === "Year 1"}
-                  onChange={handleYearChange}
-                />{" "}
-                Year 1
-                <input
-                  type="radio"
-                  value="Year 2"
-                  name="Year"
-                  checked={selectedYear === "Year 2"}
-                  onChange={handleYearChange}
-                />{" "}
-                Year 2
-                <input
-                  type="radio"
-                  value="Year 3"
-                  name="Year"
-                  checked={selectedYear === "Year 3"}
-                  onChange={handleYearChange}
-                />{" "}
-                Year 3
-                <input
-                  type="radio"
-                  value="Year 4"
-                  name="Year"
-                  checked={selectedYear === "Year 4"}
-                  onChange={handleYearChange}
-                />{" "}
-                Year 4
+                {YEARS.map((year, index) => (
+                  <label key={`year-radio-${index}`}>
+                    <input
+                      type="radio"
+                      value={year}
+                      name="Year"
+                      checked={selectedYear === year}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                    />{" "}
+                    {year}
+                  </label>
+                ))}
               </YearSelection>
 
               <Button
