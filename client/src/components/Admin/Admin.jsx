@@ -237,16 +237,17 @@ const Admin = () => {
       <SubjectsGrid>
         {subjects.map((subject) => (
           <SubjectBox
-            key={subject.subject_id}
-            onClick={() => handleSubjectClick(subject.subject_id)}
+          key={subject.subject_id}
+          onClick={() => handleSubjectClick(subject.subject_id)}
+        >
+          {subject.subject_name}
+          <DeleteButton
+            onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
           >
-            {subject.subject_name}
-            <DeleteButton
-              onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
-            >
-              ×
-            </DeleteButton>
-          </SubjectBox>
+            ×
+          </DeleteButton>
+        </SubjectBox>
+        
         ))}
         <SubjectBox onClick={() => setIsModalOpen(true)}>
           + Add Subject
