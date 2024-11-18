@@ -140,7 +140,7 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const currentUserId = 1;
 
@@ -170,7 +170,7 @@ const Admin = () => {
     if (window.confirm("Are you sure you want to delete this subject?")) {
       try {
         const response = await fetch(
-          `http://localhost:8000/subjects/${subjectId}`,
+          `http://localhost:8000/subjects/${subjectId}/create`,
           {
             method: "DELETE",
           }
@@ -189,7 +189,7 @@ const Admin = () => {
   };
 
   const handleSubjectClick = (subjectName) => {
-    navigate(`/admin/${subjectName}`);
+    navigate(`/admin/${subjectName}/create`);
   };
 
   const handleFormSubmit = async (e) => {

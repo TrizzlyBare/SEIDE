@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { createTopic } from "../../api";
+import { useNavigate, useParams } from "react-router-dom";
 
 const AdminContainer = styled.div`
   width: 100%;
@@ -52,43 +52,70 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ addTopic }) => {
+const CreateTopic = () => {
   const [newTopic, setNewTopic] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleInputChange = (e) => {
-    setNewTopic(e.target.value);
-  };
+  const navigate = useNavigate();
+  const { subjectName } = useParams();
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (newTopic.trim() !== "") {
       try {
-        await createTopic({ name: newTopic });
+        setIsLoading(true);
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subjectName}/topics`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              topic_name: newTopic,
+              subject_name: subjectName,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Failed to add topic");
+        }
+
         setNewTopic("");
-        alert("Topic added successfully");
-        addTopic();
+        navigate(`/admin/${subjectName}/create`);
       } catch (error) {
-        console.error("Failed to add topic", error);
+        console.error("Failed to add topic:", error);
+        alert(error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <AdminContainer>
-      <Title>Admin Page</Title>
+      <Title>Create Topic</Title>
       <Content>
         <Form onSubmit={handleFormSubmit}>
           <Input
             type="text"
-            placeholder="Enter new topic"
+            placeholder="Enter topic name"
             value={newTopic}
-            onChange={handleInputChange}
+            onChange={(e) => setNewTopic(e.target.value)}
+            autoFocus
           />
-          <Button type="submit">Add Topic</Button>
+          <Button type="submit" disabled={isLoading || newTopic.trim() === ""}>
+            {isLoading ? "Adding..." : "Add Topic"}
+          </Button>
         </Form>
       </Content>
     </AdminContainer>
   );
 };
 
-export default Admin;
+export default CreateTopic;
