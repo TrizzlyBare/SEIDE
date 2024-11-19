@@ -21,12 +21,19 @@ class Token(BaseModel):
 class _LeadBase(BaseModel):
     first_name: str
     last_name: str
+    year: int
     email: EmailStr
     company: str
     note: str
 
-class LeadCreate(_LeadBase):
-    pass
+class LeadCreate(BaseModel):
+    first_name: str
+    last_name: str
+    year: int
+    email: EmailStr
+    company: str
+    note: str
+
 
 class Lead(_LeadBase):
     id: int

@@ -14,14 +14,16 @@ oauth2schema = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
 JWT_SECRET = "myjwtsecret"
 
 def get_db():
-    db = _database.SessionLocal()
+    db = _database.SessionLocal()  # Assuming SessionLocal is correctly defined in _database
     try:
         yield db
     finally:
         db.close()
 
+
 async def get_user_by_email(email: str, db: _orm.Session):
     return db.query(_models.User).filter(_models.User.email == email).first()
+
 
 async def create_user(user: _schemas.UserCreate, db: _orm.Session):
     hashed_password = _hash.bcrypt.hash(user.password)
@@ -36,6 +38,7 @@ async def authenticate_user(email: str, password: str, db: _orm.Session):
     if not user or not _hash.bcrypt.verify(password, user.hashed_password):
         return False
     return user
+
 
 async def create_token(user: _models.User):
     # Generate JWT token
@@ -71,9 +74,11 @@ async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.Lead
     db.refresh(lead)
     return _schemas.Lead.from_orm(lead)
 
+
 async def get_leads(user: _schemas.User, db: _orm.Session):
-    leads = db.query(_models.Lead).filter_by(owner_id=user.id)
+    leads = db.query(_models.Lead).filter_by(owner_id=user.id).all()
     return list(map(_schemas.Lead.from_orm, leads))
+
 
 async def _lead_selector(lead_id: int, user: _schemas.User, db: _orm.Session):
     lead = (
@@ -90,6 +95,7 @@ async def get_lead(lead_id: int, user: _schemas.User, db: _orm.Session):
     lead = await _lead_selector(lead_id=lead_id, user=user, db=db)
     return _schemas.Lead.from_orm(lead)
 
+
 async def delete_lead(lead_id: int, user: _schemas.User, db: _orm.Session):
     lead = await _lead_selector(lead_id, user, db)
     db.delete(lead)
@@ -99,6 +105,7 @@ async def update_lead(lead_id: int, lead: _schemas.LeadCreate, user: _schemas.Us
     lead_db = await _lead_selector(lead_id, user, db)
     lead_db.first_name = lead.first_name
     lead_db.last_name = lead.last_name
+    lead_db.year = lead.year
     lead_db.email = lead.email
     lead_db.company = lead.company
     lead_db.note = lead.note
