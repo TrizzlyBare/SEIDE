@@ -9,6 +9,7 @@ router = APIRouter(tags=["Subjects"])
 
 class SubjectBase(BaseModel):
     subject_name: str
+    year: str
 
 class SubjectCreate(SubjectBase):
     user_id: int
@@ -36,7 +37,8 @@ class TopicResponse(BaseModel):
 async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
     db_subject = Subject(
         subject_name=subject.subject_name,
-        user_id=subject.user_id
+        user_id=subject.user_id,
+        year=subject.year
     )
     db.add(db_subject)
     db.commit()

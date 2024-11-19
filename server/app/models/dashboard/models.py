@@ -20,10 +20,12 @@ class Subject(Base):
 
     subject_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     subject_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    year: Mapped[str] = mapped_column(String, nullable=False)  # New year field
     topics: Mapped[List["Topic"]] = relationship("Topic", back_populates="subject")
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"))
     user: Mapped["User"] = relationship("User", back_populates="subjects")
+
 
 class Topic(Base):
     __tablename__ = 'topics_table'
