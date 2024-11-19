@@ -9,7 +9,7 @@ router = APIRouter(tags=["Subjects"])
 
 class SubjectBase(BaseModel):
     subject_name: str
-    year: str
+    year: str  # Add the year field
 
 class SubjectCreate(SubjectBase):
     user_id: int
@@ -37,8 +37,8 @@ class TopicResponse(BaseModel):
 async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
     db_subject = Subject(
         subject_name=subject.subject_name,
-        user_id=subject.user_id,
-        year=subject.year
+        year=subject.year,  # Include the year field
+        user_id=subject.user_id
     )
     db.add(db_subject)
     db.commit()
@@ -61,9 +61,15 @@ async def delete_subject(subject_id: int, db: Session = Depends(get_db)):
     subject = db.query(Subject).filter(Subject.subject_id == subject_id).first()
     if subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
+    
+    # Delete all associated topics
+    topics = db.query(Topic).filter(Topic.subject_id == subject_id).all()
+    for topic in topics:
+        db.delete(topic)
+    
     db.delete(subject)
     db.commit()
-    return {"message": "Subject deleted successfully"}
+    return {"message": "Subject and associated topics deleted successfully"}
 
 @router.post("/subjects/{subject_id}/topics", response_model=TopicResponse)
 async def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depends(get_db)):

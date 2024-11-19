@@ -31,7 +31,7 @@ const Admin = () => {
       setIsLoading(true);
       setError(null);
       const response = await fetch("http://localhost:8000/subjects/");
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || "Failed to fetch subjects");
@@ -52,12 +52,15 @@ const Admin = () => {
     if (window.confirm("Are you sure you want to delete this subject?")) {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:8000/subjects/${subjectId}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subjectId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -112,7 +115,7 @@ const Admin = () => {
   };
 
   if (error) return <div>Error: {error}</div>;
-  
+
   useEffect(() => {
     fetchSubjects();
   }, []);
@@ -121,7 +124,9 @@ const Admin = () => {
       <Title>Subject Management</Title>
 
       {YEARS.map((year, yearIndex) => {
-        const yearSubjects = subjects.filter((subject) => subject.year === year);
+        const yearSubjects = subjects.filter(
+          (subject) => subject.year === year
+        );
 
         if (yearSubjects.length === 0) return null;
 
