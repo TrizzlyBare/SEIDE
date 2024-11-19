@@ -1,142 +1,97 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import {
-  Container,
-  SignUpContainer,
-  SignInContainer,
-  OverlayContainer,
-  Overlay,
-  Form,
-  Title,
-  Input,
-  Button,
-  Paragraph,
-  LeftOverlayPanel,
-  RightOverlayPanel,
-} from "../components/Auth/Components";
+import React, { useState, useEffect } from "react";
+import Admin from "../components/Admin/Admin";
+import { getSubjects, createSubject } from "../api";
+import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 
-const AuthPage = () => {
-  const [signingIn, setSigningIn] = useState(true); // Toggle between Sign-In and Sign-Up
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+const AdminPage = () => {
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [creating, setCreating] = useState(false);
 
-  const handleSignUp = async () => {
+  const fetchSubjects = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/users', {
-        email,
-        password,
-      });
-      alert("Sign Up successful!");
-      setSigningIn(true); // Toggle to SignIn form
+      setLoading(true);
+      setError(null);
+      const data = await getSubjects();
+      console.log(data); // Log the data to inspect the structure
+      setSubjects(data);
     } catch (error) {
-      console.error("Sign Up failed:", error.response ? error.response.data : error.message);
-      alert("Sign Up failed: Something went wrong");
+      setError("Failed to fetch subjects. Please try again later.");
+      console.error("Error fetching subjects:", error);
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const handleSignIn = async () => {
+
+  const handleCreateSubject = async (subject) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/token', {
-        username: email,
-        password,
-      });
-      localStorage.setItem("access_token", response.data.access_token);
-      alert("Sign In successful!");
-      navigate("/app");
+      setCreating(true);
+      await createSubject(subject);
+      await fetchSubjects();
     } catch (error) {
-      console.error("Sign In failed:", error.response ? error.response.data : error.message);
-      alert("Sign In failed: Invalid Credentials");
+      setError("Failed to create subject. Please try again.");
+      console.error("Error creating subject:", error);
+    } finally {
+      setCreating(false);
     }
   };
-  
+
+  const checkLogin = () => {
+    console.log(window.localStorage.getItem("token"));
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login";
+    } else {
+      print("Checking login status");
+      fetch(
+        "http://localhost:8000/api/users/me",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+          },
+          
+        } 
+      ).then((response) => {
+          if (!response.ok) {
+            window.location.href = "/login";
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking login status:", error);
+          window.location.href = "/login";
+        });
+    }
+  }
+
+  useEffect(() => {
+    fetchSubjects();
+    checkLogin();
+  }, []);
+
   return (
-    <Container>
-          <SignUpContainer signingIn={signingIn}>
-      <Form onSubmit={handleSignUp}>
-        <Title>Create Account</Title>
-        <Input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Input
-          type="text"
-          placeholder="SurName"
-          value={surname}
-          onChange={(e) => setSurname(e.target.value)}
-          required
-        />
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Signing Up..." : "Sign Up"}
-        </Button>
-      </Form>
-    </SignUpContainer>
-
-    <SignInContainer signingIn={signingIn}>
-      <Form onSubmit={handleSignIn}>
-        <Title>Sign In</Title>
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Signing In..." : "Sign In"}
-        </Button>
-      </Form>
-    </SignInContainer>
-
-    <OverlayContainer signingIn={signingIn}>
-      <Overlay signingIn={signingIn}>
-        <LeftOverlayPanel signingIn={signingIn}>
-          <Title>Welcome Back!</Title>
-          <Paragraph>
-            To keep connected with us, please login with your personal info
-          </Paragraph>
-          <Button onClick={() => setSigningIn(true)}>Sign In</Button>
-        </LeftOverlayPanel>
-        <RightOverlayPanel signingIn={signingIn}>
-          <Title>Hello, Friend!</Title>
-          <Paragraph>
-            Enter your personal details and start your journey with us
-          </Paragraph>
-          <Button onClick={() => setSigningIn(false)}>Sign Up</Button>
-        </RightOverlayPanel>
-      </Overlay>
-    </OverlayContainer>
-
-    </Container>
+    <div className="sidebar-container">
+      <AdminSidebar subjects={subjects} addSubject={handleCreateSubject} />
+      <Admin addSubject={handleCreateSubject} />
+      <div>
+        <h2>Subjects List</h2>
+        {loading ? (
+          <div>Loading subjects...</div>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : (
+          <ul>
+            {subjects.map((subject, index) => (
+              <li key={subject.id || index}>
+                {subject.subject_name} {/* Display the subject name correctly */}
+              </li>
+            ))}
+          </ul>
+        )}
+        {creating && <div>Creating subject...</div>}
+      </div>
+    </div>
   );
 };
 
-export default AuthPage;
+export default AdminPage;

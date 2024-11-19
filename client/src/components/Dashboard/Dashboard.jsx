@@ -1,63 +1,59 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Header,
-  DashboardContainer,
-  SubjectList,
-  Subject,
-  SubcategoryList,
-  Subcategory,
-} from "./dashboard_styles";
-import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { getSubjects } from "../../api";
+
+const Container = styled.div`
+  display: flex;
+`;
+
+const DashboardContainer = styled.div`
+  flex: 1;
+  padding: 20px;
+`;
+
+const Title = styled.h1`
+  margin-bottom: 20px;
+`;
+
+const Content = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const SubjectList = styled.ul`
+  list-style: none;
+  padding: 0;
+`;
+
+const SubjectItem = styled.li`
+  padding: 10px;
+  background-color: #fff;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+`;
 
 const Dashboard = () => {
   const [subjects, setSubjects] = useState([]);
-  const [expandedSubject, setExpandedSubject] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const fetchSubjects = async () => {
     try {
-      setIsLoading(true);
-      const response = await fetch("http://localhost:8000/subjects/", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        console.error(
-          "Failed to fetch subjects: ",
-          response.status,
-          response.statusText
-        );
-        setSubjects([]);
-        return;
-      }
-
-      const data = await response.json();
-      console.log("Fetched subjects data:", data);
-
+      const data = await getSubjects();
       if (Array.isArray(data)) {
-        const enrichedData = data.map((subject, index) => ({
-          ...subject,
-          id: subject.id || `subject-${index}`,
-          subcategories: Array.isArray(subject.subcategories)
-            ? subject.subcategories.map((subcategory, subIndex) => ({
-                ...subcategory,
-                id: subcategory.id || `subcategory-${index}-${subIndex}`,
-              }))
-            : [],
-        }));
-        setSubjects(enrichedData);
+        setSubjects(data);
       } else {
-        console.error("Fetched data is not an array:", data);
+        console.error("Fetched data is not an array", data);
         setSubjects([]);
       }
     } catch (error) {
-      console.error("Failed to fetch subjects:", error);
+      console.error("Failed to fetch subjects", error);
       setSubjects([]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -65,76 +61,17 @@ const Dashboard = () => {
     fetchSubjects();
   }, []);
 
-  const handleSubjectClick = (subject) => {
-    setExpandedSubject(expandedSubject === subject.id ? null : subject.id);
-  };
-
-  const handleSubjectNavigate = (subjectName) => {
-    navigate(`/subjects/${subjectName}/topics`);
-  };
-
   return (
     <Container>
-      <Header>Home Page</Header>
       <DashboardContainer>
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
+        <Title>Dashboard</Title>
+        <Content>
           <SubjectList>
-            {subjects.map((subject) => (
-              <div key={subject.id}>
-                <Subject>
-                  <div
-                    onClick={() => handleSubjectClick(subject)}
-                    style={{ flex: 1, cursor: "pointer" }}
-                  >
-                    {subject.subject_name}
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSubjectNavigate(subject.id);
-                    }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "right",
-                      marginLeft: "10px",
-                      padding: "4px 8px",
-                      border: "none",
-                      borderRadius: "4px",
-                      backgroundColor: "#fff",
-
-                      cursor: "pointer",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    View Topics
-                  </button>
-                </Subject>
-                {expandedSubject === subject.id && (
-                  <SubcategoryList>
-                    {subject.subcategories.map((subcategory) => (
-                      <Subcategory
-                        key={subcategory.id}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleSubcategoryClick(
-                            subject.subject_name,
-                            subcategory.subcategory_name
-                          );
-                        }}
-                      >
-                        {subcategory.subcategory_name}
-                      </Subcategory>
-                    ))}
-                  </SubcategoryList>
-                )}
-              </div>
+            {subjects.map((subject, index) => (
+              <SubjectItem key={index}>{subject.name}</SubjectItem>
             ))}
           </SubjectList>
-        )}
+        </Content>
       </DashboardContainer>
     </Container>
   );

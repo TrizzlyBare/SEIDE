@@ -1,6 +1,6 @@
 import fastapi as _fastapi
 import fastapi.security as _security
-import jwt as _jwt
+import jwt 
 import datetime as _dt
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
@@ -40,7 +40,7 @@ async def authenticate_user(email: str, password: str, db: _orm.Session):
 async def create_token(user: _models.User):
     # Generate JWT token
     token_data = {"sub": user.email, "exp": _dt.datetime.utcnow() + _dt.timedelta(hours=1)}
-    token = _jwt.encode(token_data, JWT_SECRET, algorithm="HS256")
+    token = jwt.encode(token_data, JWT_SECRET, algorithm="HS256")
     return {"access_token": token, "token_type": "bearer"}
 
 async def get_current_user(
@@ -53,11 +53,11 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = _jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except _jwt.JWTError:
+    except jwt.JWTError:
         raise credentials_exception
     user = db.query(_models.User).filter(_models.User.id == user_id).first()
     if user is None:

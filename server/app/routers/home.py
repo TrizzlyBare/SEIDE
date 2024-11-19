@@ -69,6 +69,14 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 async def read_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 
+@router.post("/subjects/", response_model=SubjectCreate)
+async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
+    db_subject = Subject(subject_name=subject.subject_name, user_id=subject.user_id)
+    db.add(db_subject)
+    db.commit()
+    db.refresh(db_subject)
+    return db_subject
+
 @router.get("/subjects/")
 async def read_subjects(db: Session = Depends(get_db)):
     return db.query(Subject).all()
@@ -85,13 +93,43 @@ async def create_topic(topic: TopicCreate, db: Session = Depends(get_db)):
 async def read_topics(db: Session = Depends(get_db)):
     return db.query(Topic).all()
 
+@router.post("/questions/", response_model=QuestionCreate)
+async def create_question(question: QuestionCreate, db: Session = Depends(get_db)):
+    db_question = Question(question_text=question.question_text, topic_id=question.topic_id)
+    db.add(db_question)
+    db.commit()
+    db.refresh(db_question)
+    return db_question
+
 @router.get("/questions/")
 async def read_questions(db: Session = Depends(get_db)):
     return db.query(Question).all()
 
+@router.post("/answers/", response_model=AnswerCreate)
+async def create_answer(answer: AnswerCreate, db: Session = Depends(get_db)):
+    db_answer = Answer(answer_text=answer.answer_text, is_correct=answer.is_correct, question_id=answer.question_id)
+    db.add(db_answer)
+    db.commit()
+    db.refresh(db_answer)
+    return db_answer
+
 @router.get("/answers/")
 async def read_answers(db: Session = Depends(get_db)):
     return db.query(Answer).all()
+
+@router.post("/testcases/", response_model=TestCaseCreate)
+async def create_testcase(testcase: TestCaseCreate, db: Session = Depends(get_db)):
+    # Write the input data to a bash file
+    bash_file_path = f"./testcases/testcase_{testcase.question_id}.sh"
+    os.makedirs(os.path.dirname(bash_file_path), exist_ok=True)
+    with open(bash_file_path, "w") as bash_file:
+        bash_file.write(testcase.input_data)
+    
+    db_testcase = TestCase(input_data=bash_file_path, expected_output=testcase.expected_output, question_id=testcase.question_id)
+    db.add(db_testcase)
+    db.commit()
+    db.refresh(db_testcase)
+    return db_testcase
 
 @router.get("/testcases/")
 async def read_testcases(db: Session = Depends(get_db)):

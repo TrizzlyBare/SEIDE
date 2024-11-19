@@ -1,12 +1,14 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import NavBar from "./components/navBar/NavBar";
 import AuthPage from "./pages/AuthPage";
 import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
-import HomePage from "./pages/HomePage";
-import TopicsManager from "./components/Admin/topics_manager"; // Import the TopicsManager component
+import HomePage from "./pages/Homepage";
+import SignUpPage from "./pages/SignUpPage";
+import SignInPage from "./pages/SignInPage";
+import CreateTopic from "./components/Admin/create_topic";
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -20,12 +22,9 @@ function App() {
           <Route path="/editor" element={<CodeEditorPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
-          <Route
-            path="admin/subjects/:subject_id/topics"
-            element={<TopicsManager />}
-          />{" "}
-          {/* Add this route */}
+          <Route path="/admin/create_topic" element={<CreateTopic />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signin" element={<SignInPage />} />
         </Routes>
       </div>
     </div>

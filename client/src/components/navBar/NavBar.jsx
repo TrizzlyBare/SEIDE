@@ -10,7 +10,7 @@ const NavBar = () => {
   return (
     <HeaderContainer>
       <NavLinks>
-        <BaseLink to="/home">Home</BaseLink>
+        <BaseLink to="/">Home</BaseLink>
         <BaseLink to="/editor">Code Editor</BaseLink>
         <ProfileLink to="/profile">Profile</ProfileLink>
       </NavLinks>

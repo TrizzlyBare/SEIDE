@@ -13,29 +13,36 @@ router = _fastapi.APIRouter(tags=["Authentication"])
 async def create_user(
     user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
-    db_user = await _services.get_user_by_email(user.email, db)
-    if db_user:
-        raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
-    
-    user = await _services.create_user(user, db)
-    token = await _services.create_token(user)
-    
-    logging.info(f"User created successfully: {user.email}")
-    
-    return {"message": "User created successfully", "token": token}
+    print(user)
+    try:
+        db_user = await _services.get_user_by_email(user.email, db)
+        if db_user:
+            raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
+        
+        user = await _services.create_user(user, db)
+        token = await _services.create_token(user)
+        
+        logging.info(f"User created successfully: {user.email}")
+        
+        return {"message": "User created successfully", "token": token}
+    except Exception as e:
+        logging.error(f"Error creating user: {e}")
+        raise _fastapi.HTTPException(status_code=500, detail="Internal Server Error")
 
 @router.post("/api/token")
 async def generate_token(
     form_data: _security.OAuth2PasswordRequestForm = _fastapi.Depends(),
     db: _orm.Session = _fastapi.Depends(_services.get_db),
 ):
-    user = await _services.authenticate_user(form_data.email, form_data.password, db)
+    user = await _services.authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise _fastapi.HTTPException(status_code=400, detail="Invalid credentials")
     return await _services.create_token(user)
 
+
 @router.get("/api/users/me", response_model=_schemas.User)
 async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):
+    print(user)
     return user
 
 @router.post("/api/leads", response_model=_schemas.Lead)
