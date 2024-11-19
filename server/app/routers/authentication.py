@@ -29,11 +29,11 @@ async def generate_token(
     form_data: _security.OAuth2PasswordRequestForm = _fastapi.Depends(),
     db: _orm.Session = _fastapi.Depends(_services.get_db),
 ): 
-    print("We are here")
     user = await _services.authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise _fastapi.HTTPException(status_code=400, detail="Invalid credentials")
-    return await _services.create_token(user)
+    token = await _services.create_token(user)
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/api/users/me", response_model=_schemas.User)
 async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):

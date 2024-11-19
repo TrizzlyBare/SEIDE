@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -14,6 +14,7 @@ import {
   LeftOverlayPanel,
   RightOverlayPanel,
 } from "../components/Auth/Components";
+import { UserContext } from "../components/Context/UserContext";
 
 const AuthPage = () => {
   const [signingIn, setSigningIn] = useState(true); // Toggle between Sign-In and Sign-Up
@@ -21,8 +22,9 @@ const AuthPage = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
-  const [Year, setYear] = useState("");
+  const [year, setYear] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
@@ -37,6 +39,9 @@ const AuthPage = () => {
         body: JSON.stringify({
           email,
           password,
+          name,
+          surname,
+          year,
         }),
       });
 
@@ -56,14 +61,18 @@ const AuthPage = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
+      // Check for admin credentials
       if (email === "admin@testing.com" && password === "admin") {
+        setUser({ role: "admin" });
+        localStorage.setItem("userRole", "admin");
         alert("Admin Sign In successful!");
         navigate("/admin");
         return;
       }
 
+      // Regular user authentication
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
@@ -82,39 +91,15 @@ const AuthPage = () => {
 
       const data = await response.json();
       localStorage.setItem("access_token", data.access_token);
+      setUser({ role: "user" }); // Set user role to regular user
+      localStorage.setItem("userRole", "user");
       alert("Sign In successful!");
       navigate("/home");
     } catch (error) {
       console.error("Sign In failed:", error.message);
       alert("Sign In failed: Invalid Credentials");
     } finally {
-      setLoading(false); // Stop loading
-    }
-  };
-
-  const callApiWithToken = async (token) => {
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    };
-
-    try {
-      const response = await fetch(
-        "http://localhost:8000/api/protected-endpoint",
-        requestOptions
-      );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      console.log("API call successful:", data);
-      // Handle the data from the API call
-    } catch (error) {
-      console.error("API call failed:", error);
-      alert("API call failed: " + error.message);
+      setLoading(false);
     }
   };
 
@@ -155,7 +140,7 @@ const AuthPage = () => {
           <select
             id="year"
             name="year"
-            value={Year}
+            value={year}
             onChange={(e) => setYear(e.target.value)}
           >
             <option value="1">Year 1</option>
