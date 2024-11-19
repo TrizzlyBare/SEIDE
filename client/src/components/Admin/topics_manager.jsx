@@ -225,8 +225,7 @@ const TopicsManager = () => {
   };
 
   const handleTopicClick = (topicId) => {
-    // Updated navigation path to include both subject_id and topic_id
-    navigate(`/admin/subjects/${subject_id}/topics/${topicId}/questions`);
+    navigate(`/admin/:subject_id/topics/:topic_id/questions/`);
   };
 
   const fetchTopics = async () => {
@@ -255,7 +254,7 @@ const TopicsManager = () => {
       );
     } catch (error) {
       setError(error.message);
-      navigate("/admin"); // Redirect to admin on invalid access
+      navigate("/admin");
     } finally {
       setIsLoading(false);
     }

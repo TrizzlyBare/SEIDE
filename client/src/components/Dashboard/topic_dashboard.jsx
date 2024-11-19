@@ -36,12 +36,15 @@ const TopicDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
+
       const response = await fetch(
         `http://localhost:8000/subjects/${subject_id}/topics`
       );
+
       if (!response.ok) {
         throw new Error("Failed to fetch topics");
       }
+
       const data = await response.json();
       setTopics(data);
     } catch (error) {
@@ -91,7 +94,6 @@ const TopicDashboard = () => {
               <Subject
                 key={topic.topic_id}
                 onClick={() => handleTopicClick(topic.topic_id)}
-                style={{ cursor: "pointer" }}
               >
                 {topic.topic_name}
               </Subject>

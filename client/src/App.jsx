@@ -26,11 +26,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
           <Route
-            path="/subjects/:subject_id/topics/:topics_id/questions"
-            element={<QuestionDashboard />}
-          />
-          <Route
-            path="/admin/subjects/:subject_id/topics/:topic_id/questions"
+            path="/admin/:subject_id/topics/:topic_id/questions"
             element={<QuestionManager />}
           />
           <Route path="/subjects" element={<Dashboard />} />
@@ -38,7 +34,10 @@ function App() {
             path="/subjects/:subject_id/topics"
             element={<TopicDashboard />}
           />
-          <Route path="/questions" element={<QuestionDashboard />} />
+          <Route
+            path="/subjects/:subject_id/topics/:topics_id/questions"
+            element={<QuestionDashboard />}
+          />
           <Route
             path="/subjects/:subject_id/topics"
             element={<TopicsManager />}
