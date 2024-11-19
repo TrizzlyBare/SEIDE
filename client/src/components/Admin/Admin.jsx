@@ -5,6 +5,7 @@ import {
   Title,
   SubjectsGrid,
   SubjectBox,
+  SubjectAddingBox,
   DeleteButton,
   ModalOverlay,
   ModalContent,
@@ -46,7 +47,6 @@ const Admin = () => {
       setIsLoading(false);
     }
   };
-
 
   const handleDeleteSubject = async (subjectId, e) => {
     e.stopPropagation();
@@ -153,9 +153,9 @@ const Admin = () => {
         );
       })}
 
-      <SubjectBox onClick={() => setIsModalOpen(true)}>
+      <SubjectAddingBox onClick={() => setIsModalOpen(true)}>
         + Add Subject
-      </SubjectBox>
+      </SubjectAddingBox>
 
       {isModalOpen && (
         <ModalOverlay onClick={() => setIsModalOpen(false)}>

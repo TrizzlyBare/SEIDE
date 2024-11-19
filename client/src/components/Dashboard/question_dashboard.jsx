@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 // Styled Components
@@ -70,11 +71,40 @@ const QuestionDashboard = () => {
     labs: [],
     homework: [],
   });
+  const [subjectName, setSubjectName] = useState("");
+  const [topicName, setTopicName] = useState("");
+  const { subject_id, topic_id } = useParams();
 
   useEffect(() => {
+    const fetchSubjectDetails = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subject_id}`
+        );
+        const data = await response.json();
+        setSubjectName(data.subject_name);
+      } catch (error) {
+        console.error("Error fetching subject details:", error);
+      }
+    };
+
+    const fetchTopicDetails = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`
+        );
+        const data = await response.json();
+        setTopicName(data.topic_name);
+      } catch (error) {
+        console.error("Error fetching topic details:", error);
+      }
+    };
+
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("/questions/");
+        const response = await fetch(
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions`
+        );
         const questionsData = await response.json();
 
         const formattedQuestions = questionsData.map((q) => ({
@@ -97,13 +127,17 @@ const QuestionDashboard = () => {
       }
     };
 
+    fetchSubjectDetails();
+    fetchTopicDetails();
     fetchQuestions();
-  }, []);
+  }, [subject_id, topic_id]);
 
   return (
     <DashboardContainer>
       <Header>
-        <Title>Student Dashboard</Title>
+        <Title>
+          Problems of {topicName}, {subjectName}
+        </Title>
       </Header>
 
       <ContentSection>

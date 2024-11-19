@@ -47,6 +47,20 @@ export const SubjectBox = styled.div`
   }
 `;
 
+export const SubjectAddingBox = styled(SubjectBox)`
+  margin-top: 30px;
+  aspect-ratio: 0;
+  width: 100%;
+  border: 2px dashed #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #999;
+    background-color: #f8f8f8;
+  }
+`;
+
 export const DeleteButton = styled.button`
   position: absolute;
   top: 5px;
@@ -57,7 +71,7 @@ export const DeleteButton = styled.button`
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  display: flex;
+  display: flex;f
   align-items: center;
   justify-content: center;
   cursor: pointer;
