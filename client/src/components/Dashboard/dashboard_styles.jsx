@@ -14,6 +14,7 @@ export const Header = styled.div`
   padding: 30px;
   background-color: #333;
   color: #fff;
+  margin-top: 40px;
   margin-left: 20px;
   margin-right: 20px;
 
@@ -33,18 +34,28 @@ export const SubjectList = styled.div`
 export const Subject = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
-  padding: 20px;
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  cursor: pointer;
   transition: all 0.2s ease;
   font-size: 20px;
-  r &:hover {
+  height: 80px;
+  overflow: hidden; // Ensure content stays within bounds
+  padding: 0;
+
+  &:hover {
     background-color: #f9f9f9;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
+`;
+
+export const SubjectName = styled.div`
+  padding: 20px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  min-width: 200px;
 `;
 
 export const SubcategoryList = styled.div`
@@ -63,4 +74,19 @@ export const Subcategory = styled.div`
   &:hover {
     background-color: #efefef;
   }
+`;
+
+export const ViewTopicsButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  flex: 1;
+  height: 100%;
+  border: none;
+  background-color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0 20px;
+  margin: 0;
 `;

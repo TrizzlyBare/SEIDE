@@ -5,6 +5,8 @@ import {
   DashboardContainer,
   SubjectList,
   Subject,
+  SubjectName,
+  ViewTopicsButton,
   SubcategoryList,
   Subcategory,
 } from "./dashboard_styles";
@@ -41,22 +43,23 @@ const Dashboard = () => {
         const enrichedData = data.map((subject, index) => {
           // Log each subject to debug
           console.log("Processing subject:", subject);
-          
+
           return {
             ...subject,
             // Fallback to index if id is undefined
             id: subject.id || index,
-            subject_name: subject.subject_name || 'Unnamed Subject',
+            subject_name: subject.subject_name || "Unnamed Subject",
             subcategories: Array.isArray(subject.subcategories)
               ? subject.subcategories.map((subcategory, subIndex) => ({
                   ...subcategory,
                   id: subcategory.id || `sub-${index}-${subIndex}`,
-                  subcategory_name: subcategory.subcategory_name || 'Unnamed Subcategory'
+                  subcategory_name:
+                    subcategory.subcategory_name || "Unnamed Subcategory",
                 }))
-              : []
+              : [],
           };
         });
-        
+
         console.log("Enriched data:", enrichedData); // Debug log for processed data
         setSubjects(enrichedData);
       } else {
@@ -90,7 +93,9 @@ const Dashboard = () => {
   };
 
   const handleSubcategoryClick = (subjectName, subcategoryName) => {
-    console.log(`Clicked subcategory ${subcategoryName} of subject ${subjectName}`);
+    console.log(
+      `Clicked subcategory ${subcategoryName} of subject ${subjectName}`
+    );
   };
 
   return (
@@ -103,62 +108,43 @@ const Dashboard = () => {
           <p>No subjects found</p>
         ) : (
           <SubjectList>
-            {subjects.map((subject, index) => {
-              // Debug log for rendering
-              console.log("Rendering subject:", subject);
-              
-              return (
-                <div key={`subject-${subject.id || index}`}>
-                  <Subject>
-                    <div
-                      onClick={() => handleSubjectClick(subject)}
-                      style={{ flex: 1, cursor: "pointer" }}
-                    >
-                      {subject.subject_name || 'Unnamed Subject'}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSubjectNavigate(subject);
-                      }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "right",
-                        marginLeft: "10px",
-                        padding: "4px 8px",
-                        border: "none",
-                        borderRadius: "4px",
-                        backgroundColor: "#fff",
-                        cursor: "pointer",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    >
-                      View Topics
-                    </button>
-                  </Subject>
-                  {expandedSubject === subject.id && (
-                    <SubcategoryList>
-                      {subject.subcategories.map((subcategory, subIndex) => (
-                        <Subcategory
-                          key={`subcategory-${subject.id || index}-${subcategory.id || subIndex}`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleSubcategoryClick(
-                              subject.subject_name,
-                              subcategory.subcategory_name
-                            );
-                          }}
-                        >
-                          {subcategory.subcategory_name || 'Unnamed Subcategory'}
-                        </Subcategory>
-                      ))}
-                    </SubcategoryList>
-                  )}
-                </div>
-              );
-            })}
+            {subjects.map((subject, index) => (
+              <div key={`subject-${subject.id || index}`}>
+                <Subject>
+                  <SubjectName onClick={() => handleSubjectClick(subject)}>
+                    {subject.subject_name || "Unnamed Subject"}
+                  </SubjectName>
+                  <ViewTopicsButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubjectNavigate(subject);
+                    }}
+                  >
+                    View Topics
+                  </ViewTopicsButton>
+                </Subject>
+                {expandedSubject === subject.id && (
+                  <SubcategoryList>
+                    {subject.subcategories.map((subcategory, subIndex) => (
+                      <Subcategory
+                        key={`subcategory-${subject.id || index}-${
+                          subcategory.id || subIndex
+                        }`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleSubcategoryClick(
+                            subject.subject_name,
+                            subcategory.subcategory_name
+                          );
+                        }}
+                      >
+                        {subcategory.subcategory_name || "Unnamed Subcategory"}
+                      </Subcategory>
+                    ))}
+                  </SubcategoryList>
+                )}
+              </div>
+            ))}
           </SubjectList>
         )}
       </DashboardContainer>

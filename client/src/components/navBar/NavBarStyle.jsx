@@ -6,15 +6,16 @@ export const HeaderContainer = styled.header`
   background-color: #2d3748;
   color: white;
   padding: 15px;
-  position: fixed; /* Fixed position */
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  height: 60px; /* Set a fixed height for the header */
+  height: 80px;
 `;
 
 export const NavLinks = styled.nav`
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   margin-right: 20px;
   gap: 10px;

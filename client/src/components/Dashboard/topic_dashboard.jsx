@@ -11,41 +11,44 @@ import {
 const TopicDashboard = () => {
   const [topics, setTopics] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { subject_id } = useParams();
   const navigate = useNavigate();
 
   const fetchTopics = async () => {
+    if (!subject_id || subject_id === "0") {
+      setError("Invalid subject ID");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      console.log("Fetching topics for subject_id:", subject_id); // Debug log
+      setError(null);
+      console.log("Fetching topics for subject_id:", subject_id);
 
-      const response = await fetch("http://localhost:8000/topics/", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      // Fix: Use template literal for proper URL construction
+      const response = await fetch(
+        `http://localhost:8000/subjects/${subject_id}/topics`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (!response.ok) {
-        console.error("Failed to fetch topics:", response.status, response.statusText);
-        setTopics([]);
-        return;
+        throw new Error(
+          `Failed to fetch topics: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      console.log("All topics data:", data); // Debug log
+      console.log("Fetched topics:", data);
 
-      // Make sure subject_id is treated as a number for comparison
-      const subjectIdNum = parseInt(subject_id);
-      console.log("Looking for topics with subject_id:", subjectIdNum); // Debug log
-
-      const subjectTopics = data.filter(topic => {
-        console.log("Comparing topic subject_id:", topic.subject_id, "with:", subjectIdNum);
-        return topic.subject_id === subjectIdNum;
-      });
-
-      console.log("Filtered topics:", subjectTopics); // Debug log
-      setTopics(subjectTopics);
+      // No need to filter as the API already returns filtered topics
+      setTopics(data);
     } catch (error) {
       console.error("Failed to fetch topics:", error);
+      setError(error.message);
       setTopics([]);
     } finally {
       setIsLoading(false);
@@ -53,21 +56,30 @@ const TopicDashboard = () => {
   };
 
   useEffect(() => {
-    if (subject_id) {
-      fetchTopics();
-    }
+    fetchTopics();
   }, [subject_id]);
+
+  // Function to validate if we have a valid subject_id
+  const isValidSubjectId = (id) => {
+    return id && id !== "0" && !isNaN(parseInt(id));
+  };
 
   return (
     <Container>
       <Header>
-        Topics for Subject {subject_id}
+        {isValidSubjectId(subject_id)
+          ? `Topics for Subject ${subject_id}`
+          : "Invalid Subject ID"}
         <button
-          onClick={() => navigate('/subjects')}
+          onClick={() => navigate("/subjects")}
           style={{
-            marginLeft: '10px',
-            padding: '4px 8px',
-            borderRadius: '4px',
+            marginLeft: "10px",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            background: "#333",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
           }}
         >
           Back to Subjects
@@ -76,13 +88,26 @@ const TopicDashboard = () => {
       <DashboardContainer>
         {isLoading ? (
           <p>Loading topics...</p>
+        ) : error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : !isValidSubjectId(subject_id) ? (
+          <p>Invalid subject ID. Please select a valid subject.</p>
         ) : topics.length === 0 ? (
           <p>No topics found for this subject</p>
         ) : (
           <SubjectList>
             {topics.map((topic) => (
-              <Subject key={topic.id || `topic-${topic.topic_name}`}>
-                {topic.topic_name || 'Unnamed Topic'}
+              <Subject
+                key={topic.topic_id}
+                style={{
+                  padding: "15px",
+                  marginBottom: "10px",
+                  background: "white",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                {topic.topic_name}
               </Subject>
             ))}
           </SubjectList>
