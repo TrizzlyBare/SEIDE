@@ -18,7 +18,9 @@ const TopicDashboard = () => {
 
   const fetchSubjectDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/subjects/${subject_id}`);
+      const response = await fetch(
+        `http://localhost:8000/subjects/${subject_id}`
+      );
       if (!response.ok) {
         throw new Error("Subject not found");
       }
@@ -26,7 +28,7 @@ const TopicDashboard = () => {
       setSubjectName(data.subject_name);
     } catch (error) {
       setError("Failed to load subject details");
-      navigate('/subjects');
+      navigate("/subjects");
     }
   };
 
@@ -34,9 +36,11 @@ const TopicDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const response = await fetch(`http://localhost:8000/subjects/${subject_id}/topics`);
-      
+
+      const response = await fetch(
+        `http://localhost:8000/subjects/${subject_id}/topics`
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch topics");
       }
@@ -62,13 +66,13 @@ const TopicDashboard = () => {
   return (
     <Container>
       <Header>
-        {subjectName ? `Topics for ${subjectName}` : 'Topics'}
+        {subjectName ? `Topics for ${subjectName}` : "Topics"}
         <button
-          onClick={() => navigate('/subjects')}
+          onClick={() => navigate("/subjects")}
           style={{
-            marginLeft: '10px',
-            padding: '4px 8px',
-            borderRadius: '4px',
+            marginLeft: "10px",
+            padding: "4px 8px",
+            borderRadius: "4px",
           }}
         >
           Back to Subjects
@@ -83,9 +87,7 @@ const TopicDashboard = () => {
         ) : (
           <SubjectList>
             {topics.map((topic) => (
-              <Subject key={topic.topic_id}>
-                {topic.topic_name}
-              </Subject>
+              <Subject key={topic.topic_id}>{topic.topic_name}</Subject>
             ))}
           </SubjectList>
         )}

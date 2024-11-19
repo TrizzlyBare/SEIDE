@@ -10,7 +10,7 @@ export const HeaderContainer = styled.header`
   top: 0;
   left: 0;
   z-index: 1000;
-  height: 60px; /* Set a fixed height for the header */
+  height: 80px; /* Set a fixed height for the header */
 `;
 
 export const NavLinks = styled.nav`
