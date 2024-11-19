@@ -13,6 +13,7 @@ router = APIRouter(tags=["Questions"])
 class QuestionCreate(BaseModel):
     question_text: str
     topic_id: int
+    question_type: str 
 
 class AnswerCreate(BaseModel):
     answer_text: str
@@ -28,6 +29,7 @@ class QuestionResponse(BaseModel):
     question_id: int
     question_text: str
     topic_id: int
+    question_type: str
     answers: List['AnswerResponse']
     test_cases: List['TestCaseResponse']
 
@@ -64,11 +66,20 @@ async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(ge
     
     return query.all()
 
+# Remove the duplicate and keep only this version
 @router.post("/questions/", response_model=QuestionResponse)
 async def create_question(question: QuestionCreate, db: Session = Depends(get_db)):
+    # Validate question type
+    if question.question_type not in ["homework", "lab"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Question type must be either 'homework' or 'lab'"
+        )
+
     db_question = Question(
         question_text=question.question_text,
-        topic_id=question.topic_id
+        topic_id=question.topic_id,
+        question_type=question.question_type
     )
     db.add(db_question)
     db.commit()
@@ -116,9 +127,17 @@ async def create_topic_question(
     question: QuestionCreate, 
     db: Session = Depends(get_db)
 ):
+    # Validate question type
+    if question.question_type not in ["homework", "lab"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Question type must be either 'homework' or 'lab'"
+        )
+
     db_question = Question(
         question_text=question.question_text,
-        topic_id=topic_id
+        topic_id=topic_id,
+        question_type=question.question_type  # Add the question type
     )
     db.add(db_question)
     db.commit()

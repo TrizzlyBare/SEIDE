@@ -17,7 +17,7 @@ import {
 import { UserContext } from "../components/Context/UserContext";
 
 const AuthPage = () => {
-  const [signingIn, setSigningIn] = useState(true); // Toggle between Sign-In and Sign-Up
+  const [signingIn, setSigningIn] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -50,12 +50,12 @@ const AuthPage = () => {
       }
 
       alert("Sign Up successful!");
-      setSigningIn(true); // Toggle to SignIn form
+      setSigningIn(true);
     } catch (error) {
       console.error("Sign Up failed:", error.message);
       alert("Sign Up failed: Something went wrong");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -63,7 +63,6 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Check for admin credentials
       if (email === "admin@testing.com" && password === "admin") {
         setUser({ role: "admin" });
         localStorage.setItem("userRole", "admin");
@@ -72,7 +71,6 @@ const AuthPage = () => {
         return;
       }
 
-      // Regular user authentication
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
@@ -91,7 +89,7 @@ const AuthPage = () => {
 
       const data = await response.json();
       localStorage.setItem("access_token", data.access_token);
-      setUser({ role: "user" }); // Set user role to regular user
+      setUser({ role: "user" });
       localStorage.setItem("userRole", "user");
       alert("Sign In successful!");
       navigate("/home");
@@ -105,7 +103,6 @@ const AuthPage = () => {
 
   return (
     <Container>
-      {/* SignUpContainer: Only passes 'signingIn' prop to styled-components */}
       <SignUpContainer signingIn={signingIn}>
         <Form onSubmit={handleSignUp}>
           <Title>Create Account</Title>
