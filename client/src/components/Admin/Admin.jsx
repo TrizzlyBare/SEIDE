@@ -47,6 +47,7 @@ const Admin = () => {
     }
   };
 
+
   const handleDeleteSubject = async (subjectId, e) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this subject?")) {
@@ -118,6 +119,7 @@ const Admin = () => {
   useEffect(() => {
     fetchSubjects();
   }, []);
+
   return (
     <AdminContainer>
       <Title>Subject Management</Title>
@@ -136,7 +138,7 @@ const Admin = () => {
               {yearSubjects.map((subject) => (
                 <SubjectBox
                   key={`subject-${subject.subject_id}`}
-                  onClick={() => handleSubjectClick(subject.subject_id)} // Fixed: Now passing subject_id
+                  onClick={() => handleSubjectClick(subject.subject_id)}
                 >
                   {subject.subject_name}
                   <DeleteButton

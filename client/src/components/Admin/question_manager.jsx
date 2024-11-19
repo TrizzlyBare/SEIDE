@@ -216,16 +216,15 @@ const QuestionManager = () => {
   
         // Add test cases - endpoint matches questions.py
         for (const testCase of newQuestion.testCases) {
-          await fetch(`http://localhost:8000/questions/${questionData.question_id}/testcases/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              input_data: testCase.input,
-              expected_output: testCase.expectedOutput,
-              question_id: questionData.question_id
-            })
-          });
-        }
+            await fetch(`http://localhost:8000/questions/${questionData.question_id}/testcases/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                input_data: testCase.input,        // Changed from input
+                expected_output: testCase.expectedOutput,  // Changed from expectedOutput
+              })
+            });
+          }
   
         setIsModalOpen(false);
         setNewQuestion({

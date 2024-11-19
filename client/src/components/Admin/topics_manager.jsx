@@ -234,20 +234,23 @@ const TopicsManager = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch(
-        `http://localhost:8000/subjects/${subject_id}/topics`
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to fetch topics");
+      
+      // First validate the subject exists
+      const subjectResponse = await fetch(`http://localhost:8000/subjects/${subject_id}`);
+      if (!subjectResponse.ok) {
+        throw new Error("Invalid subject access");
       }
-
+      
+      const response = await fetch(`http://localhost:8000/subjects/${subject_id}/topics`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch topics");
+      }
+  
       const data = await response.json();
-      setTopics(data);
+      setTopics(data.filter(topic => topic.subject_id === parseInt(subject_id)));
     } catch (error) {
-      console.error("Error fetching topics:", error);
       setError(error.message);
+      navigate('/admin'); // Redirect to admin on invalid access
     } finally {
       setIsLoading(false);
     }

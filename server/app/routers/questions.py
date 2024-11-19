@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 import logging
+from typing import List, Optional
 from app.models.dashboard.db_config import get_db
 from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion
 from app.models.dashboard.createtable import create_tables
 import fastapi as _fastapi
 
-router = _fastapi.APIRouter(tags=["Questions"])
+router = APIRouter(tags=["Questions"])
 
 class QuestionCreate(BaseModel):
     question_text: str
@@ -16,50 +17,80 @@ class QuestionCreate(BaseModel):
 class AnswerCreate(BaseModel):
     answer_text: str
     is_correct: bool
-    question_id: int
-    
+
 class TestCaseCreate(BaseModel):
     input_data: str
     expected_output: str
-    question_id: int
 
-class DoneQuestionCreate(BaseModel):
+class QuestionResponse(BaseModel):
     question_id: int
-    user_id: int
+    question_text: str
+    topic_id: int
+    answers: List['AnswerResponse']
+    test_cases: List['TestCaseResponse']
+
+    class Config:
+        orm_mode = True
+
+class AnswerResponse(BaseModel):
+    answer_id: int
+    answer_text: str
     is_correct: bool
+    
+    class Config:
+        orm_mode = True
 
-@router.post("questions/{question_id}/answers/", response_model=AnswerCreate)
+class TestCaseResponse(BaseModel):
+    testcase_id: int
+    input_data: str
+    expected_output: str
+    
+    class Config:
+        orm_mode = True
+
+@router.get("/questions/", response_model=List[QuestionResponse])
+async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(Question).options(
+        joinedload(Question.answers),
+        joinedload(Question.test_cases)
+    )
+    
+    if topic_id:
+        query = query.filter(Question.topic_id == topic_id)
+    
+    return query.all()
+
+@router.post("/questions/", response_model=QuestionResponse)
+async def create_question(question: QuestionCreate, db: Session = Depends(get_db)):
+    db_question = Question(
+        question_text=question.question_text,
+        topic_id=question.topic_id
+    )
+    db.add(db_question)
+    db.commit()
+    db.refresh(db_question)
+    return db_question
+
+@router.post("/questions/{question_id}/answers/", response_model=AnswerResponse)
 async def create_answer(question_id: int, answer: AnswerCreate, db: Session = Depends(get_db)):
-    db_answer = Answer(answer_text=answer.answer_text, is_correct=answer.is_correct, question_id=question_id)
+    db_answer = Answer(
+        answer_text=answer.answer_text,
+        is_correct=answer.is_correct,
+        question_id=question_id
+    )
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
     return db_answer
 
-@router.get("questions/{question_id}/answers/")
-async def read_answers(question_id: int, db: Session = Depends(get_db)):
-    return db.query(Answer).filter(Answer.question_id == question_id).all()
-
-@router.post("questions/{question_id}/testcases/", response_model=TestCaseCreate)
+@router.post("/questions/{question_id}/testcases/", response_model=TestCaseResponse) 
 async def create_testcase(question_id: int, testcase: TestCaseCreate, db: Session = Depends(get_db)):
-    db_testcase = TestCase(input_data=testcase.input_data, expected_output=testcase.expected_output, question_id=question_id)
+    db_testcase = TestCase(
+        input_data=testcase.input_data,
+        expected_output=testcase.expected_output,
+        question_id=question_id
+    )
     db.add(db_testcase)
     db.commit()
     db.refresh(db_testcase)
     return db_testcase
-
-@router.get("questions/{question_id}/testcases/")
-async def read_testcases(question_id: int, db: Session = Depends(get_db)):
-    return db.query(TestCase).filter(TestCase.question_id == question_id).all()
-
-@router.post("questions/{question_id}/donequestions/", response_model=DoneQuestionCreate)
-async def create_donequestion(question_id: int, donequestion: DoneQuestionCreate, db: Session = Depends(get_db)):
-    db_donequestion = DoneQuestion(question_id=question_id, user_id=donequestion.user_id, is_correct=donequestion.is_correct)
-    db.add(db_donequestion)
-    db.commit()
-    db.refresh(db_donequestion)
-    return db_donequestion
-
-@router.get("questions/{question_id}/donequestions/")
-async def read_donequestions(question_id: int, db: Session = Depends(get_db)):
-    return db.query(DoneQuestion).filter(DoneQuestion.question_id == question_id).all()

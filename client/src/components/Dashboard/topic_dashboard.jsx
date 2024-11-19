@@ -10,45 +10,42 @@ import {
 
 const TopicDashboard = () => {
   const [topics, setTopics] = useState([]);
+  const [subjectName, setSubjectName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { subject_id } = useParams();
   const navigate = useNavigate();
+
+  const fetchSubjectDetails = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/subjects/${subject_id}`);
+      if (!response.ok) {
+        throw new Error("Subject not found");
+      }
+      const data = await response.json();
+      setSubjectName(data.subject_name);
+    } catch (error) {
+      setError("Failed to load subject details");
+      navigate('/subjects');
+    }
+  };
 
   const fetchTopics = async () => {
     try {
       setIsLoading(true);
-      console.log("Fetching topics for subject_id:", subject_id);
-
-      const response = await fetch("http://localhost:8000/topics/", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
+      setError(null);
+      
+      const response = await fetch(`http://localhost:8000/subjects/${subject_id}/topics`);
+      
       if (!response.ok) {
-        console.error("Failed to fetch topics:", response.status, response.statusText);
-        setTopics([]);
-        return;
+        throw new Error("Failed to fetch topics");
       }
 
       const data = await response.json();
-      console.log("All topics data:", data);
-
-      // Convert subject_id from URL to number and subtract 1 to match zero-based index
-      const subjectIdNum = parseInt(subject_id);
-      console.log("Looking for topics with subject_id:", subjectIdNum);
-
-      // Filter topics making sure we handle both zero-based and one-based IDs
-      const subjectTopics = data.filter(topic => {
-        const topicSubjectId = topic.subject_id;
-        console.log("Comparing topic subject_id:", topicSubjectId, "with:", subjectIdNum);
-        // Check both the direct ID and adjusted ID to handle both cases
-        return topicSubjectId === subjectIdNum || topicSubjectId === (subjectIdNum - 1);
-      });
-
-      console.log("Filtered topics:", subjectTopics);
-      setTopics(subjectTopics);
+      setTopics(data);
     } catch (error) {
       console.error("Failed to fetch topics:", error);
+      setError(error.message);
       setTopics([]);
     } finally {
       setIsLoading(false);
@@ -57,6 +54,7 @@ const TopicDashboard = () => {
 
   useEffect(() => {
     if (subject_id) {
+      fetchSubjectDetails();
       fetchTopics();
     }
   }, [subject_id]);
@@ -64,7 +62,7 @@ const TopicDashboard = () => {
   return (
     <Container>
       <Header>
-        Topics for Subject {subject_id}
+        {subjectName ? `Topics for ${subjectName}` : 'Topics'}
         <button
           onClick={() => navigate('/subjects')}
           style={{
@@ -77,6 +75,7 @@ const TopicDashboard = () => {
         </button>
       </Header>
       <DashboardContainer>
+        {error && <p className="error">{error}</p>}
         {isLoading ? (
           <p>Loading topics...</p>
         ) : topics.length === 0 ? (
@@ -84,8 +83,8 @@ const TopicDashboard = () => {
         ) : (
           <SubjectList>
             {topics.map((topic) => (
-              <Subject key={topic.topic_id || `topic-${topic.topic_name}`}>
-                {topic.topic_name || 'Unnamed Topic'}
+              <Subject key={topic.topic_id}>
+                {topic.topic_name}
               </Subject>
             ))}
           </SubjectList>
