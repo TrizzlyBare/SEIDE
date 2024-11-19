@@ -82,12 +82,12 @@ async def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depend
 async def read_topics(subject_id: int, db: Session = Depends(get_db)):
     return db.query(Topic).filter(Topic.subject_id == subject_id).all()
 
-@router.delete("/subjects/{subject_id}/topics/{topic_id}")
-async def delete_topic(subject_id: int, topic_id: int, db: Session = Depends(get_db)):
-    topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
+@router.get("/subjects/{subject_id}/topics/{topic_id}", response_model=TopicResponse)
+async def read_topic(subject_id: int, topic_id: int, db: Session = Depends(get_db)):
+    topic = db.query(Topic).filter(
+        Topic.subject_id == subject_id,
+        Topic.topic_id == topic_id
+    ).first()
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
-    
-    db.delete(topic)
-    db.commit()
-    return {"message": "Topic deleted successfully"}
+    return topic

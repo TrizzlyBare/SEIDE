@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+import QuestionTypeSelector from './QuestionTypeSelector';
 
 const Container = styled.div`
   width: 100%;
@@ -76,7 +77,7 @@ const Overlay = styled.div`
   justify-content: center;
 `;
 
-export default function QuestionManager() {
+const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -86,57 +87,58 @@ export default function QuestionManager() {
 
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
+    questionType: "homework",
     answers: [{ text: "", isCorrect: false }],
-    testCases: [
-      {
-        input: "",
-        expectedOutput: "",
-        setupScript: "#!/bin/bash\n\n",
-        validationScript: 'diff <(echo "$expected") <(echo "$output")',
-      },
-    ],
+    testCases: [{
+      input: "",
+      expectedOutput: "",
+      setupScript: "#!/bin/bash\n\n",
+      validationScript: 'diff <(echo "$expected") <(echo "$output")',
+    }],
   });
 
   const fetchQuestions = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:8000/questions/`);
+      const response = await fetch(
+        `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions`
+      );
       if (!response.ok) throw new Error("Failed to fetch questions");
       const data = await response.json();
-      const topicQuestions = data.filter(
-        (q) => q.topic_id === parseInt(topic_id)
-      );
-      setQuestions(topicQuestions);
+      setQuestions(data);
     } catch (err) {
       setError(err.message);
+      console.error("Error fetching questions:", err);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchQuestions();
-  }, [topic_id]);
-
+  
+  // Update the handleAddQuestion function endpoints
   const handleAddQuestion = async (e) => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const questionResponse = await fetch(`http://localhost:8000/questions/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_text: newQuestion.questionText,
-          topic_id: parseInt(topic_id),
-        }),
-      });
-
+      const questionResponse = await fetch(
+        `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question_text: newQuestion.questionText,
+            question_type: newQuestion.questionType,
+            topic_id: parseInt(topic_id),
+          }),
+        }
+      );
+  
       if (!questionResponse.ok) throw new Error("Failed to create question");
       const questionData = await questionResponse.json();
-
+  
+      // Update answer endpoint
       for (const answer of newQuestion.answers) {
-        await fetch(
-          `http://localhost:8000/questions/${questionData.question_id}/answers/`,
+        const answerResponse = await fetch(
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${questionData.question_id}/answers`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -146,11 +148,13 @@ export default function QuestionManager() {
             }),
           }
         );
+        if (!answerResponse.ok) throw new Error("Failed to create answer");
       }
-
+  
+      // Update test case endpoint
       for (const testCase of newQuestion.testCases) {
-        await fetch(
-          `http://localhost:8000/questions/${questionData.question_id}/testcases/`,
+        const testCaseResponse = await fetch(
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${questionData.question_id}/testcases`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -162,13 +166,15 @@ export default function QuestionManager() {
             }),
           }
         );
+        if (!testCaseResponse.ok) throw new Error("Failed to create test case");
       }
-
+  
       setIsModalOpen(false);
       resetForm();
       fetchQuestions();
     } catch (err) {
       setError(err.message);
+      console.error("Error adding question:", err);
     } finally {
       setIsLoading(false);
     }
@@ -204,40 +210,38 @@ export default function QuestionManager() {
     });
   };
 
+  useEffect(() => {
+    fetchQuestions();
+  }, [subject_id, topic_id]);
+
   return (
     <Container>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "20px",
-        }}
-      >
-        <Button onClick={() => navigate(`/admin/${subject_id}/create`)}>
-          ← Back to Topics
-        </Button>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+        <Button onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</Button>
         <h1 style={{ margin: 0, fontSize: "24px" }}>Questions</h1>
       </div>
-
-      {error && (
-        <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>
-      )}
-
-      <Button
-        $primary
-        onClick={() => setIsModalOpen(true)}
-        style={{ marginBottom: "20px" }}
-      >
-        Add New Question
-      </Button>
-
+  
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+  
+      <Button $primary onClick={() => setIsModalOpen(true)} style={{ marginBottom: "20px" }}>Add New Question</Button>
+  
       {isLoading ? (
         <div>Loading...</div>
       ) : (
         questions.map((question) => (
           <Card key={question.question_id}>
-            <h3 style={{ margin: "0 0 16px 0" }}>{question.question_text}</h3>
-
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0 }}>{question.question_text}</h3>
+              <span style={{ 
+                padding: "4px 8px", 
+                borderRadius: "4px", 
+                background: question.question_type === "homework" ? "#e3f2fd" : "#f3e5f5",
+                color: question.question_type === "homework" ? "#1565c0" : "#7b1fa2"
+              }}>
+                {question.question_type === "homework" ? "Homework" : "Lab"}
+              </span>
+            </div>
+  
             <div style={{ marginBottom: "16px" }}>
               <h4 style={{ marginBottom: "8px" }}>Answers:</h4>
               {question.answers?.map((answer, idx) => (
@@ -247,9 +251,7 @@ export default function QuestionManager() {
                     padding: "8px",
                     margin: "4px 0",
                     background: answer.is_correct ? "#e8f5e9" : "#fff",
-                    border: `1px solid ${
-                      answer.is_correct ? "#a5d6a7" : "#e0e0e0"
-                    }`,
+                    border: `1px solid ${answer.is_correct ? "#a5d6a7" : "#e0e0e0"}`,
                     borderRadius: "4px",
                   }}
                 >
@@ -257,7 +259,7 @@ export default function QuestionManager() {
                 </div>
               ))}
             </div>
-
+  
             <div>
               <h4 style={{ marginBottom: "8px" }}>Test Cases:</h4>
               {question.test_cases?.map((testCase, idx) => (
@@ -275,14 +277,12 @@ export default function QuestionManager() {
                   {testCase.setup_script && (
                     <div style={{ marginTop: "8px" }}>
                       <strong>Setup Script:</strong>
-                      <pre
-                        style={{
-                          background: "#f1f1f1",
-                          padding: "8px",
-                          marginTop: "4px",
-                          borderRadius: "4px",
-                        }}
-                      >
+                      <pre style={{
+                        background: "#f1f1f1",
+                        padding: "8px",
+                        marginTop: "4px",
+                        borderRadius: "4px",
+                      }}>
                         {testCase.setup_script}
                       </pre>
                     </div>
@@ -293,7 +293,7 @@ export default function QuestionManager() {
           </Card>
         ))
       )}
-
+  
       {isModalOpen && (
         <Overlay onClick={() => setIsModalOpen(false)}>
           <Modal onClick={(e) => e.stopPropagation()}>
@@ -303,15 +303,21 @@ export default function QuestionManager() {
                 $large
                 placeholder="Question text"
                 value={newQuestion.questionText}
-                onChange={(e) =>
-                  setNewQuestion({
-                    ...newQuestion,
-                    questionText: e.target.value,
-                  })
-                }
+                onChange={(e) => setNewQuestion({
+                  ...newQuestion,
+                  questionText: e.target.value,
+                })}
                 required
               />
-
+  
+              <QuestionTypeSelector
+                selectedType={newQuestion.questionType}
+                onChange={(type) => setNewQuestion({
+                  ...newQuestion,
+                  questionType: type
+                })}
+              />
+  
               <h3 style={{ margin: "20px 0 10px" }}>Answers</h3>
               {newQuestion.answers.map((answer, idx) => (
                 <div key={idx} style={{ marginBottom: "10px" }}>
@@ -325,14 +331,12 @@ export default function QuestionManager() {
                     }}
                     required
                   />
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <label style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginTop: "4px",
+                  }}>
                     <input
                       type="checkbox"
                       checked={answer.isCorrect}
@@ -348,19 +352,14 @@ export default function QuestionManager() {
               ))}
               <Button
                 type="button"
-                onClick={() =>
-                  setNewQuestion({
-                    ...newQuestion,
-                    answers: [
-                      ...newQuestion.answers,
-                      { text: "", isCorrect: false },
-                    ],
-                  })
-                }
+                onClick={() => setNewQuestion({
+                  ...newQuestion,
+                  answers: [...newQuestion.answers, { text: "", isCorrect: false }],
+                })}
               >
                 Add Answer
               </Button>
-
+  
               <h3 style={{ margin: "20px 0 10px" }}>Test Cases</h3>
               {newQuestion.testCases.map((testCase, idx) => (
                 <div
@@ -378,10 +377,7 @@ export default function QuestionManager() {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].input = e.target.value;
-                      setNewQuestion({
-                        ...newQuestion,
-                        testCases: newTestCases,
-                      });
+                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
                     }}
                     required
                   />
@@ -391,10 +387,7 @@ export default function QuestionManager() {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].expectedOutput = e.target.value;
-                      setNewQuestion({
-                        ...newQuestion,
-                        testCases: newTestCases,
-                      });
+                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
                     }}
                     required
                   />
@@ -405,10 +398,7 @@ export default function QuestionManager() {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].setupScript = e.target.value;
-                      setNewQuestion({
-                        ...newQuestion,
-                        testCases: newTestCases,
-                      });
+                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
                     }}
                   />
                   <TextArea
@@ -418,10 +408,7 @@ export default function QuestionManager() {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].validationScript = e.target.value;
-                      setNewQuestion({
-                        ...newQuestion,
-                        testCases: newTestCases,
-                      });
+                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
                     }}
                   />
                 </div>
@@ -429,15 +416,13 @@ export default function QuestionManager() {
               <Button type="button" onClick={addTestCase}>
                 Add Test Case
               </Button>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "8px",
-                  marginTop: "20px",
-                }}
-              >
+  
+              <div style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+                marginTop: "20px",
+              }}>
                 <Button type="submit" $primary disabled={isLoading}>
                   {isLoading ? "Adding..." : "Add Question"}
                 </Button>
@@ -452,3 +437,4 @@ export default function QuestionManager() {
     </Container>
   );
 }
+export default QuestionManager;
