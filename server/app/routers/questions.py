@@ -21,6 +21,8 @@ class AnswerCreate(BaseModel):
 class TestCaseCreate(BaseModel):
     input_data: str
     expected_output: str
+    setup_script: str = "#!/bin/bash\n\n"
+    validation_script: str = 'diff <(echo "$expected") <(echo "$output")'
 
 class QuestionResponse(BaseModel):
     question_id: int
@@ -41,12 +43,14 @@ class AnswerResponse(BaseModel):
         orm_mode = True
 
 class TestCaseResponse(BaseModel):
-    testcase_id: int
+    test_case_id: int
     input_data: str
-    expected_output: str
-    
+    expected_output: str 
+    setup_script: str
+    validation_script: str
+
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.get("/questions/", response_model=List[QuestionResponse])
 async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
