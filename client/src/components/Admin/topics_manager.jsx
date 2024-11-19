@@ -226,31 +226,36 @@ const TopicsManager = () => {
 
   const handleTopicClick = (topicId) => {
     // Updated navigation path to include both subject_id and topic_id
-    navigate(`/subjects/${subject_id}/topics/${topicId}/questions`);
+    navigate(`/admin/subjects/${subject_id}/topics/${topicId}/questions`);
   };
-
 
   const fetchTopics = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // First validate the subject exists
-      const subjectResponse = await fetch(`http://localhost:8000/subjects/${subject_id}`);
+      const subjectResponse = await fetch(
+        `http://localhost:8000/subjects/${subject_id}`
+      );
       if (!subjectResponse.ok) {
         throw new Error("Invalid subject access");
       }
-      
-      const response = await fetch(`http://localhost:8000/subjects/${subject_id}/topics`);
+
+      const response = await fetch(
+        `http://localhost:8000/subjects/${subject_id}/topics`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch topics");
       }
-  
+
       const data = await response.json();
-      setTopics(data.filter(topic => topic.subject_id === parseInt(subject_id)));
+      setTopics(
+        data.filter((topic) => topic.subject_id === parseInt(subject_id))
+      );
     } catch (error) {
       setError(error.message);
-      navigate('/admin'); // Redirect to admin on invalid access
+      navigate("/admin"); // Redirect to admin on invalid access
     } finally {
       setIsLoading(false);
     }
@@ -359,10 +364,10 @@ const TopicsManager = () => {
           </AddTopicBox>
 
           {topics.map((topic) => (
-            <TopicBox 
+            <TopicBox
               key={topic.topic_id}
               onClick={() => handleTopicClick(topic.topic_id)} // Add click handler here
-              style={{ cursor: 'pointer' }} // Add pointer cursor to indicate clickability
+              style={{ cursor: "pointer" }} // Add pointer cursor to indicate clickability
             >
               {topic.topic_name}
               <DeleteButton
