@@ -50,6 +50,7 @@ class Question(Base):
     answers: Mapped[List["Answer"]] = relationship("Answer", back_populates="question")
     test_cases: Mapped[List["TestCase"]] = relationship("TestCase", back_populates="question")
     done_questions: Mapped[List["DoneQuestion"]] = relationship("DoneQuestion", back_populates="question")
+    user_code: Mapped[List["UserCodeData"]] = relationship("UserCodeData", back_populates="question")
 
 class Answer(Base):
     __tablename__ = 'answer_table'
@@ -84,3 +85,12 @@ class DoneQuestion(Base):
 
     question: Mapped["Question"] = relationship("Question", back_populates="done_questions")
     user: Mapped["User"] = relationship("User", back_populates="done_questions")
+
+class UserCodeData(Base):
+    __tablename__ = 'user_code_data_table'
+
+    user_code_data_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    code_data: Mapped[str] = mapped_column(String, nullable=False)
+
+    question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
+    question: Mapped["Question"] = relationship("Question", back_populates="user_code")
