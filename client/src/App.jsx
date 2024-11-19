@@ -22,7 +22,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
           <Route
-            path="/subjects/:subject_id/topics"
+            path="admin/subjects/:subject_id/topics"
             element={<TopicsManager />}
           />{" "}
           {/* Add this route */}

@@ -89,7 +89,7 @@ const TopicsManager = () => {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { subject_id } = useParams(); // Extract subject_id from route parameters
+  const { subject_id } = useParams(); 
 
   const fetchTopics = async () => {
     try {

@@ -136,7 +136,6 @@ const Button = styled.button`
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
-  const [year, setYear] = useState(""); // Add state for year
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -196,7 +195,6 @@ const Admin = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (newSubject.trim() !== "") {
-      // Check if year is not empty
       try {
         setIsLoading(true);
         const response = await fetch("http://localhost:8000/subjects/", {

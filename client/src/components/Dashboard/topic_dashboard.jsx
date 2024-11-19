@@ -65,12 +65,8 @@ const Dashboard = () => {
     fetchSubjects();
   }, []);
 
-  const handleSubjectClick = (subject) => {
-    setExpandedSubject(expandedSubject === subject.id ? null : subject.id);
-  };
-
-  const handleSubjectNavigate = (subjectName) => {
-    navigate(`/subjects/${subjectName}/topics`);
+  const handleSubjectClick = (subjectId) => {
+    navigate(`/subjects/${subjectId}/topics`);
   };
 
   return (
@@ -83,35 +79,8 @@ const Dashboard = () => {
           <SubjectList>
             {subjects.map((subject) => (
               <div key={subject.id}>
-                <Subject>
-                  <div
-                    onClick={() => handleSubjectClick(subject)}
-                    style={{ flex: 1, cursor: "pointer" }}
-                  >
-                    {subject.subject_name}
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSubjectNavigate(subject.id);
-                    }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "right",
-                      marginLeft: "10px",
-                      padding: "4px 8px",
-                      border: "none",
-                      borderRadius: "4px",
-                      backgroundColor: "#fff",
-
-                      cursor: "pointer",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    View Topics
-                  </button>
+                <Subject onClick={() => handleSubjectClick(subject.id)}>
+                  {subject.subject_name}
                 </Subject>
                 {expandedSubject === subject.id && (
                   <SubcategoryList>
