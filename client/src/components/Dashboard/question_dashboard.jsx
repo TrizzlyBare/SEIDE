@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import styled from "styled-components";
+import { useParams, useNavigate } from "react-router-dom";
+import styled from 'styled-components';
+
+const API_BASE_URL = "http://localhost:8000";
 
 // Styled Components
 const DashboardContainer = styled.div`
@@ -66,71 +68,160 @@ const QuestionItem = styled.li`
   }
 `;
 
+const BackButton = styled.button`
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: #e0e0e0;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  padding: 2rem;
+`;
+
+const LoadingPlaceholder = styled.div`
+  height: 1rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: pulse 1.5s infinite;
+
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+`;
+
+const ErrorContainer = styled.div`
+  padding: 2rem;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  color: #d32f2f;
+`;
+
 const QuestionDashboard = () => {
-  const [questions, setQuestions] = useState({
-    labs: [],
-    homework: [],
-  });
+  const [questions, setQuestions] = useState({ labs: [], homework: [] });
   const [subjectName, setSubjectName] = useState("");
   const [topicName, setTopicName] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { subject_id, topic_id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSubjectDetails = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/subjects/${subject_id}`
-        );
-        const data = await response.json();
-        setSubjectName(data.subject_name);
-      } catch (error) {
-        console.error("Error fetching subject details:", error);
-      }
-    };
+        setLoading(true);
+        setError(null);
 
-    const fetchTopicDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`
-        );
-        const data = await response.json();
-        setTopicName(data.topic_name);
-      } catch (error) {
-        console.error("Error fetching topic details:", error);
-      }
-    };
+        if (!subject_id || !topic_id) {
+          throw new Error("Missing subject or topic ID");
+        }
 
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions`
-        );
-        const questionsData = await response.json();
+        const subjectIdNum = parseInt(subject_id);
+        const topicIdNum = parseInt(topic_id);
 
-        const formattedQuestions = questionsData.map((q) => ({
+        if (isNaN(subjectIdNum) || isNaN(topicIdNum)) {
+          throw new Error("Invalid subject or topic ID");
+        }
+
+        // Fetch subject details
+        const subjectRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}`);
+        if (!subjectRes.ok) {
+          throw new Error(`Failed to fetch subject (${subjectRes.status})`);
+        }
+        const subjectData = await subjectRes.json();
+        setSubjectName(subjectData.subject_name);
+
+        // Fetch topic details
+        const topicRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}`);
+        if (!topicRes.ok) {
+          throw new Error(`Failed to fetch topic (${topicRes.status})`);
+        }
+        const topicData = await topicRes.json();
+        setTopicName(topicData.topic_name);
+
+        // Fetch questions
+        const questionsRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}/questions`);
+        if (!questionsRes.ok) {
+          throw new Error(`Failed to fetch questions (${questionsRes.status})`);
+        }
+        const questionsData = await questionsRes.json();
+
+        if (!Array.isArray(questionsData)) {
+          throw new Error('Invalid questions data format');
+        }
+
+        const processedQuestions = questionsData.map(q => ({
           id: q.question_id,
           title: q.question_text,
-          answers: q.answers,
-          testCases: q.test_cases,
-          topic_id: q.topic_id,
-          status: "pending", // You might want to check DoneQuestion table
         }));
 
-        // Split between labs and homework based on topic association
-        // You might want to adjust this logic based on your data structure
         setQuestions({
-          labs: formattedQuestions.filter((q) => q.topic_id % 2 === 0), // Example split
-          homework: formattedQuestions.filter((q) => q.topic_id % 2 === 1),
+          labs: processedQuestions.filter((_, index) => index % 2 === 0),
+          homework: processedQuestions.filter((_, index) => index % 2 === 1)
         });
+
       } catch (error) {
-        console.error("Error fetching questions:", error);
+        console.error('Error fetching data:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchSubjectDetails();
-    fetchTopicDetails();
-    fetchQuestions();
+    fetchData();
   }, [subject_id, topic_id]);
+
+  const LoadingState = () => (
+    <LoadingContainer>
+      <LoadingPlaceholder style={{ width: '60%' }} />
+      <LoadingPlaceholder style={{ width: '80%' }} />
+      <LoadingPlaceholder style={{ width: '40%' }} />
+    </LoadingContainer>
+  );
+
+  const ErrorState = () => (
+    <ErrorContainer>
+      <h3>Error Loading Questions</h3>
+      <p>{error}</p>
+      <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics`)}>
+        Back to Topics
+      </BackButton>
+    </ErrorContainer>
+  );
+
+  const QuestionCard = ({ title, questions = [] }) => (
+    <Card>
+      <CardTitle>{title}</CardTitle>
+      <QuestionList>
+        {questions.length > 0 ? (
+          questions.map((question) => (
+            <QuestionItem
+              key={question.id}
+              onClick={() => navigate(`/editor?questionId=${question.id}`)}
+            >
+              {question.title}
+            </QuestionItem>
+          ))
+        ) : (
+          <QuestionItem>No questions available</QuestionItem>
+        )}
+      </QuestionList>
+    </Card>
+  );
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState />;
 
   return (
     <DashboardContainer>
@@ -138,36 +229,20 @@ const QuestionDashboard = () => {
         <Title>
           Problems of {topicName}, {subjectName}
         </Title>
+        <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics`)}>
+          Back to Topics
+        </BackButton>
       </Header>
 
       <ContentSection>
-        <Card>
-          <CardTitle>Labs</CardTitle>
-          <QuestionList>
-            {questions.labs.map((question) => (
-              <QuestionItem key={question.id}>
-                <h3>{question.title}</h3>
-                <p>Number of Test Cases: {question.testCases.length}</p>
-                <p>Number of Answers: {question.answers.length}</p>
-                <p>Status: {question.status}</p>
-              </QuestionItem>
-            ))}
-          </QuestionList>
-        </Card>
-
-        <Card>
-          <CardTitle>Homework</CardTitle>
-          <QuestionList>
-            {questions.homework.map((question) => (
-              <QuestionItem key={question.id}>
-                <h3>{question.title}</h3>
-                <p>Number of Test Cases: {question.testCases.length}</p>
-                <p>Number of Answers: {question.answers.length}</p>
-                <p>Status: {question.status}</p>
-              </QuestionItem>
-            ))}
-          </QuestionList>
-        </Card>
+        <QuestionCard 
+          title="Lab Questions" 
+          questions={questions.labs} 
+        />
+        <QuestionCard 
+          title="Homework Questions" 
+          questions={questions.homework} 
+        />
       </ContentSection>
     </DashboardContainer>
   );
