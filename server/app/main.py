@@ -20,7 +20,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # Explicitly create tables for both database engines
     AuthBase.metadata.create_all(bind=auth_engine, checkfirst=True)
     DashboardBase.metadata.create_all(bind=dashboard_engine, checkfirst=True)
 

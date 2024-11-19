@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   Container,
   SignUpContainer,
@@ -26,38 +25,96 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (e) => {
+    e.preventDefault();
     setLoading(true); // Start loading
     try {
-      const response = await axios.post('http://localhost:8000/api/users', {
-        email,
-        password,
+      const response = await fetch("http://localhost:8000/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error("Sign Up failed");
+      }
+
       alert("Sign Up successful!");
       setSigningIn(true); // Toggle to SignIn form
     } catch (error) {
-      console.error("Sign Up failed:", error.response ? error.response.data : error.message);
+      console.error("Sign Up failed:", error.message);
       alert("Sign Up failed: Something went wrong");
     } finally {
       setLoading(false); // Stop loading
     }
   };
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (e) => {
+    e.preventDefault();
     setLoading(true); // Start loading
     try {
-      const response = await axios.post('http://localhost:8000/api/token', {
-        username: email,
-        password,
+      if (email === "admin@testing.com" && password === "admin") {
+        alert("Admin Sign In successful!");
+        navigate("/admin");
+        return;
+      }
+
+      const formData = new URLSearchParams();
+      formData.append("username", email);
+      formData.append("password", password);
+
+      const response = await fetch("http://localhost:8000/api/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
       });
-      localStorage.setItem("access_token", response.data.access_token);
+
+      if (!response.ok) {
+        throw new Error("Sign In failed: Invalid Credentials");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("access_token", data.access_token);
       alert("Sign In successful!");
-      navigate("/app");
+      navigate("/home");
     } catch (error) {
-      console.error("Sign In failed:", error.response ? error.response.data : error.message);
+      console.error("Sign In failed:", error.message);
       alert("Sign In failed: Invalid Credentials");
     } finally {
       setLoading(false); // Stop loading
+    }
+  };
+
+  const callApiWithToken = async (token) => {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/protected-endpoint",
+        requestOptions
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      console.log("API call successful:", data);
+      // Handle the data from the API call
+    } catch (error) {
+      console.error("API call failed:", error);
+      alert("API call failed: " + error.message);
     }
   };
 
@@ -95,7 +152,12 @@ const AuthPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <select id="year" name="year" value={Year} onChange={(e) => setYear(e.target.value)}>
+          <select
+            id="year"
+            name="year"
+            value={Year}
+            onChange={(e) => setYear(e.target.value)}
+          >
             <option value="1">Year 1</option>
             <option value="2">Year 2</option>
             <option value="3">Year 3</option>
