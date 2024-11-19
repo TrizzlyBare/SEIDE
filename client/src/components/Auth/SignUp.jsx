@@ -17,7 +17,7 @@ const SignUp = () => {
 
   const submitSignUp = async () => {
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch("http://127.0.0.1:8000/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

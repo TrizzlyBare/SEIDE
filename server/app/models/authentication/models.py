@@ -2,12 +2,8 @@ import datetime as _dt
 import sqlalchemy as _sql
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
-
-import app.models.authentication.au_database as _database
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
 from passlib.context import CryptContext
 
 # Use a single declarative base for all models
@@ -26,14 +22,13 @@ class User(Base):
     def verify_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.hashed_password)
 
-class Lead(Base):  # Change from _database.Base to Base
+class Lead(Base):
     __tablename__ = "leads"
-
+    
     id = _sql.Column(_sql.Integer, primary_key=True, index=True)
     owner_id = _sql.Column(_sql.Integer, _sql.ForeignKey("users.id"))
     first_name = _sql.Column(_sql.String, index=True)
     last_name = _sql.Column(_sql.String, index=True)
-    year = _sql.Column(_sql.Integer, index=True)
     email = _sql.Column(_sql.String, index=True)
     company = _sql.Column(_sql.String, index=True, default="")
     note = _sql.Column(_sql.String, default="")

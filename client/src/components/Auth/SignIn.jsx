@@ -47,7 +47,7 @@ const SignIn = () => {
     console.log("Login button clicked");
     e.preventDefault();const submitLogin = async () => {
       try {
-        const response = await fetch("http://localhost:8000/login", {
+        const response = await fetch("http://localhost:8000/api/token", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
@@ -58,10 +58,14 @@ const SignIn = () => {
     
         if (!response.ok) {
           const data = await response.json();
+          console.log(data);
           setErrorMessage(data.detail);
         } else {
           const data = await response.json();
+          console.log(data);
+          window.localStorage.setItem("token", data.access_token);
           setToken(data.access_token); // Store JWT token in context
+          window.location.href = "/";
         }
       } catch (error) {
         console.error("Login error:", error);

@@ -225,7 +225,7 @@ const TopicsManager = () => {
   };
 
   const handleTopicClick = (topicId) => {
-    navigate(`/admin/${subject_id}/topics/${topicId}/questions`);
+    navigate(`/admin/:subject_id/topics/:topic_id/questions/`);
   };
 
   const fetchTopics = async () => {
