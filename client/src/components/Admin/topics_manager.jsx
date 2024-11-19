@@ -224,6 +224,12 @@ const TopicsManager = () => {
     }
   };
 
+  const handleTopicClick = (topicId) => {
+    // Updated navigation path to include both subject_id and topic_id
+    navigate(`/subjects/${subject_id}/topics/${topicId}/questions`);
+  };
+
+
   const fetchTopics = async () => {
     try {
       setIsLoading(true);
@@ -350,7 +356,11 @@ const TopicsManager = () => {
           </AddTopicBox>
 
           {topics.map((topic) => (
-            <TopicBox key={topic.topic_id}>
+            <TopicBox 
+              key={topic.topic_id}
+              onClick={() => handleTopicClick(topic.topic_id)} // Add click handler here
+              style={{ cursor: 'pointer' }} // Add pointer cursor to indicate clickability
+            >
               {topic.topic_name}
               <DeleteButton
                 onClick={(e) => handleDeleteTopic(topic.topic_id, e)}

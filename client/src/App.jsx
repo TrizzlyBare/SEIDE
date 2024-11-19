@@ -7,6 +7,9 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
 import TopicsManager from "./components/Admin/topics_manager"; // Import the TopicsManager component
+import QuestionManager from "./components/Admin/question_manager"; // Import the QuestionManager component
+import TopicDashboard from "./components/Dashboard/topic_dashboard"; // Updated path
+import Dashboard from "./components/Dashboard/Dashboard";
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -21,6 +24,9 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
+          <Route path="/subjects/:subject_id/topics/:topic_id/questions" element={<QuestionManager />} />
+          <Route path="/subjects" element={<Dashboard />} />
+          <Route path="/subjects/:subject_id/topics" element={<TopicDashboard />} />
           <Route
             path="/subjects/:subject_id/topics"
             element={<TopicsManager />}
