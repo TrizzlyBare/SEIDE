@@ -15,36 +15,41 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="app-container">
-      <NavBar />
-      <div className="content-container">
-        <Routes>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/editor" element={<CodeEditorPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
-          <Route
-            path="/admin/:subject_id/topics/:topic_id/questions"
-            element={<QuestionManager />}
-          />
-          <Route path="/subjects" element={<Dashboard />} />
-          <Route
-            path="/subjects/:subject_id/topics"
-            element={<TopicDashboard />}
-          />
-          <Route
-            path="/subjects/:subject_id/topics/:topics_id/questions"
-            element={<QuestionDashboard />}
-          />
-          <Route
-            path="/subjects/:subject_id/topics"
-            element={<TopicsManager />}
-          />{" "}
-        </Routes>
+    <Router>
+      <div className="app-container">
+        <NavBar />
+        <div className="content-container">
+          <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/editor" element={<CodeEditorPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route
+              path="/admin/:subject_id/create"
+              element={<TopicsManager />}
+            />
+            <Route
+              path="/admin/:subject_id/topics/:topic_id/questions"
+              element={<QuestionManager />}
+            />
+            <Route path="/subjects" element={<Dashboard />} />
+            <Route
+              path="/subjects/:subject_id/topics"
+              element={<TopicDashboard />}
+            />
+            <Route
+              path="/subjects/:subject_id/topics/:topic_id/questions"
+              element={<QuestionDashboard />}
+            />
+            <Route
+              path="/subjects/:subject_id/topics"
+              element={<TopicsManager />}
+            />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 
