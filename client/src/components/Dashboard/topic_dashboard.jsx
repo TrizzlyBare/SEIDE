@@ -17,7 +17,7 @@ const TopicDashboard = () => {
   const fetchTopics = async () => {
     try {
       setIsLoading(true);
-      console.log("Fetching topics for subject_id:", subject_id); // Debug log
+      console.log("Fetching topics for subject_id:", subject_id);
 
       const response = await fetch("http://localhost:8000/topics/", {
         method: "GET",
@@ -31,18 +31,21 @@ const TopicDashboard = () => {
       }
 
       const data = await response.json();
-      console.log("All topics data:", data); // Debug log
+      console.log("All topics data:", data);
 
-      // Make sure subject_id is treated as a number for comparison
+      // Convert subject_id from URL to number and subtract 1 to match zero-based index
       const subjectIdNum = parseInt(subject_id);
-      console.log("Looking for topics with subject_id:", subjectIdNum); // Debug log
+      console.log("Looking for topics with subject_id:", subjectIdNum);
 
+      // Filter topics making sure we handle both zero-based and one-based IDs
       const subjectTopics = data.filter(topic => {
-        console.log("Comparing topic subject_id:", topic.subject_id, "with:", subjectIdNum);
-        return topic.subject_id === subjectIdNum;
+        const topicSubjectId = topic.subject_id;
+        console.log("Comparing topic subject_id:", topicSubjectId, "with:", subjectIdNum);
+        // Check both the direct ID and adjusted ID to handle both cases
+        return topicSubjectId === subjectIdNum || topicSubjectId === (subjectIdNum - 1);
       });
 
-      console.log("Filtered topics:", subjectTopics); // Debug log
+      console.log("Filtered topics:", subjectTopics);
       setTopics(subjectTopics);
     } catch (error) {
       console.error("Failed to fetch topics:", error);
@@ -81,7 +84,7 @@ const TopicDashboard = () => {
         ) : (
           <SubjectList>
             {topics.map((topic) => (
-              <Subject key={topic.id || `topic-${topic.topic_name}`}>
+              <Subject key={topic.topic_id || `topic-${topic.topic_name}`}>
                 {topic.topic_name || 'Unnamed Topic'}
               </Subject>
             ))}

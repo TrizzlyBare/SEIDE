@@ -35,17 +35,16 @@ const Dashboard = () => {
       }
 
       const data = await response.json();
-      console.log("Raw subjects data:", data); // Debug log for raw data
+      console.log("Raw subjects data:", data);
 
       if (Array.isArray(data)) {
         const enrichedData = data.map((subject, index) => {
-          // Log each subject to debug
           console.log("Processing subject:", subject);
           
           return {
             ...subject,
-            // Fallback to index if id is undefined
-            id: subject.id || index,
+            // Use subject_id instead of id to match Admin.jsx
+            id: subject.subject_id || index + 1, // Adding 1 to match the 1-based IDs
             subject_name: subject.subject_name || 'Unnamed Subject',
             subcategories: Array.isArray(subject.subcategories)
               ? subject.subcategories.map((subcategory, subIndex) => ({
@@ -57,7 +56,7 @@ const Dashboard = () => {
           };
         });
         
-        console.log("Enriched data:", enrichedData); // Debug log for processed data
+        console.log("Enriched data:", enrichedData);
         setSubjects(enrichedData);
       } else {
         console.error("Fetched data is not an array:", data);
@@ -76,16 +75,17 @@ const Dashboard = () => {
   }, []);
 
   const handleSubjectClick = (subject) => {
-    console.log("Clicked subject:", subject); // Debug log
+    console.log("Clicked subject:", subject);
     setExpandedSubject(expandedSubject === subject.id ? null : subject.id);
   };
 
   const handleSubjectNavigate = (subject) => {
-    console.log("Navigating to subject:", subject); // Debug log
+    console.log("Navigating to subject:", subject);
     if (subject.id === undefined) {
       console.error("Subject ID is undefined:", subject);
       return;
     }
+    // Using the subject.id which now matches Admin.jsx's subject_id
     navigate(`/subjects/${subject.id}/topics`);
   };
 
@@ -104,11 +104,10 @@ const Dashboard = () => {
         ) : (
           <SubjectList>
             {subjects.map((subject, index) => {
-              // Debug log for rendering
               console.log("Rendering subject:", subject);
               
               return (
-                <div key={`subject-${subject.id || index}`}>
+                <div key={`subject-${subject.id}`}>
                   <Subject>
                     <div
                       onClick={() => handleSubjectClick(subject)}
@@ -142,7 +141,7 @@ const Dashboard = () => {
                     <SubcategoryList>
                       {subject.subcategories.map((subcategory, subIndex) => (
                         <Subcategory
-                          key={`subcategory-${subject.id || index}-${subcategory.id || subIndex}`}
+                          key={`subcategory-${subject.id}-${subcategory.id || subIndex}`}
                           onClick={(event) => {
                             event.stopPropagation();
                             handleSubcategoryClick(

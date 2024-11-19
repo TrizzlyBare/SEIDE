@@ -14,7 +14,7 @@ import {
 } from "./admin_styles";
 
 const YEARS = ["Year 1", "Year 2", "Year 3", "Year 4"];
-const CURRENT_USER_ID = 1;
+const CURRENT_USER_ID = 0;
 
 const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
