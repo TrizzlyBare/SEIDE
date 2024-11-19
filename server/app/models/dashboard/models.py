@@ -1,6 +1,12 @@
 from typing import List
 from sqlalchemy import ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy_utils import ChoiceType
+import enum
+
+class QuestionType(enum.Enum):
+    HOMEWORK = "homework"
+    LAB = "lab"
 
 class Base(DeclarativeBase):
     pass
@@ -43,6 +49,11 @@ class Question(Base):
 
     question_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     question_text: Mapped[str] = mapped_column(String, nullable=False)
+    question_type: Mapped[str] = mapped_column(
+        ChoiceType(QuestionType, impl=String()),
+        nullable=False,
+        default=QuestionType.HOMEWORK
+    )
 
     topic_id: Mapped[int] = mapped_column(ForeignKey("topics_table.topic_id"))
     topic: Mapped["Topic"] = relationship("Topic", back_populates="questions")
