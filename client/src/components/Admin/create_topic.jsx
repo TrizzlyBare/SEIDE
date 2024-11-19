@@ -67,7 +67,7 @@ const TopicsGrid = styled.div`
   padding: 20px;
 `;
 
-const TopicBox = styled.div`
+const TopicsBox = styled.div`
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -120,6 +120,24 @@ const LoadingSpinner = styled.div`
   font-size: 16px;
   color: #666;
 `;
+
+// const TopicBox = styled.div`
+//   aspect-ratio: 1;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   border: 2px solid #e0e0e0;
+//   border-radius: 8px;
+//   cursor: pointer;
+//   font-size: 16px;
+//   color: #333;
+//   background: white;
+//   transition: all 0.2s ease;
+//   position: relative;
+//   padding: 15px;
+//   text-align: center;
+//   word-break: break-word;
+// `;
 
 const TopicsManager = () => {
   const [topics, setTopics] = useState([]);
@@ -256,6 +274,8 @@ const TopicsManager = () => {
           )}
         </TopicsGrid>
       )}
+
+    <TopicsBox onClick={() => setIsModalOpen(true)}><TopicsBox/>
     </TopicsContainer>
   );
 };

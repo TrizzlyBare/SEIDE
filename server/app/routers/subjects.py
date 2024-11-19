@@ -62,7 +62,6 @@ async def delete_subject(subject_id: int, db: Session = Depends(get_db)):
     if subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
     
-    # Delete all associated topics
     topics = db.query(Topic).filter(Topic.subject_id == subject_id).all()
     for topic in topics:
         db.delete(topic)
@@ -82,3 +81,13 @@ async def create_topic(subject_id: int, topic: TopicCreate, db: Session = Depend
 @router.get("/subjects/{subject_id}/topics", response_model=List[TopicResponse])
 async def read_topics(subject_id: int, db: Session = Depends(get_db)):
     return db.query(Topic).filter(Topic.subject_id == subject_id).all()
+
+@router.delete("/subjects/{subject_id}/topics/{topic_id}")
+async def delete_topic(subject_id: int, topic_id: int, db: Session = Depends(get_db)):
+    topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
+    if topic is None:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    db.delete(topic)
+    db.commit()
+    return {"message": "Topic deleted successfully"}

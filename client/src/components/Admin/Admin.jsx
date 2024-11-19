@@ -77,9 +77,8 @@ const Admin = () => {
     }
   };
 
-  // Fixed: Now passing subject_id instead of subject_name
   const handleSubjectClick = (subjectId) => {
-    navigate(`/admin/${subjectId}/create`); // Also fixed the route to match topics management
+    navigate(`/admin/${subjectId}/create`);
   };
 
   const handleFormSubmit = async (e) => {
