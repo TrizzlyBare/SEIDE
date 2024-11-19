@@ -54,15 +54,17 @@ class TestCaseResponse(BaseModel):
 
 @router.get("/questions/", response_model=List[QuestionResponse])
 async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
+    logging.info(f"Fetching questions with topic_id={topic_id}")
     query = db.query(Question).options(
         joinedload(Question.answers),
         joinedload(Question.test_cases)
     )
-    
     if topic_id:
         query = query.filter(Question.topic_id == topic_id)
-    
-    return query.all()
+    result = query.all()
+    logging.info(f"Fetched questions: {result}")
+    return result
+
 
 @router.post("/questions/", response_model=QuestionResponse)
 async def create_question(question: QuestionCreate, db: Session = Depends(get_db)):

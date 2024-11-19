@@ -69,7 +69,7 @@ class TestCase(Base):
     expected_output: Mapped[str] = mapped_column(String, nullable=False)
     setup_script: Mapped[str] = mapped_column(String, nullable=False, default="#!/bin/bash\n\n")
     validation_script: Mapped[str] = mapped_column(String, nullable=False, 
-                                                default='diff <(echo "$expected") <(echo "$output")')
+                                                 default='diff <(echo "$expected") <(echo "$output")')
 
     question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
     question: Mapped["Question"] = relationship("Question", back_populates="test_cases")
