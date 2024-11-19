@@ -225,8 +225,7 @@ const TopicsManager = () => {
   };
 
   const handleTopicClick = (topicId) => {
-    // Updated navigation path to include both subject_id and topic_id
-    navigate(`/subjects/${subject_id}/topics/${topicId}/questions`);
+    navigate(`/admin/:subject_id/topics/:topic_id/questions/`);
   };
 
 
@@ -250,7 +249,7 @@ const TopicsManager = () => {
       setTopics(data.filter(topic => topic.subject_id === parseInt(subject_id)));
     } catch (error) {
       setError(error.message);
-      navigate('/admin'); // Redirect to admin on invalid access
+      navigate('/admin');
     } finally {
       setIsLoading(false);
     }

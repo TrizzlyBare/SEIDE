@@ -63,6 +63,11 @@ const TopicDashboard = () => {
     }
   }, [subject_id]);
 
+  const handleTopicClick = (topicId) => {
+    navigate(`/subjects/${subject_id}/topics/${topicId}/questions`);
+  };
+
+
   return (
     <Container>
       <Header>
@@ -87,7 +92,12 @@ const TopicDashboard = () => {
         ) : (
           <SubjectList>
             {topics.map((topic) => (
-              <Subject key={topic.topic_id}>{topic.topic_name}</Subject>
+              <Subject
+                key={topic.topic_id}
+                onClick={() => handleTopicClick(topic.topic_id)}
+              >
+                {topic.topic_name}
+              </Subject>
             ))}
           </SubjectList>
         )}
