@@ -15,22 +15,6 @@ const TopicsContainer = styled.div`
   justify-content: flex-start;
 `;
 
-const Title = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  color: #333;
-`;
-
-const TopicsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 1200px;
-  padding: 20px;
-`;
-
 const DeleteButton = styled.button`
   position: absolute;
   top: 5px;
@@ -72,6 +56,22 @@ const TopicBox = styled.div`
   &:hover ${DeleteButton} {
     opacity: 1;
   }
+`;
+
+const Title = styled.h1`
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+`;
+
+const TopicsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
 `;
 
 const AddTopicBox = styled(TopicBox)`
