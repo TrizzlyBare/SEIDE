@@ -10,6 +10,7 @@ import TopicsManager from "./components/Admin/topics_manager"; // Import the Top
 import QuestionManager from "./components/Admin/question_manager"; // Import the QuestionManager component
 import TopicDashboard from "./components/Dashboard/topic_dashboard"; // Updated path
 import Dashboard from "./components/Dashboard/Dashboard";
+import QuestionDashboard from "./components/Dashboard/question_dashboard";
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/subjects/:subject_id/topics/:topic_id/questions" element={<QuestionManager />} />
           <Route path="/subjects" element={<Dashboard />} />
           <Route path="/subjects/:subject_id/topics" element={<TopicDashboard />} />
+          <Route path="/questions" element={<QuestionDashboard />} />
           <Route
             path="/subjects/:subject_id/topics"
             element={<TopicsManager />}

@@ -43,7 +43,6 @@ const Dashboard = () => {
           
           return {
             ...subject,
-            // Use subject_id instead of id to match Admin.jsx
             id: subject.subject_id || index + 1, // Adding 1 to match the 1-based IDs
             subject_name: subject.subject_name || 'Unnamed Subject',
             subcategories: Array.isArray(subject.subcategories)
@@ -85,7 +84,6 @@ const Dashboard = () => {
       console.error("Subject ID is undefined:", subject);
       return;
     }
-    // Using the subject.id which now matches Admin.jsx's subject_id
     navigate(`/subjects/${subject.id}/topics`);
   };
 
