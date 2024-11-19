@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import NavBar from "./components/navBar/NavBar";
 import AuthPage from "./pages/AuthPage";
 import CodeEditorPage from "./pages/CodeEditorPage";
@@ -14,9 +19,12 @@ import QuestionDashboard from "./components/Dashboard/question_dashboard";
 import "./App.css";
 
 function App() {
+  const location = useLocation();
+  const hideNavBar = location.pathname === "/";
+
   return (
     <div className="app-container">
-      <NavBar />
+      {!hideNavBar && <NavBar />}
       <div className="content-container">
         <Routes>
           <Route path="/" element={<AuthPage />} />
@@ -24,15 +32,11 @@ function App() {
           <Route path="/editor" element={<CodeEditorPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          
-          {/* Admin routes */}
           <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
           <Route
             path="/admin/:subject_id/topics/:topic_id/questions"
             element={<QuestionManager />}
           />
-          
-          {/* User routes */}
           <Route path="/subjects" element={<Dashboard />} />
           <Route
             path="/subjects/:subject_id/topics"
