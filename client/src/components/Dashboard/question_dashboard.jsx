@@ -65,48 +65,40 @@ const QuestionItem = styled.li`
   }
 `;
 
-const DashboardHome = () => {
-  const [labQuestions, setLabQuestions] = useState([
-    {
-      id: 1,
-      title: "Lab 1: Data Structures Implementation",
-      dueDate: "2024-11-25",
-      status: "pending",
-    },
-    {
-      id: 2,
-      title: "Lab 2: Algorithm Analysis",
-      dueDate: "2024-11-28",
-      status: "completed",
-    },
-    {
-      id: 3,
-      title: "Lab 3: Database Design",
-      dueDate: "2024-12-01",
-      status: "pending",
-    },
-  ]);
+const QuestionDashboard = () => {
+  const [questions, setQuestions] = useState({
+    labs: [],
+    homework: [],
+  });
 
-  const [homeworkQuestions, setHomeworkQuestions] = useState([
-    {
-      id: 1,
-      title: "Homework 1: Programming Fundamentals",
-      dueDate: "2024-11-24",
-      status: "pending",
-    },
-    {
-      id: 2,
-      title: "Homework 2: Object-Oriented Design",
-      dueDate: "2024-11-27",
-      status: "pending",
-    },
-    {
-      id: 3,
-      title: "Homework 3: Web Development Basics",
-      dueDate: "2024-11-30",
-      status: "completed",
-    },
-  ]);
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch("/questions/");
+        const questionsData = await response.json();
+
+        const formattedQuestions = questionsData.map((q) => ({
+          id: q.question_id,
+          title: q.question_text,
+          answers: q.answers,
+          testCases: q.test_cases,
+          topic_id: q.topic_id,
+          status: "pending", // You might want to check DoneQuestion table
+        }));
+
+        // Split between labs and homework based on topic association
+        // You might want to adjust this logic based on your data structure
+        setQuestions({
+          labs: formattedQuestions.filter((q) => q.topic_id % 2 === 0), // Example split
+          homework: formattedQuestions.filter((q) => q.topic_id % 2 === 1),
+        });
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   return (
     <DashboardContainer>
@@ -118,10 +110,11 @@ const DashboardHome = () => {
         <Card>
           <CardTitle>Labs</CardTitle>
           <QuestionList>
-            {labQuestions.map((question) => (
+            {questions.labs.map((question) => (
               <QuestionItem key={question.id}>
                 <h3>{question.title}</h3>
-                <p>Due: {new Date(question.dueDate).toLocaleDateString()}</p>
+                <p>Number of Test Cases: {question.testCases.length}</p>
+                <p>Number of Answers: {question.answers.length}</p>
                 <p>Status: {question.status}</p>
               </QuestionItem>
             ))}
@@ -131,10 +124,11 @@ const DashboardHome = () => {
         <Card>
           <CardTitle>Homework</CardTitle>
           <QuestionList>
-            {homeworkQuestions.map((question) => (
+            {questions.homework.map((question) => (
               <QuestionItem key={question.id}>
                 <h3>{question.title}</h3>
-                <p>Due: {new Date(question.dueDate).toLocaleDateString()}</p>
+                <p>Number of Test Cases: {question.testCases.length}</p>
+                <p>Number of Answers: {question.answers.length}</p>
                 <p>Status: {question.status}</p>
               </QuestionItem>
             ))}
@@ -145,4 +139,4 @@ const DashboardHome = () => {
   );
 };
 
-export default DashboardHome;
+export default QuestionDashboard;
