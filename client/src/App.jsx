@@ -6,8 +6,10 @@ import CodeEditorPage from "./pages/CodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
-import TopicsManager from "./components/Admin/topics_manager"; // Import the TopicsManager component
-import "./App.css"; // Import the CSS file
+import TopicsManager from "./components/Admin/topics_manager";
+import Dashboard from "./components/Dashboard/Dashboard"; // Updated path
+import TopicDashboard from "./components/Dashboard/topic_dashboard"; // Updated path
+import "./App.css";
 
 function App() {
   return (
@@ -21,11 +23,14 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/:subject_id/create" element={<TopicsManager />} />
-          <Route
-            path="admin/subjects/:subject_id/topics"
-            element={<TopicsManager />}
-          />{" "}
-          {/* Add this route */}
+          <Route path="/admin/subjects/:subject_id/topics" element={<TopicsManager />} />
+          
+          {/* Dashboard routes */}
+          <Route path="/subjects" element={<Dashboard />} />
+          <Route path="/subjects/:subject_id/topics" element={<TopicDashboard />} />
+          
+          {/* 404 route */}
+          <Route path="*" element={<div>Page not found</div>} />
         </Routes>
       </div>
     </div>
