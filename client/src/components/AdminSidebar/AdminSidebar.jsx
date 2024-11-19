@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/AdminSidebar.css";
 import logo from "./se_logo.png";
@@ -9,6 +9,7 @@ import logoutlogo from "./Logout.png"; // Ensure this path is correct
 const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeLink, setActiveLink] = useState("");
+  const [email, setEmail] = useState("");
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -19,11 +20,36 @@ const AdminSidebar = () => {
     setActiveLink(href);
   };
 
+  const checkLogin = async () => {
+    const token = localStorage.getItem("token");
+    console.log(token);
+    if (!token) {
+      window.location.href = "/signin";
+    }
+    fetch("http://localhost:8000/api/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,  // Use the token stored in localStorage
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setEmail(data.email);
+      })
+      .catch((error) => console.error("Error:", error));
+    
+  }
+
   const handleSearchFocus = () => {
     if (isCollapsed) {
       setIsCollapsed(false);
     }
   };
+
+  useEffect(() => {
+    checkLogin();
+  } , []);
 
   return (
     <nav className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
@@ -84,6 +110,45 @@ const AdminSidebar = () => {
               <span className="tooltip-content">Code Editor</span>
             </Link>
           </li>
+          <li>
+            <Link
+              to="/admin"
+              title="Admin"
+              className={`tooltip ${activeLink === "/admin" ? "active" : ""}`}
+              onClick={() => handleLinkClick("/admin")}
+            >
+              {/* Code Editor icon */}
+              {/* <img src={htmllogo} alt="editor" /> */}
+              <span className="link hide">Admin</span>
+              <span className="tooltip-content">Admin</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/answers"
+              title="Answers"
+              className={`tooltip ${activeLink === "/answers" ? "active" : ""}`}
+              onClick={() => handleLinkClick("/answers")}
+            >
+              {/* Code Editor icon */}
+              {/* <img src={htmllogo} alt="editor" /> */}
+              <span className="link hide">Answers</span>
+              <span className="tooltip-content">Answers</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/questions"
+              title="Questions"
+              className={`tooltip ${activeLink === "/questions" ? "active" : ""}`}
+              onClick={() => handleLinkClick("/questions")}
+            >
+              {/* Code Editor icon */}
+              {/* <img src={htmllogo} alt="editor" /> */}
+              <span className="link hide">Questions</span>
+              <span className="tooltip-content">Questions</span>
+            </Link>
+          </li>
         </ul>
       </div>
 
@@ -104,7 +169,7 @@ const AdminSidebar = () => {
           </div>
           <section className="avatar-name hide">
             <div className="username">John Doe</div>
-            <div className="email">john.doe@gmail.com</div>
+            <div className="email">{email}</div>
           </section>
         </Link>
         <Link

@@ -9,6 +9,10 @@ import HomePage from "./pages/Homepage";
 import SignUpPage from "./pages/SignUpPage";
 import SignInPage from "./pages/SignInPage";
 import CreateTopic from "./components/Admin/create_topic";
+import AdminQuestion from "./components/Admin/create_question";
+import QuestionPage from "./pages/QuestionsPage";
+import AnswersPage from "./pages/AdminAnswers";
+import Dashboard from "./components/Dashboard/Dashboard";
 import "./App.css"; // Import the CSS file
 
 function App() {
@@ -23,8 +27,12 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/create_topic" element={<CreateTopic />} />
+          <Route path="/admin/create_question" element={<AdminQuestion />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/questions" element={<QuestionPage />} />
+          <Route path="/answers" element={<AnswersPage />} />
         </Routes>
       </div>
     </div>

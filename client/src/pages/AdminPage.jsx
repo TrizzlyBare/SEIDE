@@ -37,8 +37,29 @@ const AdminPage = () => {
     }
   };
 
+  const checkLogin = async () => {
+    const token = localStorage.getItem("token");
+    console.log(token);
+    if (!token) {
+      window.location.href = "/signin";
+    }
+    fetch("http://localhost:8000/api/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // Use the token stored in localStorage
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => {
+        console.error("Error:", error);
+        window.location.href = "/signin";
+      });
+  };
+
   useEffect(() => {
     fetchSubjects();
+    checkLogin();
   }, []);
 
   return (
@@ -55,7 +76,12 @@ const AdminPage = () => {
           <ul>
             {subjects.map((subject, index) => (
               <li key={subject.id || index}>
-                {subject.subject_name} {/* Display the subject name correctly */}
+              <a
+                href={`/admin/create_topic?id=${subject.id}`}
+                key={subject.id || index}
+              >
+                {subject.subject_name}
+              </a>
               </li>
             ))}
           </ul>

@@ -54,12 +54,13 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        print(payload)
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except jwt.JWTError:
         raise credentials_exception
-    user = db.query(_models.User).filter(_models.User.id == user_id).first()
+    user = db.query(_models.User).filter(_models.User.email == user_id).first()
     if user is None:
         raise credentials_exception
     return user

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { createTopic, getTopics } from "../../api"; // Assuming the API method for topics is createTopic
+import { createQuestion, getQuestions } from "../../api"; // Assuming the API method for topics is createTopic
 import { useLocation } from "react-router-dom";
 
 const AdminContainer = styled.div`
@@ -34,10 +34,14 @@ const Form = styled.form`
   margin-bottom: 20px;
 `;
 
-const Input = styled.input`
+const Textarea = styled.textarea`
   padding: 10px;
   margin-bottom: 10px;
   font-size: 16px;
+  resize: vertical; /* Allow resizing vertically only */
+  min-height: 80px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 `;
 
 const Button = styled.button`
@@ -53,9 +57,9 @@ const Button = styled.button`
   }
 `;
 
-const Admin = ({ addTopic }) => {
+const AdminQuestion = ({ addTopic }) => {
   const [newTopic, setNewTopic] = useState("");
-  const [topics, setTopics] = useState([]);
+  const [question, setQuestion] = useState([]);
   const location = useLocation();
 
   // Extract the "id" from the query string
@@ -66,22 +70,6 @@ const Admin = ({ addTopic }) => {
 
   const id = getIdFromQuery(); // Get the ID from the URL query
 
-  const fetchTopics = async () => {
-    try {
-      console.log("Fetching topics...");
-      const data = await getTopics(id);
-      console.log("Fetched data:", data);
-      if (Array.isArray(data)) {
-        setTopics(data);
-      } else {
-        console.error("Fetched data is not an array", data);
-        setTopics([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch topics", error);
-      setTopics([]);
-    }
-  };
 
   const checkLogin = async () => {
     const token = localStorage.getItem("token");
@@ -94,8 +82,7 @@ const Admin = ({ addTopic }) => {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`, // Use the token stored in localStorage
       },
-    })
-      .then((response) => response.json())
+    }).then((response) => response.json())
       .then((data) => console.log(data))
       .catch((error) => {
         console.error("Error:", error);
@@ -107,7 +94,6 @@ const Admin = ({ addTopic }) => {
     if (id) {
       console.log("Received ID:", id);
     }
-    fetchTopics();
     checkLogin();
   }, [id]);
 
@@ -119,10 +105,11 @@ const Admin = ({ addTopic }) => {
     e.preventDefault();
     if (newTopic.trim() !== "") {
       try {
-        await createTopic(id,newTopic);
+        await createQuestion(id,newTopic);
         setNewTopic("");
-        alert("Topic added successfully");
+        alert("Question added successfully");
         addTopic();
+        window.location.href = `/admin`;
       } catch (error) {
         console.error("Failed to add topic", error);
       }
@@ -134,29 +121,16 @@ const Admin = ({ addTopic }) => {
       <Title>Admin Page</Title>
       <Content>
         <Form onSubmit={handleFormSubmit}>
-          <Input
-            type="text"
-            placeholder="Enter new topic"
+          <Textarea
+            placeholder="Enter the question"
             value={newTopic}
             onChange={handleInputChange}
           />
-          <Button type="submit">Add Topic</Button>
+          <Button type="submit">Add Question</Button>
         </Form>
-        <div>
-        <h2>Topics List</h2>
-        <ul>
-          {topics.map((topic) => (
-            <li key={topic.id}>
-              <a href={`/admin/create_question?id=${topic.topic_id}`}>
-                {topic.topic_name}
-                </a>
-              </li>
-          ))}
-        </ul>
-      </div>
       </Content>
     </AdminContainer>
   );
 };
 
-export default Admin;
+export default AdminQuestion;

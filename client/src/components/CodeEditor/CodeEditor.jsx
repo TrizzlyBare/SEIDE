@@ -5,12 +5,22 @@ import { CODE_SNIPPETS } from "../../middleware/constants";
 import Output from "./Output";
 import "../../styles/CodeEditorPage.css";
 import styled from "styled-components";
+import {createAnswer} from "../../api";
 
 const CodeEditor = () => {
   const editorRef = useRef();
   const [value, setValue] = useState("");
   const [language, setLanguage] = useState("javascript");
   const [textInput, setTextInput] = useState(""); // State for the problem description
+
+
+  const getQuestionIdFromQuery = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get("question_id");
+  };
+
+  const questionId = getQuestionIdFromQuery();
+
 
   const onMount = (editor) => {
     editorRef.current = editor;
@@ -25,6 +35,19 @@ const CodeEditor = () => {
   const handleTextInputChange = (e) => {
     setTextInput(e.target.value);
   };
+
+  const submitCode = () => {
+    const code = editorRef.current.getValue();
+    const data = {
+      answer_text: code,
+      is_correct: true,
+      question_id: questionId,
+    }
+    createAnswer(data)
+
+    window.location.href = "/admin/aswers";
+
+  }
 
   return (
     <div className="main-container">
@@ -54,6 +77,12 @@ const CodeEditor = () => {
             onMount={onMount}
           />
           <Output editorRef={editorRef} language={language} />
+
+          <div>
+            <button className="submit-button" onClick={submitCode}>
+              Submit
+            </button>
+          </div>
         </div>
       </div>
     </div>

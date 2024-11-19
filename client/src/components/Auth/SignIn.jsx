@@ -65,6 +65,7 @@ const SignIn = () => {
           console.log(data);
           window.localStorage.setItem("token", data.access_token);
           setToken(data.access_token); // Store JWT token in context
+          window.location.href = "/";
         }
       } catch (error) {
         console.error("Login error:", error);

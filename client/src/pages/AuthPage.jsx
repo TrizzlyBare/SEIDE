@@ -37,31 +37,26 @@ const AdminPage = () => {
     }
   };
 
-  const checkLogin = () => {
-    console.log(window.localStorage.getItem("token"));
-    if (!localStorage.getItem("token")) {
-      window.location.href = "/login";
-    } else {
-      print("Checking login status");
-      fetch(
-        "http://localhost:8000/api/users/me",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${window.localStorage.getItem("token")}`,
-          },
-          
-        } 
-      ).then((response) => {
-          if (!response.ok) {
-            window.location.href = "/login";
-          }
-        })
-        .catch((error) => {
-          console.error("Error checking login status:", error);
-          window.location.href = "/login";
-        });
+  const checkLogin = async () => {
+    const token = localStorage.getItem("token");
+    console.log(token);
+    if (!token) {
+      window.location.href = "/signin";
     }
+    fetch("http://localhost:8000/api/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,  // Use the token stored in localStorage
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => {
+        console.error("Error:", error);
+        window.location.href = "/signin";
+
+      });
+    
   }
 
   useEffect(() => {

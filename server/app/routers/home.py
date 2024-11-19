@@ -101,9 +101,16 @@ async def create_question(question: QuestionCreate, db: Session = Depends(get_db
     db.refresh(db_question)
     return db_question
 
-@router.get("/questions/")
+@router.get("/questionss/")
 async def read_questions(db: Session = Depends(get_db)):
     return db.query(Question).all()
+
+# get questions by question id
+@router.get("/questions/{question_id}")
+async def read_questions(question_id: int, db: Session = Depends(get_db)):
+    return db.query(Question).filter(Question.question_id == question_id).first()
+
+
 
 @router.post("/answers/", response_model=AnswerCreate)
 async def create_answer(answer: AnswerCreate, db: Session = Depends(get_db)):

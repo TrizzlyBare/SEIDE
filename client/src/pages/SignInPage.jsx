@@ -5,7 +5,8 @@ function SignInPage() {
 
 
   return (
-<><SignIn  /></>
+<><SignIn  />
+</>
   );
 }
 

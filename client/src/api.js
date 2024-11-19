@@ -84,7 +84,10 @@ export const getSubjects = async() => {
 
 // Topic endpoints
 export const createTopic = async(subjectId, topicData) => {
-    return apiCall("post", `${API_URL}/subjects/${subjectId}/topics/`, topicData);
+    return apiCall("post", `${API_URL}/topics/`, {
+        subject_id: subjectId,
+        topic_name: topicData,
+    });
 };
 
 export const getTopics = async(subjectId) => {
@@ -93,16 +96,31 @@ export const getTopics = async(subjectId) => {
 
 // Question endpoints
 export const createQuestion = async(topicId, questionData) => {
-    return apiCall("post", `${API_URL}/subjects/topics/${topicId}/questions/`, questionData);
+    return apiCall("post", `${API_URL}/questions/`, {
+        topic_id: topicId,
+        question_text: questionData,
+    });
 };
 
 export const getQuestions = async(topicId) => {
     return apiCall("get", `${API_URL}/subjects/topics/${topicId}/questions/`);
 };
 
+export const getQuestionById = async(questionId) => {
+    return apiCall("get", `${API_URL}/questions/${questionId}`);
+};
+
+export const getAllQuestions = async() => {
+    return apiCall("get", `${API_URL}/questionss/`);
+};
+
 // Answer endpoints
-export const createAnswer = async(questionId, answerData) => {
-    return apiCall("post", `${API_URL}/questions/${questionId}/answers/`, answerData);
+export const createAnswer = async(answerData) => {
+    return apiCall("post", `${API_URL}/answers/`, answerData);
+};
+
+export const getAllAnswers = async() => {
+    return apiCall("get", `${API_URL}/answers/`);
 };
 
 export const getAnswers = async(questionId) => {
