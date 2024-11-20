@@ -17,7 +17,7 @@
   .content__cover {
     position: relative;
     height: 200px;
-    background: linear-gradient(to right, #4a90e2, #63b3ed);
+    background: linear-gradient(to right, #333, #112d4e);
     border-radius: 1rem 1rem 0 0;
     margin: -2rem -2rem 0;
   }

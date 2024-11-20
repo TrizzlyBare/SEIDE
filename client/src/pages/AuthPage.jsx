@@ -24,6 +24,10 @@ const UserRole = {
   ADMIN: "ADMIN",
 };
 
+const LogoImage = ({ src, alt }) => (
+  <img src={src} alt={alt} style={{ width: '80%', maxWidth: '200px', margin: '0 auto' }} />
+);
+
 const AuthPage = () => {
   const [signingIn, setSigningIn] = useState(true);
   const [email, setEmail] = useState("");
@@ -299,14 +303,20 @@ const AuthPage = () => {
       <OverlayContainer signingIn={signingIn}>
         <Overlay signingIn={signingIn}>
           <LeftOverlayPanel signingIn={signingIn}>
-            <Title>Welcome Back!</Title>
+          <LogoImage
+          src="https://www.se.kmitl.ac.th/assets/se.png"
+          alt="Logo"
+        />
             <Paragraph>
               To keep connected with us, please login with your personal info
             </Paragraph>
             <Button onClick={() => handleOverlayClick(true)}>Sign In</Button>
           </LeftOverlayPanel>
           <RightOverlayPanel signingIn={signingIn}>
-            <Title>Hello, Friend!</Title>
+          <LogoImage
+          src="https://www.se.kmitl.ac.th/assets/se.png"
+          alt="Logo"
+        />
             <Paragraph>
               Enter your personal details and start your journey with us
             </Paragraph>

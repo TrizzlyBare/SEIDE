@@ -16,6 +16,7 @@ const NavBar = () => {
         <BaseLink to="/curriculum">Program</BaseLink>
         <BaseLink to="/editor">Code Editor</BaseLink>
         <ProfileLink to="/profile">Profile</ProfileLink>
+        <BaseLink to="/">Log out</BaseLink>
       </NavLinks>
     </HeaderContainer>
   );
