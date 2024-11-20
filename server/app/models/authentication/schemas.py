@@ -1,38 +1,48 @@
-import datetime as _dt
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+from enum import Enum
 
-class _UserBase(BaseModel):
+class UserRole(str, Enum):
+    YEAR1 = "YEAR1"
+    YEAR2 = "YEAR2"
+    YEAR3 = "YEAR3"
+    YEAR4 = "YEAR4"
+    ADMIN = "ADMIN"
+
+class UserBase(BaseModel):
     email: EmailStr
 
-class UserCreate(_UserBase):
+class UserCreate(UserBase):
     password: str
-
-class User(_UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class _LeadBase(BaseModel):
     first_name: str
     last_name: str
-    email: EmailStr
-    company: str
-    note: str
+    year: int
+    role: UserRole = UserRole.YEAR1
 
-class LeadCreate(_LeadBase):
-    pass
-
-class Lead(_LeadBase):
+class User(UserBase):
     id: int
-    owner_id: int
-    date_created: _dt.datetime
-    date_last_updated: _dt.datetime
+    first_name: str
+    last_name: str
+    year: int
+    role: UserRole
 
     class Config:
         orm_mode = True
+class Lead(BaseModel):
+    id: int
+    owner_id: int
+    first_name: str
+    last_name: str
+    email: str
+    company: Optional[str] = ""
+    note: Optional[str] = ""
+
+    class Config:
+        orm_mode = True
+
+class LeadCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    company: Optional[str] = ""
+    note: Optional[str] = ""

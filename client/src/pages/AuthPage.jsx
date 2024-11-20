@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -14,56 +14,136 @@ import {
   LeftOverlayPanel,
   RightOverlayPanel,
 } from "../components/Auth/Components";
+import { UserContext } from "../components/Context/UserContext";
+
+const UserRole = {
+  YEAR1: "YEAR1",
+  YEAR2: "YEAR2",
+  YEAR3: "YEAR3",
+  YEAR4: "YEAR4",
+  ADMIN: "ADMIN",
+};
 
 const AuthPage = () => {
-  const [signingIn, setSigningIn] = useState(true); // Toggle between Sign-In and Sign-Up
+  const [signingIn, setSigningIn] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [Year, setYear] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [year, setYear] = useState("1");
   const [loading, setLoading] = useState(false);
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const initializeAdmin = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/initialize-admin", {
+          method: "POST",
+        });
+        if (!response.ok) {
+          console.error("Failed to initialize admin");
+        } else {
+          const data = await response.json();
+          console.log("Admin initialization response:", data);
+        }
+      } catch (error) {
+        console.error("Admin initialization error:", error);
+      }
+    };
+
+    initializeAdmin();
+  }, []);
+
+  const getRoleFromYear = (year) => {
+    return UserRole[`YEAR${year}`] || UserRole.YEAR1;
+  };
+
+  const handleRoleBasedNavigation = (role) => {
+    console.log("Navigating based on role:", role);
+    // if (UserRole.ADMIN === "ADMIN") {
+    //   navigate("/admin");
+    // } else if (
+    //   UserRole.YEAR1 === "YEAR1" ||
+    //   UserRole.YEAR2 === "YEAR2" ||
+    //   UserRole.YEAR3 === "YEAR3" ||
+    //   UserRole.YEAR4 === "YEAR4"
+    // ) {
+    //   navigate("/home");
+    // } else {
+    //   throw new Error("Invalid role received from server");
+    // }
+    switch (role) {
+      case UserRole.ADMIN:
+        navigate("/admin");
+        console.log("Navigating to admin");
+        break;
+      case UserRole.YEAR1:
+      case UserRole.YEAR2:
+      case UserRole.YEAR3:
+      case UserRole.YEAR4:
+        navigate("/home");
+        break;
+      default:
+        throw new Error("Invalid role received from server");
+    }
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
+      const signUpData = {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+        year: parseInt(year),
+        role: getRoleFromYear(year),
+      };
+
       const response = await fetch("http://localhost:8000/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify(signUpData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Sign Up failed");
+        throw new Error(data.detail || "Sign Up failed");
       }
 
+      // Store token
+      localStorage.setItem("access_token", data.token.access_token);
+
+      // Set user in context with all data from response
+      setUser({
+        id: data.user.id,
+        email: data.user.email,
+        first_name: data.user.first_name,
+        last_name: data.user.last_name,
+        year: data.user.year,
+        role: data.user.role,
+      });
+
       alert("Sign Up successful!");
-      setSigningIn(true); // Toggle to SignIn form
+      navigate("/");
     } catch (error) {
-      console.error("Sign Up failed:", error.message);
-      alert("Sign Up failed: Something went wrong");
+      console.error("Sign Up failed:", error);
+      alert(error.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
-      if (email === "admin@testing.com" && password === "admin") {
-        alert("Admin Sign In successful!");
-        navigate("/admin");
-        return;
-      }
-
+      // First try to authenticate
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
@@ -76,68 +156,72 @@ const AuthPage = () => {
         body: formData.toString(),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Sign In failed: Invalid Credentials");
+        throw new Error(data.detail || "Authentication failed");
       }
 
-      const data = await response.json();
+      // Store token
       localStorage.setItem("access_token", data.access_token);
-      alert("Sign In successful!");
-      navigate("/home");
+
+      // User data should now be included in the token response
+      setUser({
+        id: data.user.id,
+        email: data.user.email,
+        first_name: data.user.first_name,
+        last_name: data.user.last_name,
+        year: data.user.year,
+        role: data.role,
+      });
+
+      console.log("User authenticated successfully:", data);
+
+      // Optional: Verify role access
+      const roleCheckResponse = await fetch(
+        "http://localhost:8000/api/role-check",
+        {
+          headers: {
+            Authorization: `Bearer ${data.access_token}`,
+          },
+        }
+      );
+
+      if (!roleCheckResponse.ok) {
+        throw new Error("Failed to verify role access");
+      }
+
+      const roleData = await roleCheckResponse.json();
+
+      console.log("Role check response:", roleData);
+
+      handleRoleBasedNavigation(roleData.role);
     } catch (error) {
-      console.error("Sign In failed:", error.message);
-      alert("Sign In failed: Invalid Credentials");
+      console.error("Sign In failed:", error);
+      alert(error.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
-  const callApiWithToken = async (token) => {
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    };
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setFirstName("");
+    setLastName("");
+    setYear("1");
+  };
 
-    try {
-      const response = await fetch(
-        "http://localhost:8000/api/protected-endpoint",
-        requestOptions
-      );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      console.log("API call successful:", data);
-      // Handle the data from the API call
-    } catch (error) {
-      console.error("API call failed:", error);
-      alert("API call failed: " + error.message);
-    }
+  const handleOverlayClick = (isSignIn) => {
+    setSigningIn(isSignIn);
+    resetForm();
   };
 
   return (
     <Container>
-      {/* SignUpContainer: Only passes 'signingIn' prop to styled-components */}
       <SignUpContainer signingIn={signingIn}>
         <Form onSubmit={handleSignUp}>
           <Title>Create Account</Title>
-          <Input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="SurName"
-            value={surname}
-            onChange={(e) => setSurname(e.target.value)}
-            required
-          />
           <Input
             type="email"
             placeholder="Email"
@@ -152,11 +236,31 @@ const AuthPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <Input
+            type="text"
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+          <Input
+            type="text"
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
           <select
-            id="year"
-            name="year"
-            value={Year}
+            value={year}
             onChange={(e) => setYear(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 15px",
+              margin: "8px 0",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+            }}
+            required
           >
             <option value="1">Year 1</option>
             <option value="2">Year 2</option>
@@ -169,7 +273,6 @@ const AuthPage = () => {
         </Form>
       </SignUpContainer>
 
-      {/* SignInContainer: Only passes 'signingIn' prop to styled-components */}
       <SignInContainer signingIn={signingIn}>
         <Form onSubmit={handleSignIn}>
           <Title>Sign In</Title>
@@ -193,7 +296,6 @@ const AuthPage = () => {
         </Form>
       </SignInContainer>
 
-      {/* OverlayContainer: Only passes 'signingIn' prop to styled-components */}
       <OverlayContainer signingIn={signingIn}>
         <Overlay signingIn={signingIn}>
           <LeftOverlayPanel signingIn={signingIn}>
@@ -201,14 +303,14 @@ const AuthPage = () => {
             <Paragraph>
               To keep connected with us, please login with your personal info
             </Paragraph>
-            <Button onClick={() => setSigningIn(true)}>Sign In</Button>
+            <Button onClick={() => handleOverlayClick(true)}>Sign In</Button>
           </LeftOverlayPanel>
           <RightOverlayPanel signingIn={signingIn}>
             <Title>Hello, Friend!</Title>
             <Paragraph>
               Enter your personal details and start your journey with us
             </Paragraph>
-            <Button onClick={() => setSigningIn(false)}>Sign Up</Button>
+            <Button onClick={() => handleOverlayClick(false)}>Sign Up</Button>
           </RightOverlayPanel>
         </Overlay>
       </OverlayContainer>
