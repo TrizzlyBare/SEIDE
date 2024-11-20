@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 import logging
@@ -14,6 +15,19 @@ class QuestionCreate(BaseModel):
     question_text: str
     topic_id: int
     question_type: str #will be either "homework" or "lab"
+    language: str
+    due_date: Optional[str] = None
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "question_text": "Sample question",
+                "topic_id": 1,
+                "question_type": "homework",
+                "language": "python",
+                "due_date": "2024-03-21T15:30:00Z"
+            }
+        }
 
 class AnswerCreate(BaseModel):
     answer_text: str
@@ -30,6 +44,8 @@ class QuestionResponse(BaseModel):
     question_text: str
     topic_id: int
     question_type: str
+    language: str
+    due_date: Optional[datetime]
     answers: List['AnswerResponse']
     test_cases: List['TestCaseResponse']
 
@@ -53,6 +69,20 @@ class TestCaseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DoneQuestionCreate(BaseModel):
+    user_id: int
+    is_correct: bool
+
+class DoneQuestionResponse(BaseModel):
+    done_question_id: int
+    question_id: int
+    user_id: int
+    is_correct: bool
+    submitted_at: datetime
+
+    class Config:
+        orm_mode = True
 
 @router.get("/questions/", response_model=List[QuestionResponse])
 async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
@@ -127,22 +157,60 @@ async def create_topic_question(
     question: QuestionCreate, 
     db: Session = Depends(get_db)
 ):
-    # Validate question type
-    if question.question_type not in ["homework", "lab"]:
+    try:
+        # Validate question type
+        if question.question_type not in ["homework", "lab"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Question type must be either 'homework' or 'lab'"
+            )
+
+        # Verify topic exists
+        topic = db.query(Topic).filter(
+            Topic.topic_id == topic_id,
+            Topic.subject_id == subject_id
+        ).first()
+        
+        if not topic:
+            raise HTTPException(
+                status_code=404,
+                detail="Topic not found or does not belong to the specified subject"
+            )
+
+        # Parse the due_date string to datetime object if it exists
+        due_date = None
+        if question.due_date:
+            try:
+                # Remove the 'Z' and milliseconds if present
+                clean_date = question.due_date.replace('Z', '').split('.')[0]
+                due_date = datetime.strptime(clean_date, "%Y-%m-%dT%H:%M:%S")
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid date format. Expected format: YYYY-MM-DDTHH:MM:SS"
+                )
+
+        db_question = Question(
+            question_text=question.question_text,
+            topic_id=topic_id,
+            question_type=question.question_type,
+            language=question.language,
+            due_date=due_date
+        )
+        
+        db.add(db_question)
+        db.commit()
+        db.refresh(db_question)
+        return db_question
+        
+    except Exception as e:
+        db.rollback()
+        logging.error(f"Error creating question: {str(e)}")
         raise HTTPException(
-            status_code=400,
-            detail="Question type must be either 'homework' or 'lab'"
+            status_code=500,
+            detail=str(e)
         )
 
-    db_question = Question(
-        question_text=question.question_text,
-        topic_id=topic_id,
-        question_type=question.question_type  # Add the question type
-    )
-    db.add(db_question)
-    db.commit()
-    db.refresh(db_question)
-    return db_question
 
 @router.post("/subjects/{subject_id}/topics/{topic_id}/questions/{question_id}/answers", response_model=AnswerResponse)
 async def create_topic_question_answer(
@@ -181,3 +249,35 @@ async def create_topic_question_testcase(
     db.commit()
     db.refresh(db_testcase)
     return db_testcase
+
+@router.get("/questions/{question_id}", response_model=QuestionResponse)
+async def get_question(question_id: int, db: Session = Depends(get_db)):
+    question = db.query(Question).options(
+        joinedload(Question.answers),
+        joinedload(Question.test_cases)
+    ).filter(Question.question_id == question_id).first()
+    
+    if question is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Question not found"
+        )
+    
+    return question
+
+@router.post("/questions/{question_id}/submit", response_model=DoneQuestionResponse)
+async def submit_question(
+    question_id: int,
+    submission: DoneQuestionCreate,
+    db: Session = Depends(get_db)
+):
+    db_submission = DoneQuestion(
+        question_id=question_id,
+        user_id=submission.user_id,
+        is_correct=submission.is_correct,
+        submitted_at=datetime.utcnow()
+    )
+    db.add(db_submission)
+    db.commit()
+    db.refresh(db_submission)
+    return db_submission

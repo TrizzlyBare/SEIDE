@@ -60,6 +60,8 @@ const EditorContainer = styled.div`
   flex: 1;
   overflow: hidden;
   background: #1e1e1e;
+  display: flex;
+  flex-direction: column;
 `;
 
 const TestCase = styled.div`
@@ -107,6 +109,17 @@ const BackButton = styled.button`
   &:hover {
     background: #e0e0e0;
   }
+`;
+
+const EditorWrapper = styled.div`
+  flex: 2;
+  min-height: 0;
+`;
+
+const OutputWrapper = styled.div`
+  flex: 1;
+  min-height: 200px;
+  border-top: 1px solid #e0e0e0;
 `;
 
 const QuestionCodeEditor = () => {
@@ -296,31 +309,35 @@ const QuestionCodeEditor = () => {
         </EditorHeader>
         
         <EditorContainer>
-          <Editor
-            height="calc(100vh - 130px)" // Adjust height to account for header and output
-            language={selectedLanguage}
-            value={value}
-            onChange={setValue}
-            onMount={onMount}
-            theme="vs-dark"
-            options={{
-              minimap: { enabled: false },
-              fontSize: 14,
-              wordWrap: "on",
-              lineNumbers: "on",
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              folding: true,
-              bracketPairColorization: true,
-            }}
-          />
+          <EditorWrapper>
+            <Editor
+              height="100%"
+              language={selectedLanguage}
+              value={value}
+              onChange={setValue}
+              onMount={onMount}
+              theme="vs-light"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                wordWrap: "on",
+                lineNumbers: "on",
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                folding: true,
+                bracketPairColorization: true,
+              }}
+            />
+          </EditorWrapper>
+          
+          <OutputWrapper>
+            <Output 
+              editorRef={editorRef} 
+              language={selectedLanguage}
+              testCase={selectedTestCase !== null ? question?.test_cases[selectedTestCase] : null}
+            />
+          </OutputWrapper>
         </EditorContainer>
-        
-        <Output 
-          editorRef={editorRef} 
-          language={selectedLanguage}
-          testCase={selectedTestCase !== null ? question?.test_cases[selectedTestCase] : null}
-        />
       </EditorPanel>
     </Container>
   );

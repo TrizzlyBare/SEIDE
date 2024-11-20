@@ -1,8 +1,9 @@
-from typing import List
-from sqlalchemy import ForeignKey, Integer, String, Boolean
+from typing import List, Optional
+from sqlalchemy import ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 from sqlalchemy_utils import ChoiceType
 import enum
+from datetime import datetime, timedelta
 
 class QuestionType(enum.Enum):
     HOMEWORK = "homework"
@@ -63,6 +64,7 @@ class Question(Base):
     test_cases: Mapped[List["TestCase"]] = relationship("TestCase", back_populates="question")
     done_questions: Mapped[List["DoneQuestion"]] = relationship("DoneQuestion", back_populates="question")
     user_code: Mapped[List["UserCodeData"]] = relationship("UserCodeData", back_populates="question")
+    due_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 class Answer(Base):
     __tablename__ = 'answer_table'
@@ -97,6 +99,7 @@ class DoneQuestion(Base):
 
     question: Mapped["Question"] = relationship("Question", back_populates="done_questions")
     user: Mapped["User"] = relationship("User", back_populates="done_questions")
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class UserCodeData(Base):
     __tablename__ = 'user_code_data_table'
