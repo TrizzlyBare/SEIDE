@@ -10,6 +10,7 @@ import {
   CourseTitle,
   CourseDetails,
   DescriptionButton,
+  ImageWrapper,
 } from "./CurriculumStyle";
 import { curriculumData } from "./curriculumData";
 
@@ -31,9 +32,11 @@ const Curriculum = () => {
         curriculum of the program is designed in accordance with the recent
         ACM/IEEE guideline for undergraduate curriculum in software engineering.
       </Paragraph>
-      <SubHeader>Curriculum Overview - Study Plans</SubHeader>
-      <Image src="/images/curriculum.jpg" alt="Program Overview" />
-      <SubHeader>Year 1 and Year 2</SubHeader>
+      <SubHeader style={{ textAlign: "center" }}>Curriculum Overview - Study Plans</SubHeader>
+      <ImageWrapper>
+          <Image src="/images/curriculum.jpg" alt="Program Overview" />
+      </ImageWrapper>
+      <SubHeader style={{ textDecoration: "underline" }}>Year 1 and Year 2</SubHeader>
       <Paragraph>
         In the first two years, the students will study basic courses in
         mathematics, computer science, and software engineering and develop
@@ -44,7 +47,7 @@ const Curriculum = () => {
         8 - 10 weeks. All the courses in the first two years will be held at the
         International College in the Bangkok Campus of KMITL.
       </Paragraph>
-      <SubHeader>Year 3 and Year 4</SubHeader>
+      <SubHeader style={{ textDecoration: "underline" }}>Year 3 and Year 4</SubHeader>
       <Paragraph>
         In Year 3 and Year 4, the students will learn advanced topics in
         software engineering and important software development methodologies
@@ -72,7 +75,7 @@ const Curriculum = () => {
         courses. Also the students are recommended to work on their senior
         projects that utilize the knowledge of their respective specializations.
       </Paragraph>
-      <SubHeader>
+      <SubHeader style={{ textDecoration: "underline" }}>
         Year 3 and Year 4 (KMITL-Glasgow Double-Degree Program)
       </SubHeader>
       <Paragraph>
@@ -80,7 +83,7 @@ const Curriculum = () => {
         courses in Years 3 and 4 in the Software Engineering program at the
         School of Computing Science, University of Glasgow.
       </Paragraph>
-      <SubHeader>
+      <SubHeader style={{ textDecoration: "underline" }}>
         Year 3 and Year 4 (KMITL-Queensland Double-Degree Program)
       </SubHeader>
       <Paragraph>
@@ -96,31 +99,31 @@ const Curriculum = () => {
           <CourseContainer>
             {year.semesters.map((semester) => (
               <SemesterContainer key={semester.semester}>
-                <h3>{semester.semester}</h3>
+               <h3 style={{ fontSize: "24px", fontWeight: "bold", color: "#333", textAlign: "center" }}>
+                  {semester.semester}
+                </h3>
                 {semester.courses.map((course) => (
-                  <div key={course.id}>
-                    <CourseTitle>{course.title}</CourseTitle>
-                    <CourseDetails>
-                      <strong>Prerequisite:</strong> {course.prerequisite}
-                      <br />
-                      <strong>Program:</strong> {course.program}
-                      <br />
-                      <strong>Subject Credit:</strong> {course.credit}
-                    </CourseDetails>
-                    {expandedCourse === course.id && (
-                      <Paragraph>
-                        <strong>Description:</strong> {course.description}
-                      </Paragraph>
-                    )}
-                    <DescriptionButton
-                      onClick={() => toggleDescription(course.id)}
-                    >
-                      {expandedCourse === course.id
-                        ? "Hide Description"
-                        : "View Description"}
-                    </DescriptionButton>
-                  </div>
-                ))}
+                <div key={course.id}>
+                  <CourseTitle
+                    onClick={() => toggleDescription(course.id)}
+                    style={{ cursor: "pointer", textDecoration: expandedCourse === course.id ? "underline" : "none" }}
+                  >
+                    {course.title}
+                  </CourseTitle>
+                  <CourseDetails>
+                    <strong>Prerequisite:</strong> {course.prerequisite}
+                    <br />
+                    <strong>Program:</strong> {course.program}
+                    <br />
+                    <strong>Subject Credit:</strong> {course.credit}
+                  </CourseDetails>
+                  {expandedCourse === course.id && (
+                    <Paragraph>
+                      <strong>Description:</strong> {course.description}
+                    </Paragraph>
+                  )}
+                </div>
+              ))}
               </SemesterContainer>
             ))}
           </CourseContainer>
