@@ -22,17 +22,23 @@ import "./App.css";
 import QuestionCodeEditor from "./components/CodeEditor/CodeEditor";
 import Footer from "./components/Footer/Footer";
 import Curriculum from "./components/Curriculum/Curriculum";
+import Sidebar from "./components/Sidebar/Sidebar";
+import AdminUsers from "./components/Admin/AdminUsers";
 
 function App() {
   const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
   const hideNavBar = location.pathname === "/";
   const hideFooter = location.pathname === "/";
+  const hideFooterAdmin = location.pathname.startsWith("/admin");
 
   return (
     <UserProvider>
       <div className="app-container">
         {!hideNavBar && <NavBar />}
         <div className="content-container">
+          {isAdminRoute && <Sidebar />}{" "}
+          {/* Show sidebar only for admin routes */}
           <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/home" element={<HomePage />} />
@@ -63,12 +69,16 @@ function App() {
               element={<ProtectedRoute element={<QuestionManager />} />}
             />
             <Route
+              path="/admin/users"
+              element={<ProtectedRoute element={<AdminUsers />} />}
+            />
+            <Route
               path="/editor/:subject_id/:topic_id/:question_id"
               element={<QuestionCodeEditor />}
             />
           </Routes>
         </div>
-        {!hideFooter && <Footer />}s{" "}
+        {!hideFooter && !hideFooterAdmin && <Footer />}
       </div>
     </UserProvider>
   );

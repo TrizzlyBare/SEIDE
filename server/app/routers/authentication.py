@@ -71,19 +71,26 @@ async def create_user(
                 detail="Email already registered"
             )
         
-        # Create user with role validation
+        # Create user
         created_user = await _services.create_user(user, db)
-        token = await _services.create_token(created_user)
+        
+        # Get the actual user object from the database for token creation
+        db_user = await _services.get_user_by_email(created_user["email"], db)
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error retrieving created user"
+            )
+        
+        # Create token using the database user object
+        token_data = await _services.create_token(db_user)
         
         return {
             "message": "User created successfully",
-            "token": {
-                "access_token": token["access_token"],
-                "token_type": token["token_type"],
-                "user": created_user
-            },
+            "token": token_data,
             "user": created_user
         }
+        
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -92,6 +99,11 @@ async def create_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+    
+@router.get("/api/all_users", response_model=List[_schemas.User])
+async def get_all_users(db: Session = Depends(_services.get_db)):
+    users = db.query(_models.User).all()
+    return users
 
 # Login endpoint
 
@@ -136,17 +148,36 @@ async def login(
             detail="An unexpected error occurred during login"
         )
 
-    
 @router.get("/api/role-check")
 async def check_role_access(
+    request: _fastapi.Request,  # Add request parameter
     token: str = Depends(oauth2schema),
     db: Session = Depends(_services.get_db)
 ):
     try:
+        # Get authorization header correctly
+        auth_header = request.headers.get('Authorization', '')
+        logging.info(f"Authorization header: {auth_header}")
+
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No token provided",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        # Get user from token
         user = await _services.get_current_user(token, db)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
         is_admin = user.role == _models.UserRole.ADMIN
         
-        return {
+        response = {
             "role": user.role.value,
             "year": user.year,
             "permissions": {
@@ -155,13 +186,20 @@ async def check_role_access(
                 "year_level": user.year if not is_admin else None
             }
         }
+        
+        logging.info(f"Role check successful for user: {user.email} - Role: {user.role.value}")
+        return response
+
+    except HTTPException as he:
+        logging.warning(f"Authentication error: {he.detail}")
+        raise he
     except Exception as e:
-        logging.error(f"Role check error: {str(e)}")
+        logging.error(f"Unexpected error in role-check: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error checking role access"
+            detail="Internal server error during role check"
         )
-
+    
 
 # Get current user endpoint
 @router.get("/api/users/me", response_model=_schemas.User)
@@ -233,25 +271,25 @@ async def initialize_admin(db: Session = Depends(_services.get_db)):
             detail=f"Failed to initialize admin: {str(e)}"
         )
 
-@router.get("/api/role-check")
-async def check_role_access(
-    current_user: User = Depends(_services.get_current_user)
-):
-    """Check user's role and access level"""
-    try:
-        is_admin = current_user.role == UserRole.ADMIN
-        return {
-            "role": current_user.role.value,
-            "year": current_user.year,
-            "permissions": {
-                "can_access_admin": is_admin,
-                "can_access_student": not is_admin,
-                "year_level": current_user.year if not is_admin else None
-            }
-        }
-    except Exception as e:
-        logging.error(f"Role check error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error checking role access"
-        )
+# @router.get("/api/role-check")
+# async def check_role_access(
+#     current_user: User = Depends(_services.get_current_user)
+# ):
+#     """Check user's role and access level"""
+#     try:
+#         is_admin = current_user.role == UserRole.ADMIN
+#         return {
+#             "role": current_user.role.value,
+#             "year": current_user.year,
+#             "permissions": {
+#                 "can_access_admin": is_admin,
+#                 "can_access_student": not is_admin,
+#                 "year_level": current_user.year if not is_admin else None
+#             }
+#         }
+#     except Exception as e:
+#         logging.error(f"Role check error: {str(e)}")
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail="Error checking role access"
+#         )

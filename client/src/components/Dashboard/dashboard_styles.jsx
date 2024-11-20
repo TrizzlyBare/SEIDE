@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -85,4 +85,97 @@ export const Subcategory = styled.div`
   border-radius: 6px;
   cursor: pointer;
   height: 300px;
+`;
+
+export const Card = styled.div`
+  width: auto;
+  height: 500px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
+  flex-direction: row; /* Use row direction for 70-30 ratio */
+`;
+
+export const CardImageContainer = styled.div`
+  flex: 7; /* 70% of the card */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const CardImage = styled.img`
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+`;
+
+export const CardTextContainer = styled.div`
+  flex: 3; /* 30% of the card */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+export const ChangingText = styled.div`
+  font-size: 2rem;
+  margin-top: 10px;
+  color: #555;
+  ${({ show }) =>
+    show &&
+    css`
+      animation: ${fadeIn} 0.5s ease-in-out;
+    `}
+`;
+
+export const InfoContainer = styled.div`
+  padding: 20px;
+  margin: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #333;
+`;
+
+export const LecturersContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  margin: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+`;
+
+export const Column = styled.div`
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+
+  &:first-child {
+    margin-right: 20px;
+  }
 `;

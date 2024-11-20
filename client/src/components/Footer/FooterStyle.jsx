@@ -2,26 +2,28 @@ import styled from "styled-components";
 
 export const FooterContainer = styled.footer`
   width: 100%;
-  background-color: #2d3748;
-  color: white;
   padding: 20px;
-  position: fixed;
   bottom: 0;
   left: 0;
   z-index: 1000;
-  display: flex;
   justify-content: space-between;
   align-items: center;
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+  color: white;
 `;
 
 export const FooterText = styled.p`
   margin: 0;
   font-size: 1rem;
+  justify-self: center;
 `;
 
 export const FooterLinks = styled.div`
   display: flex;
   gap: 15px;
+  align-items: center;
 `;
 
 export const FooterLink = styled.a`
@@ -33,4 +35,9 @@ export const FooterLink = styled.a`
   &:hover {
     color: #e2e8f0;
   }
+`;
+
+export const KmitlLogoImg = styled.img`
+  width: 100px;
+  height: auto;
 `;

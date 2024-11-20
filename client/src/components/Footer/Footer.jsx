@@ -4,17 +4,22 @@ import {
   FooterText,
   FooterLinks,
   FooterLink,
+  KmitlLogoImg,
 } from "./FooterStyle";
 
 const Footer = () => {
   return (
     <FooterContainer>
-      <FooterText>&copy; 2023 Your Company. All rights reserved.</FooterText>
       <FooterLinks>
-        <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
-        <FooterLink href="/terms-of-service">Terms of Service</FooterLink>
+        <FooterLink href="/home">
+          <KmitlLogoImg src="/images/kmitlLogo.png" alt="KmitlLogo" />
+        </FooterLink>
         <FooterLink href="/contact">Contact</FooterLink>
       </FooterLinks>
+      <FooterText>
+        &copy; 2024 Software Engineering, King Mongkut's Institute of Technology
+        Ladkrabang
+      </FooterText>
     </FooterContainer>
   );
 };

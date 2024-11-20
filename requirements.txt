@@ -2,10 +2,9 @@ fastapi[standard]
 uvicorn
 sqlalchemy
 passlib
-jwt
-jose
 pydantic
 typing
 bcrypt == 4.0.1
 pyjwt
 sqlalchemy-utils
+python-jose

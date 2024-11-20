@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from app.models.authentication.models import UserRole
+from app.models.authentication.services import get_current_user
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import Subject, Topic
+from app.models.dashboard.models import Subject, Topic, User
 from app.models.dashboard.models import Question  # Import the Question model
 
 class QuestionResponse(BaseModel):
@@ -82,8 +85,17 @@ async def create_subject(subject: SubjectCreate, db: Session = Depends(get_db)):
     return db_subject
 
 @router.get("/subjects/", response_model=List[SubjectResponse])
-async def read_subjects(db: Session = Depends(get_db)):
-    return db.query(Subject).all()
+async def read_subjects(role: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    if role == "YEAR1":
+        return db.query(Subject).filter(Subject.year == "Year 1").all()
+    elif role == "YEAR2":
+        return db.query(Subject).filter(Subject.year == "Year 2").all()
+    elif role == "YEAR3":
+        return db.query(Subject).filter(Subject.year == "Year 3").all()
+    elif role == "YEAR4":
+        return db.query(Subject).filter(Subject.year == "Year 4").all()
+    else:
+        return db.query(Subject).all()
 
 @router.get("/subjects/{subject_id}", response_model=SubjectResponse)
 async def read_subject(subject_id: int, db: Session = Depends(get_db)):
@@ -126,4 +138,39 @@ async def read_topic(subject_id: int, topic_id: int, db: Session = Depends(get_d
     ).first()
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
-    return topic
+    return topic 
+
+@router.get("/subjects/{role}/{year}")
+async def get_subjects(
+    role: str,
+    year: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        # Verify user has access to requested role/year
+        if current_user.role != UserRole.ADMIN and (
+            current_user.role.value != role or 
+            current_user.year != year
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied"
+            )
+
+        # Get subjects based on role
+        if role == "ADMIN":
+            # Admin can see all subjects
+            subjects = db.query(Subject).all()
+        else:
+            # Students can only see subjects for their year
+            subjects = db.query(Subject).filter(Subject.year == year).all()
+
+        return subjects
+
+    except Exception as e:
+        logging.error(f"Error fetching subjects: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error fetching subjects"
+        )

@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import logging
 from fastapi import HTTPException, status, Depends
 from typing import Optional, List
+import jwt.exceptions as _jwt_exceptions
 
 import app.models.authentication.au_database as _database
 import app.models.authentication.models as _models
@@ -93,23 +94,10 @@ def check_user_role(required_roles: list[UserRole], user: _models.User) -> bool:
 
 
 
-def role_required(required_roles: list[UserRole]):
-    """Role check decorator"""
-    async def decorator(
-        current_user: _models.User = Depends(get_current_user)
-    ) -> _models.User:
-        if not check_user_role(required_roles, current_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied. Required roles: {[role.value for role in required_roles]}"
-            )
-        return current_user
-    return decorator
-
 
 
 async def create_user(user: _schemas.UserCreate, db: _orm.Session):
-    """Enhanced user creation with role validation"""
+    """Create user with proper response handling"""
     try:
         # Convert role string to enum if needed
         if isinstance(user.role, str):
@@ -150,10 +138,20 @@ async def create_user(user: _schemas.UserCreate, db: _orm.Session):
             year=user.year,
             role=user.role
         )
+        
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
-        return db_user
+        
+        # Return user data as a dictionary
+        return {
+            "id": db_user.id,
+            "email": db_user.email,
+            "first_name": db_user.first_name,
+            "last_name": db_user.last_name,
+            "year": db_user.year,
+            "role": db_user.role.value
+        }
 
     except HTTPException as he:
         raise he
@@ -162,39 +160,47 @@ async def create_user(user: _schemas.UserCreate, db: _orm.Session):
         logging.error(f"User creation error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error creating user"
+            detail=f"Error creating user: {str(e)}"
         )
 
+    
+
 async def create_token(user: _models.User):
-    """Create token with complete user information"""
+    """Create token with proper user object handling"""
     try:
-        token_data = {
+        if not hasattr(user, 'email') or not hasattr(user, 'role'):
+            raise ValueError("Invalid user object provided to create_token")
+            
+        payload = {
             "sub": user.email,
-            "id": user.id,
             "role": user.role.value,
-            "exp": _dt.datetime.utcnow() + _dt.timedelta(hours=24)
+            "exp": _dt.datetime.utcnow() + _dt.timedelta(minutes=30)
         }
         
-        token = _jwt.encode(token_data, JWT_SECRET, algorithm=ALGORITHM)
+        token = _jwt.encode(payload, JWT_SECRET, algorithm=ALGORITHM)
+        
+        # Create user data dict
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "year": user.year,
+            "role": user.role.value
+        }
         
         return {
             "access_token": token,
             "token_type": "bearer",
             "role": user.role.value,
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "year": user.year,
-                "role": user.role.value
-            }
+            "user": user_data
         }
+        
     except Exception as e:
-        logging.error(f"Error creating token: {str(e)}")
+        logging.error(f"Token creation error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Could not create token"
+            detail=f"Token creation failed: {str(e)}"
         )
     
 async def authenticate_user(email: str, password: str, db: _orm.Session):
@@ -203,57 +209,118 @@ async def authenticate_user(email: str, password: str, db: _orm.Session):
         return False
     return user
 
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: _orm.Session = Depends(get_db)
 ) -> _models.User:
     try:
-        payload = _jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        # Enhanced token validation logging
+        debug_info = await debug_token_info(token)
+        logging.info(f"Token validation started. Debug info: {debug_info}")
+
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token is missing",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        if len(token.split(".")) != 3:
+            segments = token.split(".")
+            logging.warning(f"Token format invalid. Found {len(segments)} segments instead of 3")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token format: expected 3 segments, got {len(segments)}",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        try:
+            logging.info("Attempting to decode token...")
+            payload = _jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+            logging.info("Token decoded successfully")
+        except _jwt_exceptions.ExpiredSignatureError:
+            logging.warning("Token has expired")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        except _jwt_exceptions.PyJWTError as e:
+            logging.warning(f"JWT decode error: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Could not validate credentials: {str(e)}",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
         email: str = payload.get("sub")
         role: str = payload.get("role")
-        
-        if not email or not role:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token data",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            
-        user = await get_user_by_email(email, db)
-        if not user or user.role.value != role:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid user or role mismatch",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            
-        return user
-        
-    except _jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except _jwt.JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
-async def debug_token(token: str):
+        if not email or not role:
+            logging.warning(f"Token payload missing required fields. Found: {payload.keys()}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token missing required fields",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        user = await get_user_by_email(email, db)
+        if not user:
+            logging.warning(f"User not found: {email}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+            
+        if user.role.value != role:
+            logging.warning(f"Role mismatch. Token: {role}, User: {user.role.value}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Role mismatch",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        logging.info(f"Successfully authenticated user: {email} with role: {role}")
+        return user
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Unexpected error during authentication: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during authentication"
+        )
+    
+def role_required(required_roles: list[UserRole]):
+    """Role check decorator"""
+    async def decorator(
+        current_user: _models.User = Depends(get_current_user)
+    ) -> _models.User:
+        if not check_user_role(required_roles, current_user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required roles: {[role.value for role in required_roles]}"
+            )
+        return current_user
+    return decorator
+
+async def debug_token_info(token: str) -> dict:
+    """Debug function to inspect token structure"""
     try:
-        payload = _jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        segments = token.split('.')
         return {
-            "valid": True,
-            "payload": payload
+            "segments_count": len(segments),
+            "segments_lengths": [len(s) for s in segments],
+            "appears_encoded": all(s.replace('-', '+').replace('_', '/') for s in segments),
+            "header_present": len(segments) > 0 and len(segments[0]) > 0,
+            "payload_present": len(segments) > 1 and len(segments[1]) > 0,
+            "signature_present": len(segments) > 2 and len(segments[2]) > 0
         }
     except Exception as e:
-        return {
-            "valid": False,
-            "error": str(e)
-        }
+        return {"error": str(e)}
 
 async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.LeadCreate):
     lead = _models.Lead(**lead.dict(), owner_id=user.id)
