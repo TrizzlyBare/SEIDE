@@ -1,5 +1,5 @@
 import fastapi as _fastapi
-import jwt as _jwt
+import jwt
 import datetime as _dt
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
@@ -50,7 +50,7 @@ async def create_token(user: _models.User):
         }
         
         # Create the JWT token
-        token = _jwt.encode(token_data, JWT_SECRET, algorithm=ALGORITHM)
+        token = jwt.encode(token_data, JWT_SECRET, algorithm=ALGORITHM)
         
         logging.info(f"Created token for user: {user.email}")
         return {
@@ -83,7 +83,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: _orm.Session
         
         try:
             # Decode the JWT token
-            payload = _jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
             email: str = payload.get("sub")
             if email is None:
                 logging.error("No email in token payload")
@@ -91,14 +91,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: _orm.Session
                 
             logging.info(f"Token decoded successfully for email: {email}")
             
-        except _jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError:
             logging.error("Token has expired")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        except _jwt.JWTError as e:
+        except jwt.JWTError as e:
             logging.error(f"JWT decode error: {str(e)}")
             raise credentials_exception
             
@@ -116,7 +116,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: _orm.Session
 
 async def debug_token(token: str):
     try:
-        payload = _jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         return {
             "valid": True,
             "payload": payload

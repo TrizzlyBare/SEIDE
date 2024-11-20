@@ -2,13 +2,26 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import QuestionTypeSelector from './QuestionTypeSelector';
+import { BackButton } from "./topics_manager";
 
 const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #3f72af;
+  font-family: 'Playfair Display', serif;
 `;
+
+const PageTitle = styled.h1`
+  margin: 0;
+  font-size: 35px;
+  color: #fff;
+  font-weight: 700; /* Optional: makes the text bold */
+  text-align: center; /* Centers the title */
+  margin-top: 20px; /* Adds space at the top */
+  text-decoration: underline; /* Adds underline */
+`;
+
 
 const Card = styled.div`
   background: white;
@@ -20,13 +33,13 @@ const Card = styled.div`
 
 const Button = styled.button`
   padding: 8px 16px;
-  background: ${(props) => (props.$primary ? "#1a73e8" : "#666")};
-  color: white;
+  background: ${(props) => (props.$primary ? "#fff" : "#1a73e8")};
+  color: black;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   &:hover {
-    background: ${(props) => (props.$primary ? "#1557b0" : "#555")};
+    background: ${(props) => (props.$primary ? "#dbe2ef" : "#555")};
   }
   &:disabled {
     background: #999;
@@ -217,8 +230,8 @@ const QuestionManager = () => {
   return (
     <Container>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <Button onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</Button>
-        <h1 style={{ margin: 0, fontSize: "24px" }}>Questions</h1>
+        <PageTitle>Questions</PageTitle>
+        <BackButton onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</BackButton>
       </div>
   
       {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
@@ -297,7 +310,7 @@ const QuestionManager = () => {
       {isModalOpen && (
         <Overlay onClick={() => setIsModalOpen(false)}>
           <Modal onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: "20px" }}>Add New Question</h2>
+          <h2 style={{ marginTop: "40px", marginBottom: "20px" }}>Add New Question</h2>
             <form onSubmit={handleAddQuestion}>
               <TextArea
                 $large

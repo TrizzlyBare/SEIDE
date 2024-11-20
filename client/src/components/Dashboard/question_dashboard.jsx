@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from 'styled-components';
+import { BackButton } from "../Admin/topics_manager";
 
 const API_BASE_URL = "http://localhost:8000";
 
@@ -65,20 +66,6 @@ const QuestionItem = styled.li`
   }
   &:hover {
     background: #f8f8f8;
-  }
-`;
-
-const BackButton = styled.button`
-  padding: 0.5rem 1rem;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  color: #666;
-  cursor: pointer;
-  transition: background 0.2s;
-  
-  &:hover {
-    background: #e0e0e0;
   }
 `;
 
