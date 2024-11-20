@@ -2,10 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import User, Subject, Topic, Question, Answer, TestCase
+from app.models.dashboard.models import User, Subject, Topic, Question, Answer, UserCodeData, TestCase
 import os
 import subprocess
 import fastapi as _fastapi
+
+from app.models.authentication.models import UserRole
+import app.models.authentication.models as models
+
+from app.models.authentication.services import role_required
+
 
 router = _fastapi.APIRouter(tags=["Home"]) 
 
@@ -65,6 +71,8 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+
+
 @router.get("/users/")
 async def read_users(db: Session = Depends(get_db)):
     return db.query(User).all()
@@ -96,8 +104,6 @@ async def read_answers(db: Session = Depends(get_db)):
 @router.get("/testcases/")
 async def read_testcases(db: Session = Depends(get_db)):
     return db.query(TestCase).all()
-
-
 
 @router.post("/run_code/")
 async def run_code(question_id: int, user_code: str, db: Session = Depends(get_db)):
@@ -151,8 +157,22 @@ async def create_user_code(user_code: UserCode, db: Session = Depends(get_db)):
 
 @router.get("users/{user_id}/user_code/")
 async def read_user_code(user_id: int, db: Session = Depends(get_db)):
-    return db.query(UserCode).filter(UserCode.user_id == user_id).all()
+    return db.query(UserCodeData).filter(UserCodeData.user_id == user_id).all()
 
 @router.get("users/{user_id}/user_code/{question_id}")
 async def read_user_code(user_id: int, question_id: int, db: Session = Depends(get_db)):
-    return db.query(UserCode).filter(UserCode.user_id == user_id, UserCode.question_id == question_id).first().user_code
+    return db.query(UserCodeData).filter(UserCodeData.user_id == user_id, UserCodeData.question_id == question_id).first().user_code
+
+@router.get("/admin-only")
+async def admin_only(
+    current_user: models.User = Depends(role_required([UserRole.ADMIN]))
+):
+    return {"message": "Welcome admin!"}
+
+@router.get("/student-only")
+async def student_only(
+    current_user: models.User = Depends(
+        role_required([UserRole.YEAR1, UserRole.YEAR2, UserRole.YEAR3, UserRole.YEAR4])
+    )
+):
+    return {"message": f"Welcome {current_user.role.value} student!"}

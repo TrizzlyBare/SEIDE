@@ -14,7 +14,7 @@ const ProtectedRoute = ({ element }) => {
     }
   }, [user, setUser]);
 
-  return user && user.role === "admin" ? element : <Navigate to="/" />;
+  return user && user.role === "ADMIN" ? element : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

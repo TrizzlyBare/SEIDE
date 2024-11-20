@@ -4,7 +4,6 @@ import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../../middleware/constants";
 import Output from "./Output";
 import "../../styles/CodeEditorPage.css";
-import styled from "styled-components";
 
 const CodeEditor = () => {
   const editorRef = useRef();
@@ -44,7 +43,8 @@ const CodeEditor = () => {
           <div className="editor-header">
             <LanguageSelector language={language} onSelect={onSelect} />
           </div>
-          <Editor className="editor"
+          <Editor
+            className="editor"
             height="100%"
             options={{
               minimap: { enabled: false },

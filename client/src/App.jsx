@@ -44,6 +44,7 @@ function App() {
               element={<QuestionDashboard />}
             />
             <Route
+              caseSensitive
               path="/admin"
               element={<ProtectedRoute element={<AdminPage />} />}
             />
