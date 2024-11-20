@@ -4,8 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import LanguageSelector from "./LanguageSelector";
 import Output from "./Output";
-import "../../styles/CodeEditorPage.css";
 import { LANGUAGE_VERSIONS, CODE_SNIPPETS } from "../../middleware/constants";
+import "../../styles/CodeEditorPage.css";
 
 const Container = styled.div`
   width: 100%;
@@ -15,15 +15,28 @@ const Container = styled.div`
   background: #f4f4f4;
 `;
 
-const QuestionPanel = styled.div`
+const LeftPanel = styled.div`
   width: 40%;
   min-width: 400px;
   max-width: 600px;
   height: 100vh;
-  overflow-y: auto;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-right: 1px solid #e0e0e0;
+`;
+
+const QuestionPanel = styled.div`
+  height: 60%;
+  overflow-y: auto;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+`;
+
+const TestCasePanel = styled.div`
+  height: 40%;
+  overflow-y: auto;
+  padding: 20px;
 `;
 
 const EditorPanel = styled.div`
@@ -54,6 +67,18 @@ const TestCase = styled.div`
   border-radius: 4px;
   padding: 12px;
   margin: 8px 0;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.selected {
+    border-color: #1565c0;
+    background: #e3f2fd;
+  }
 `;
 
 const Tag = styled.span`
@@ -63,6 +88,12 @@ const Tag = styled.span`
   font-weight: 500;
   background: ${props => props.$type === 'language' ? '#e3f2fd' : '#f3e5f5'};
   color: ${props => props.$type === 'language' ? '#1565c0' : '#7b1fa2'};
+  
+  &:after {
+    content: ${props => props.$version ? `" (${props.$version})"` : ''};
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
 `;
 
 const BackButton = styled.button`
@@ -85,6 +116,7 @@ const QuestionCodeEditor = () => {
   const [question, setQuestion] = useState(null);
   const [value, setValue] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("python");
+  const [selectedTestCase, setSelectedTestCase] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -93,10 +125,11 @@ const QuestionCodeEditor = () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${question_id}`
+          `http://localhost:8000/questions/${question_id}` // Updated endpoint
         );
         if (!response.ok) throw new Error("Failed to fetch question");
         const data = await response.json();
+        console.log("Question Data:", data);
         
         // Set default language to python if not specified
         const questionLanguage = data.language || 'python';
@@ -172,7 +205,7 @@ const QuestionCodeEditor = () => {
         <div style={{ padding: "20px" }}>
           <h3>Error</h3>
           <p>{error}</p>
-          <BackButton onClick={() => navigate(`/dashboard/${subject_id}/${topic_id}`)}>
+          <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics/${topic_id}/questions`)}>
             Back to Questions
           </BackButton>
         </div>
@@ -185,7 +218,7 @@ const QuestionCodeEditor = () => {
       <Container>
         <div style={{ padding: "20px" }}>
           <h3>Question not found</h3>
-          <BackButton onClick={() => navigate(`/dashboard/${subject_id}/${topic_id}`)}>
+          <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics/${topic_id}/questions`)}>
             Back to Questions
           </BackButton>
         </div>
@@ -195,79 +228,81 @@ const QuestionCodeEditor = () => {
 
   return (
     <Container>
-      <QuestionPanel>
-        <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <BackButton onClick={() => navigate(`/dashboard/${subject_id}/${topic_id}`)}>
-            ← Back
-          </BackButton>
-          <div>
-            <Tag 
-              $type="language" 
-              $version={LANGUAGE_VERSIONS[question.language]}
-              style={{ marginRight: "8px" }}
+      <LeftPanel>
+        <QuestionPanel>
+          <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics/${topic_id}/questions`)}>
+              ← Back
+            </BackButton>
+            <div>
+              <Tag 
+                $type="language" 
+                $version={LANGUAGE_VERSIONS[selectedLanguage]}
+                style={{ marginRight: "8px" }}
+              >
+                {selectedLanguage}
+              </Tag>
+              <Tag $type="type">{question?.question_type || 'practice'}</Tag>
+            </div>
+          </div>
+
+          <h2 style={{ marginBottom: "20px" }}>{question?.question_text}</h2>
+          
+          {question?.answers && question.answers.length > 0 && (
+            <div>
+              <h3 style={{ marginBottom: "12px" }}>Example Solutions</h3>
+              {question.answers.map((answer, idx) => (
+                <div key={idx} style={{ 
+                  padding: "12px",
+                  margin: "8px 0",
+                  background: answer.is_correct ? "#e8f5e9" : "#fff",
+                  border: `1px solid ${answer.is_correct ? "#a5d6a7" : "#e0e0e0"}`,
+                  borderRadius: "4px"
+                }}>
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                    {answer.answer_text}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          )}
+        </QuestionPanel>
+
+        <TestCasePanel>
+          <h3 style={{ margin: "0 0 12px 0" }}>Test Cases</h3>
+          {console.log("Current question test cases:", question?.test_cases)} {/* Add this log */}
+          {!question?.test_cases && <div>No test cases available</div>}
+          {question?.test_cases?.length === 0 && <div>Test cases array is empty</div>}
+          {question?.test_cases && question.test_cases.map((testCase, idx) => (
+            <TestCase 
+              key={idx}
+              className={selectedTestCase === idx ? 'selected' : ''}
+              onClick={() => setSelectedTestCase(idx)}
             >
-              {question.language}
-            </Tag>
-            <Tag $type="type">{question.question_type || 'practice'}</Tag>
-          </div>
-        </div>
-
-        <h2 style={{ marginBottom: "20px" }}>{question.question_text}</h2>
-        
-        {question.test_cases && question.test_cases.length > 0 && (
-          <div style={{ marginBottom: "24px" }}>
-            <h3 style={{ marginBottom: "12px" }}>Test Cases</h3>
-            {question.test_cases.map((testCase, idx) => (
-              <TestCase key={idx}>
-                <div><strong>Input:</strong> {testCase.input_data}</div>
-                <div><strong>Expected Output:</strong> {testCase.expected_output}</div>
-              </TestCase>
-            ))}
-          </div>
-        )}
-
-        {question.answers && question.answers.length > 0 && (
-          <div>
-            <h3 style={{ marginBottom: "12px" }}>Example Solutions</h3>
-            {question.answers.map((answer, idx) => (
-              <div key={idx} style={{ 
-                padding: "12px",
-                margin: "8px 0",
-                background: answer.is_correct ? "#e8f5e9" : "#fff",
-                border: `1px solid ${answer.is_correct ? "#a5d6a7" : "#e0e0e0"}`,
-                borderRadius: "4px"
-              }}>
-                <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                  {answer.answer_text}
-                </pre>
-              </div>
-            ))}
-          </div>
-        )}
-      </QuestionPanel>
+              <div><strong>Input:</strong> {testCase.input_data}</div>
+              <div><strong>Expected Output:</strong> {testCase.expected_output}</div>
+            </TestCase>
+          ))}
+        </TestCasePanel>
+      </LeftPanel>
 
       <EditorPanel>
         <EditorHeader>
           <LanguageSelector 
             language={selectedLanguage}
             onSelect={handleLanguageChange}
-            disabled={false} // Now enabled for language switching
+            disabled={false}
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.875rem', color: '#666' }}>
-              Version: {LANGUAGE_VERSIONS[selectedLanguage]}
-            </span>
-          </div>
         </EditorHeader>
         
         <EditorContainer>
           <Editor
-            height="100%"
+            height="calc(100vh - 130px)" // Adjust height to account for header and output
             language={selectedLanguage}
             value={value}
             onChange={setValue}
             onMount={onMount}
-            theme="vs-light"
+            theme="vs-dark"
             options={{
               minimap: { enabled: false },
               fontSize: 14,
@@ -284,7 +319,7 @@ const QuestionCodeEditor = () => {
         <Output 
           editorRef={editorRef} 
           language={selectedLanguage}
-          testCases={question?.test_cases}
+          testCase={selectedTestCase !== null ? question?.test_cases[selectedTestCase] : null}
         />
       </EditorPanel>
     </Container>

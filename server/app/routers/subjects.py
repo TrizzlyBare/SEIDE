@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 from typing import List
 from app.models.dashboard.db_config import get_db
@@ -38,6 +38,33 @@ class TopicResponse(BaseModel):
     topic_id: int
     topic_name: str
     subject_id: int
+
+class TestCaseResponse(BaseModel):
+    test_case_id: int
+    input_data: str
+    expected_output: str
+    setup_script: str
+    validation_script: str
+
+    class Config:
+        orm_mode = True
+
+class AnswerResponse(BaseModel):
+    answer_id: int
+    answer_text: str
+    is_correct: bool
+
+    class Config:
+        orm_mode = True
+
+class QuestionResponse(BaseModel):
+    question_id: int
+    question_text: str
+    topic_id: int
+    question_type: str
+    language: str  # Add this field
+    test_cases: List[TestCaseResponse]
+    answers: List[AnswerResponse]
 
     class Config:
         orm_mode = True
@@ -100,13 +127,3 @@ async def read_topic(subject_id: int, topic_id: int, db: Session = Depends(get_d
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
-
-@router.get("/subjects/{subject_id}/topics/{topic_id}/questions/{question_id}", response_model=QuestionResponse)
-async def read_question(subject_id: int, topic_id: int, question_id: int, db: Session = Depends(get_db)):
-    question = db.query(Question).filter(
-        Question.topic_id == topic_id,
-        Question.question_id == question_id
-    ).first()
-    if question is None:
-        raise HTTPException(status_code=404, detail="Question not found")
-    return question
