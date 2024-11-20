@@ -302,7 +302,7 @@ const QuestionCodeEditor = () => {
             value={value}
             onChange={setValue}
             onMount={onMount}
-            theme="vs-dark"
+            theme="vs-light"
             options={{
               minimap: { enabled: false },
               fontSize: 14,
