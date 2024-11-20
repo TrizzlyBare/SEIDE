@@ -20,16 +20,16 @@ const AuthPage = () => {
   const [signingIn, setSigningIn] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [year, setYear] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [year, setYear] = useState("1");
   const [loading, setLoading] = useState(false);
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:8000/api/users", {
         method: "POST",
@@ -39,21 +39,32 @@ const AuthPage = () => {
         body: JSON.stringify({
           email,
           password,
-          name,
-          surname,
-          year,
+          first_name: firstName, // Changed from name
+          last_name: lastName, // Changed from surname
+          year: parseInt(year), // Convert to number
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Sign Up failed");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Sign Up failed");
       }
 
+      const data = await response.json();
+      // Store the token and user data
+      localStorage.setItem("access_token", data.token.access_token);
+      setUser({
+        role: "user",
+        first_name: firstName,
+        last_name: lastName,
+        year: parseInt(year),
+        email,
+      });
       alert("Sign Up successful!");
       setSigningIn(true);
     } catch (error) {
       console.error("Sign Up failed:", error.message);
-      alert("Sign Up failed: Something went wrong");
+      alert(`Sign Up failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -84,18 +95,22 @@ const AuthPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Sign In failed: Invalid Credentials");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Invalid Credentials");
       }
 
       const data = await response.json();
       localStorage.setItem("access_token", data.access_token);
-      setUser({ role: "user" });
+      setUser({
+        role: "user",
+        ...data.user, // Spread the user data from response
+      });
       localStorage.setItem("userRole", "user");
       alert("Sign In successful!");
       navigate("/home");
     } catch (error) {
       console.error("Sign In failed:", error.message);
-      alert("Sign In failed: Invalid Credentials");
+      alert(`Sign In failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -108,16 +123,16 @@ const AuthPage = () => {
           <Title>Create Account</Title>
           <Input
             type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             required
           />
           <Input
             type="text"
-            placeholder="SurName"
-            value={surname}
-            onChange={(e) => setSurname(e.target.value)}
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             required
           />
           <Input
@@ -135,10 +150,16 @@ const AuthPage = () => {
             required
           />
           <select
-            id="year"
-            name="year"
             value={year}
             onChange={(e) => setYear(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 15px",
+              margin: "8px 0",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+            }}
+            required
           >
             <option value="1">Year 1</option>
             <option value="2">Year 2</option>
@@ -151,7 +172,6 @@ const AuthPage = () => {
         </Form>
       </SignUpContainer>
 
-      {/* SignInContainer: Only passes 'signingIn' prop to styled-components */}
       <SignInContainer signingIn={signingIn}>
         <Form onSubmit={handleSignIn}>
           <Title>Sign In</Title>
@@ -175,7 +195,6 @@ const AuthPage = () => {
         </Form>
       </SignInContainer>
 
-      {/* OverlayContainer: Only passes 'signingIn' prop to styled-components */}
       <OverlayContainer signingIn={signingIn}>
         <Overlay signingIn={signingIn}>
           <LeftOverlayPanel signingIn={signingIn}>

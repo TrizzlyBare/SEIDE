@@ -1,0 +1,124 @@
+.profile-page {
+  position: relative;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 2rem;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.content__cover {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(to right, #4a90e2, #63b3ed);
+  border-radius: 1rem 1rem 0 0;
+  margin: -2rem -2rem 0;
+}
+
+.content__avatar {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.content__title {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.content__title h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.content__title span {
+  color: #666;
+}
+
+.content__description {
+  text-align: center;
+  margin: 1rem 0 2rem;
+  color: #666;
+}
+
+.content__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1rem 0;
+}
+
+.edit-profile-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.edit-profile-btn:hover {
+  background-color: #357abd;
+}
+
+.profile-content {
+  margin-top: 2rem;
+}
+
+.theme-switcher-wrapper {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.theme-btn:hover {
+  transform: scale(1.1);
+}
+
+.theme-btn.active {
+  border-color: #4a90e2;
+}
+
+.theme-orange {
+  background-color: #f97316;
+}
+.theme-blue {
+  background-color: #4a90e2;
+}
+.theme-green {
+  background-color: #22c55e;
+}
+.theme-purple {
+  background-color: #a855f7;
+}
