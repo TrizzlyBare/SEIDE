@@ -54,6 +54,7 @@ class Question(Base):
         nullable=False,
         default=QuestionType.HOMEWORK
     )
+    language: Mapped[str] = mapped_column(String, nullable=False, default="python")  # New language field
 
     topic_id: Mapped[int] = mapped_column(ForeignKey("topics_table.topic_id"))
     topic: Mapped["Topic"] = relationship("Topic", back_populates="questions")

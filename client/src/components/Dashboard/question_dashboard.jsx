@@ -161,14 +161,17 @@ const QuestionDashboard = () => {
           throw new Error('Invalid questions data format');
         }
 
+        // Process questions with consistent property names
         const processedQuestions = questionsData.map(q => ({
-          id: q.question_id,
+          question_id: q.question_id,
           title: q.question_text,
+          type: q.question_type
         }));
 
+        // Properly separate labs and homework based on question type
         setQuestions({
-          labs: processedQuestions.filter((_, index) => index % 2 === 0),
-          homework: processedQuestions.filter((_, index) => index % 2 === 1)
+          labs: processedQuestions.filter(q => q.type === 'lab'),
+          homework: processedQuestions.filter(q => q.type === 'homework')
         });
 
       } catch (error) {
@@ -207,8 +210,9 @@ const QuestionDashboard = () => {
         {questions.length > 0 ? (
           questions.map((question) => (
             <QuestionItem
-              key={question.id}
-              onClick={() => navigate(`/editor?questionId=${question.id}`)}
+              key={question.question_id}
+              onClick={() => navigate(`/editor/${subject_id}/${topic_id}/${question.question_id}`)}
+              style={{ cursor: 'pointer' }}
             >
               {question.title}
             </QuestionItem>

@@ -16,6 +16,7 @@ import QuestionManager from "./components/Admin/question_manager";
 import TopicDashboard from "./components/Dashboard/topic_dashboard";
 import Dashboard from "./components/Dashboard/Dashboard";
 import QuestionDashboard from "./components/Dashboard/question_dashboard";
+import QuestionCodeEditor from "./components/CodeEditor/CodeEditor";
 import "./App.css";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
             path="/subjects/:subject_id/topics/:topic_id/questions"
             element={<QuestionDashboard />}
           />
+          <Route path="/editor/:subject_id/:topic_id/:question_id" element={<QuestionCodeEditor />} />
         </Routes>
       </div>
     </div>

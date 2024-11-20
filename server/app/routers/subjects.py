@@ -4,6 +4,15 @@ from pydantic import BaseModel
 from typing import List
 from app.models.dashboard.db_config import get_db
 from app.models.dashboard.models import Subject, Topic
+from app.models.dashboard.models import Question  # Import the Question model
+
+class QuestionResponse(BaseModel):
+    question_id: int
+    question_text: str
+    topic_id: int
+
+    class Config:
+        orm_mode = True
 
 router = APIRouter(tags=["Subjects"])
 
@@ -91,3 +100,13 @@ async def read_topic(subject_id: int, topic_id: int, db: Session = Depends(get_d
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
+
+@router.get("/subjects/{subject_id}/topics/{topic_id}/questions/{question_id}", response_model=QuestionResponse)
+async def read_question(subject_id: int, topic_id: int, question_id: int, db: Session = Depends(get_db)):
+    question = db.query(Question).filter(
+        Question.topic_id == topic_id,
+        Question.question_id == question_id
+    ).first()
+    if question is None:
+        raise HTTPException(status_code=404, detail="Question not found")
+    return question
