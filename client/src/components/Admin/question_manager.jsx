@@ -8,18 +8,20 @@ const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #3f72af;
-  font-family: 'Playfair Display', serif;
+  background-color: #dbe2ef;
 `;
 
 const PageTitle = styled.h1`
-  margin: 0;
-  font-size: 35px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  background-color: #333;
   color: #fff;
-  font-weight: 700; /* Optional: makes the text bold */
-  text-align: center; /* Centers the title */
-  margin-top: 20px; /* Adds space at the top */
-  text-decoration: underline; /* Adds underline */
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:90%;
 `;
 
 
@@ -28,18 +30,23 @@ const Card = styled.div`
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adds shadow */
 `;
 
 const Button = styled.button`
   padding: 8px 16px;
-  background: ${(props) => (props.$primary ? "#fff" : "#1a73e8")};
-  color: black;
-  border: none;
+  margin-left:27px;
+  font-size: 18px;
+  background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+  color: ${(props) => (props.$primary ? "#333" : "#fff")};
+  border: 2px dashed;
+  border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   border-radius: 4px;
   cursor: pointer;
   &:hover {
-    background: ${(props) => (props.$primary ? "#dbe2ef" : "#555")};
+    background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+    border: 2px solid;
+    border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   }
   &:disabled {
     background: #999;
@@ -69,7 +76,7 @@ const Modal = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: #dbe2ef;
   padding: 24px;
   border-radius: 8px;
   width: 90%;

@@ -8,13 +8,12 @@ const TopicsContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background: radial-gradient(circle, #fff, #3f72af); /* Radial gradient */
+  background:#dbe2ef;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  font-family: 'Playfair Display', serif;
 `;
 
 const DeleteButton = styled.button`
@@ -41,15 +40,17 @@ const DeleteButton = styled.button`
 `;
 
 const TopicBox = styled.div`
-  aspect-ratio: 1;
+  width: 100%; /* Takes full width of the container */
+  height: auto; /* Adjusts height based on content */
+  min-height: 100px; /* Sets a minimum height */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 20px;
-  color: white;
-  background: #3f72af;
+  color: #333;
+  background: #fff; /* Lighter background color */
   padding: 15px;
   text-align: center;
   word-break: break-word;
@@ -60,28 +61,33 @@ const TopicBox = styled.div`
   }
 
   &:hover {
-    background-color: #112d4e;
-    border: 4px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adds shadow */
   }
 `;
 
-export const Title = styled.h1`
-  margin: 0;
-  font-size: 45px;
-  color: #112d4e;
-  text-decoration: underline;  /* Underlines the text */
-  margin-top: 40px;  /* Adds more top space (adjust the value as needed) */
+
+const Title = styled.h1`
+ display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  background-color: #333;
+  color: #fff;
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:90%;
 `;
 
 const TopicsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: column; /* Stack topics vertically */
   gap: 20px;
-  margin-top: 20px;
   width: 100%;
   max-width: 1200px;
   padding: 20px;
 `;
+
 
 const AddTopicBox = styled(TopicBox)`
   border: 2px dashed #333;
@@ -91,9 +97,9 @@ const AddTopicBox = styled(TopicBox)`
   color: #333;
 
   &:hover {
-    border-color: #2f72af;
-    color:#2f72af;
-    background-color: #dbe2ef;
+    border: 2px solid #333;
+    color:#333;
+    background-color: #fff;
   }
 `;
 

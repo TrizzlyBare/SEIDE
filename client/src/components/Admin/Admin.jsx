@@ -124,11 +124,7 @@ const Admin = () => {
 
   return (
     <AdminContainer>
-      <Title>
-        <span className="subject">Subject</span>
-        <br />
-        <span className="management">Management</span>
-      </Title>
+      <Title>Subject Management</Title>
 
 
 

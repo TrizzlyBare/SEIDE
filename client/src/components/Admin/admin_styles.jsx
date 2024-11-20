@@ -7,11 +7,8 @@ export const AdminContainer = styled.div`
   min-height: 100vh;
 
 
-  background-color: #3f72af;
-
-  // background: linear-gradient(to top left, #3f72af 30%, transparent 70%),
-  //             linear-gradient(to bottom right, #112d4e 30%, transparent 70%);
-  // background-blend-mode: overlay; /* Blends the gradients together */
+  background-color: #dbe2ef;
+  
   
   text-align: center;
   display: flex;
@@ -24,30 +21,22 @@ font-family: 'Montserrat', sans-serif;
 `;
 
 export const Title = styled.h1`
-  width: 100%;
-  margin: 0;
-  color: #333;
-  margin-bottom: 20px;
-  margin-top:20px;
-  font-weight: bold; /* Optional for emphasis */
-  background-image: url(${Banner}); /* Use imported image */
-  background-size: cover;  /* Ensures the image covers the entire background */
-  background-position: center center; /* Centers the image */
-  background-repeat: no-repeat; /* Prevents the image from repeating */
-
-  span.subject {
-    font-size: 60px; /* Larger font size for "Subject" */
-  }
-
-  span.management {
-    font-size: 50px; /* Smaller font size for "Management" */
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  background-color: #333;
+  color: #fff;
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:90%;
 `;
 
 
 export const YearTitle = styled.h2`
   font-size: 30px;
-  color: white;
+  color: #333;
   margin-top: 30px;  /* Adds more space above each year */
   margin-bottom: 20px;  /* Adds space below each year */
   margin-left: 30px;
@@ -72,7 +61,7 @@ export const SubjectBox = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius:10px;
+  border-radius: 10px;
   font-size: 24px;
   color: #333;
   background: white;
@@ -82,16 +71,27 @@ export const SubjectBox = styled.div`
   overflow: hidden; /* Hides any overflow */
   text-align: center; /* Ensures text is centered */
   padding: 20px; /* Adjust padding for balance */
-  margin-left:30px;
+  margin-left: 100px;
 
   &:hover {
-    background-color: #8a9bbf;
-    color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 5px solid #fff;
+    border: 3px solid #333;
+    font-weight: bold; /* Corrected the typo */
+  }
+
+  &:focus {
+    outline: 2px solid #007BFF; /* Add focus state for accessibility */
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 10px; /* Adjust for smaller screens */
+    padding: 10px; /* Reduce padding on smaller screens */
+    font-size: 18px; /* Adjust font size for better readability */
   }
 `;
+
 
 export const Divider = styled.div`
   width: 100%; /* Matches the container width */
