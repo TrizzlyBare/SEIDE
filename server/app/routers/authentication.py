@@ -144,8 +144,13 @@ async def check_role_access(
 ):
     try:
         user = await _services.get_current_user(token, db)
-        is_admin = user.role == _models.UserRole.ADMIN
-        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials"
+            )
+            
+        is_admin = user.role == UserRole.ADMIN
         return {
             "role": user.role.value,
             "year": user.year,
@@ -158,10 +163,9 @@ async def check_role_access(
     except Exception as e:
         logging.error(f"Role check error: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error checking role access"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed"
         )
-
 
 # Get current user endpoint
 @router.get("/api/users/me", response_model=_schemas.User)
@@ -231,27 +235,4 @@ async def initialize_admin(db: Session = Depends(_services.get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to initialize admin: {str(e)}"
-        )
-
-@router.get("/api/role-check")
-async def check_role_access(
-    current_user: User = Depends(_services.get_current_user)
-):
-    """Check user's role and access level"""
-    try:
-        is_admin = current_user.role == UserRole.ADMIN
-        return {
-            "role": current_user.role.value,
-            "year": current_user.year,
-            "permissions": {
-                "can_access_admin": is_admin,
-                "can_access_student": not is_admin,
-                "year_level": current_user.year if not is_admin else None
-            }
-        }
-    except Exception as e:
-        logging.error(f"Role check error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error checking role access"
         )

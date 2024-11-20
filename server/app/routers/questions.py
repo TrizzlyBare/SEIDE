@@ -181,28 +181,3 @@ async def create_topic_question_testcase(
     db.commit()
     db.refresh(db_testcase)
     return db_testcase
-
-@router.get("/subjects/{subject_id}/topics/{topic_id}/questions/{question_id}", response_model=QuestionResponse)
-async def read_question(subject_id: int, topic_id: int, question_id: int, db: Session = Depends(get_db)):
-    question = db.query(Question).options(
-        joinedload(Question.test_cases),
-        joinedload(Question.answers)
-    ).filter(
-        Question.topic_id == topic_id,
-        Question.question_id == question_id
-    ).first()
-    
-    if question is None:
-        raise HTTPException(status_code=404, detail="Question not found")
-    return question
-
-@router.get("/questions/{question_id}", response_model=QuestionResponse)
-async def get_question_by_id(question_id: int, db: Session = Depends(get_db)):
-    question = db.query(Question).options(
-        joinedload(Question.test_cases),
-        joinedload(Question.answers)
-    ).filter(Question.question_id == question_id).first()
-    
-    if question is None:
-        raise HTTPException(status_code=404, detail="Question not found")
-    return question
