@@ -100,14 +100,20 @@ const Output = ({ editorRef, language, testCase }) => {
   const [output, setOutput] = useState(null);
   const [actualOutput, setActualOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(true); // Initialize as true
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const compareOutputs = (actual, expected) => {
-    // Convert to strings and ensure we have values to compare
-    const actualStr = String(actual || '').trim();
-    const expectedStr = String(expected || '').trim();
+    // If either output is missing, it's an error
+    if (!actual || !expected) {
+      console.log('Missing output - setting error', { actual, expected });
+      return false;
+    }
+
+    // Convert to strings and clean up
+    const actualStr = String(actual).replace(/\n$/, '');
+    const expectedStr = String(expected).replace(/\n$/, '');
 
     console.log('Comparing outputs:', {
       actual: actualStr,
@@ -117,6 +123,7 @@ const Output = ({ editorRef, language, testCase }) => {
       isMatch: actualStr === expectedStr
     });
 
+    // Exact match required
     return actualStr === expectedStr;
   };
 
@@ -179,7 +186,7 @@ const Output = ({ editorRef, language, testCase }) => {
     try {
       setIsLoading(true);
       setIsSuccess(false);
-      setIsError(false);
+      setIsError(true); // Default to error state
       setActualOutput(null);
       
       const { run: result } = await executeCode(language, sourceCode);
@@ -191,17 +198,24 @@ const Output = ({ editorRef, language, testCase }) => {
         return;
       }
 
-      const outputLines = result.output.split('\n');
-      setOutput(outputLines);
-      setActualOutput(result.output);
+      // Clean up the output
+      const cleanOutput = result.output.replace(/\n$/, '');
+      setOutput(cleanOutput ? cleanOutput.split('\n') : []);
+      setActualOutput(cleanOutput || '');
 
       if (testCase) {
-        const matches = compareOutputs(result.output, testCase.expected_output);
+        const matches = compareOutputs(cleanOutput, testCase.expected_output);
+        console.log('Test case validation:', {
+          actual: cleanOutput,
+          expected: testCase.expected_output,
+          matches: matches
+        });
+        
         setIsError(!matches);
         setIsSuccess(matches);
       } else {
-        setIsSuccess(!result.stderr);
-        setIsError(!!result.stderr);
+        setIsError(true);
+        setIsSuccess(false);
       }
     } catch (error) {
       console.error('Code execution error:', error);
@@ -234,7 +248,7 @@ const Output = ({ editorRef, language, testCase }) => {
               background: '#f5f5f5',
               borderRadius: '4px'
             }}>
-              {testCase.expected_output}
+              "{testCase.expected_output}"
             </pre>
           </div>
         </TestCaseInfo>
@@ -253,14 +267,18 @@ const Output = ({ editorRef, language, testCase }) => {
         <strong>Program Output:</strong>
         {output ? (
           output.map((line, index) => (
-            <div key={index}>{line || ' '}</div>
+            <div key={index}>
+              <pre style={{ margin: 0, display: 'inline' }}>
+                {line.length === 0 ? '(empty line)' : `"${line}"`}
+              </pre>
+            </div>
           ))
         ) : (
           <div>Run your code to see the output...</div>
         )}
       </OutputContainer>
 
-      {actualOutput && testCase && (
+      {actualOutput !== null && testCase && (
         <ComparisonContainer $mismatch={isError}>
           <div>
             <strong>Expected Output:</strong> 
@@ -285,10 +303,23 @@ const Output = ({ editorRef, language, testCase }) => {
               background: '#f5f5f5',
               borderRadius: '4px'
             }}>
-              {[...actualOutput].map(char => 
+              {actualOutput ? [...actualOutput].map(char => 
                 char === ' ' ? '␣' : char === '\n' ? '⏎\n' : char
-              ).join('')}
+              ).join('') : '(no output)'}
             </pre>
+          </div>
+          <div style={{ marginTop: '8px', color: isError ? '#c62828' : '#2e7d32' }}>
+            {isError ? (
+              <>
+                ✗ Outputs do not match exactly
+                <div style={{ fontSize: '0.9em', marginTop: '4px', color: '#666' }}>
+                  Expected length: {testCase.expected_output.length}, 
+                  Got length: {(actualOutput || '').length}
+                </div>
+              </>
+            ) : (
+              '✓ Outputs match exactly'
+            )}
           </div>
         </ComparisonContainer>
       )}
