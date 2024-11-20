@@ -27,3 +27,4 @@ yarn-error.log*
 /myenv
 __pycache__
 /venv
+/database/*.db
