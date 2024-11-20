@@ -20,10 +20,13 @@ import QuestionDashboard from "./components/Dashboard/question_dashboard";
 import ProtectedRoute from "./components/ProtectedRoute/protectedRouting";
 import "./App.css";
 import QuestionCodeEditor from "./components/CodeEditor/CodeEditor";
+import Footer from "./components/Footer/Footer";
+import Curriculum from "./components/Curriculum/Curriculum";
 
 function App() {
   const location = useLocation();
   const hideNavBar = location.pathname === "/";
+  const hideFooter = location.pathname === "/";
 
   return (
     <UserProvider>
@@ -33,7 +36,9 @@ function App() {
           <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/home" element={<HomePage />} />
+            <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/editor" element={<CodeEditorPage />} />
+
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/subjects" element={<Dashboard />} />
             <Route
@@ -57,9 +62,13 @@ function App() {
               path="/admin/:subject_id/topics/:topic_id/questions"
               element={<ProtectedRoute element={<QuestionManager />} />}
             />
-            <Route path="/editor/:subject_id/:topic_id/:question_id" element={<QuestionCodeEditor />} />
+            <Route
+              path="/editor/:subject_id/:topic_id/:question_id"
+              element={<QuestionCodeEditor />}
+            />
           </Routes>
         </div>
+        {!hideFooter && <Footer />}s{" "}
       </div>
     </UserProvider>
   );

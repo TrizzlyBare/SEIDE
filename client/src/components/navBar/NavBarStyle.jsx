@@ -11,6 +11,21 @@ export const HeaderContainer = styled.header`
   left: 0;
   z-index: 1000;
   height: 80px; /* Set a fixed height for the header */
+  display: flex;
+  align-items: center; /* Center items vertically */
+  justify-content: space-between; /* Add space between logo and nav links */
+`;
+
+export const LogoImage = styled.img`
+  height: 50px; /* Adjust the height as needed */
+  margin-right: 20px; /* Space between the logo and the nav links */
+  aspect-ratio: auto 50 / 50; /* Maintain aspect ratio */
+  padding: 5px; /* Add padding inside the border */
+  transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
+
+  &:hover {
+    transform: scale(1.1); /* Slightly enlarge the image on hover */
+  }
 `;
 
 export const NavLinks = styled.nav`
@@ -82,7 +97,7 @@ export const ProfileLink = styled(Link)`
       border-radius: 4px;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
+      transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     }
 
     &:hover::after {
