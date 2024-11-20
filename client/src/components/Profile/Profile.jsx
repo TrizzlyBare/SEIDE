@@ -124,11 +124,11 @@ const Profile = () => {
     <div className="profile-page">
       <div className="content">
         <div className="content__cover">
-          <div className="content__avatar">
-            <div className="text-2xl font-bold">
-              {profile.first_name?.[0]}
-              {profile.last_name?.[0]}
-            </div>
+          {/* <div className="content__avatar"> */}
+          <div className="text-2xl font-bold">
+            {profile.first_name?.[0]}
+            {profile.last_name?.[0]}
+            {/* </div> */}
           </div>
         </div>
 
@@ -144,7 +144,7 @@ const Profile = () => {
           <p>KMITL</p>
         </div>
 
-        <div className="profile-content">
+        {/* <div className="profile-content">
           <section className="mb-8">
             <h2 className="text-xl font-bold mb-4">Skills</h2>
             <ul className="grid grid-cols-2 gap-2">
@@ -164,7 +164,7 @@ const Profile = () => {
               <li>E-commerce Platform</li>
             </ul>
           </section>
-        </div>
+        </div> */}
       </div>
     </div>
   );
