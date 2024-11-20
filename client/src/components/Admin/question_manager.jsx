@@ -2,32 +2,51 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import QuestionTypeSelector from './QuestionTypeSelector';
-import LanguageSelector from "../CodeEditor/LanguageSelector";
+import { BackButton } from "./topics_manager";
 
 const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #dbe2ef;
 `;
+
+const PageTitle = styled.h1`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  background-color: #333;
+  color: #fff;
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:90%;
+`;
+
 
 const Card = styled.div`
   background: white;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adds shadow */
 `;
 
 const Button = styled.button`
   padding: 8px 16px;
-  background: ${(props) => (props.$primary ? "#1a73e8" : "#666")};
-  color: white;
-  border: none;
+  margin-left:27px;
+  font-size: 18px;
+  background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+  color: ${(props) => (props.$primary ? "#333" : "#fff")};
+  border: 2px dashed;
+  border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   border-radius: 4px;
   cursor: pointer;
   &:hover {
-    background: ${(props) => (props.$primary ? "#1557b0" : "#555")};
+    background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+    border: 2px solid;
+    border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   }
   &:disabled {
     background: #999;
@@ -57,7 +76,7 @@ const Modal = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: #dbe2ef;
   padding: 24px;
   border-radius: 8px;
   width: 90%;
@@ -89,7 +108,6 @@ const QuestionManager = () => {
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
     questionType: "homework",
-    language: "python",  // Default language
     answers: [{ text: "", isCorrect: false }],
     testCases: [{
       input: "",
@@ -129,12 +147,11 @@ const QuestionManager = () => {
           body: JSON.stringify({
             question_text: newQuestion.questionText,
             question_type: newQuestion.questionType,
-            language: newQuestion.language,  // Adding language to the request
             topic_id: parseInt(topic_id),
           }),
         }
       );
-
+  
       if (!questionResponse.ok) throw new Error("Failed to create question");
       const questionData = await questionResponse.json();
   
@@ -186,15 +203,15 @@ const QuestionManager = () => {
   const resetForm = () => {
     setNewQuestion({
       questionText: "",
-      questionType: "homework",
-      language: "python",  // Reset to default language
       answers: [{ text: "", isCorrect: false }],
-      testCases: [{
-        input: "",
-        expectedOutput: "",
-        setupScript: "#!/bin/bash\n\n",
-        validationScript: 'diff <(echo "$expected") <(echo "$output")',
-      }],
+      testCases: [
+        {
+          input: "",
+          expectedOutput: "",
+          setupScript: "#!/bin/bash\n\n",
+          validationScript: 'diff <(echo "$expected") <(echo "$output")',
+        },
+      ],
     });
   };
 
@@ -220,16 +237,14 @@ const QuestionManager = () => {
   return (
     <Container>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <Button onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</Button>
-        <h1 style={{ margin: 0, fontSize: "24px" }}>Questions</h1>
+        <PageTitle>Questions</PageTitle>
+        <BackButton onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</BackButton>
       </div>
-
+  
       {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
-
-      <Button $primary onClick={() => setIsModalOpen(true)} style={{ marginBottom: "20px" }}>
-        Add New Question
-      </Button>
-
+  
+      <Button $primary onClick={() => setIsModalOpen(true)} style={{ marginBottom: "20px" }}>Add New Question</Button>
+  
       {isLoading ? (
         <div>Loading...</div>
       ) : (
@@ -237,26 +252,16 @@ const QuestionManager = () => {
           <Card key={question.question_id}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0 }}>{question.question_text}</h3>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <span style={{ 
-                  padding: "4px 8px", 
-                  borderRadius: "4px", 
-                  background: "#e3f2fd",
-                  color: "#1565c0"
-                }}>
-                  {question.language}
-                </span>
-                <span style={{ 
-                  padding: "4px 8px", 
-                  borderRadius: "4px", 
-                  background: question.question_type === "homework" ? "#e3f2fd" : "#f3e5f5",
-                  color: question.question_type === "homework" ? "#1565c0" : "#7b1fa2"
-                }}>
-                  {question.question_type === "homework" ? "Homework" : "Lab"}
-                </span>
-              </div>
+              <span style={{ 
+                padding: "4px 8px", 
+                borderRadius: "4px", 
+                background: question.question_type === "homework" ? "#e3f2fd" : "#f3e5f5",
+                color: question.question_type === "homework" ? "#1565c0" : "#7b1fa2"
+              }}>
+                {question.question_type === "homework" ? "Homework" : "Lab"}
+              </span>
             </div>
-
+  
             <div style={{ marginBottom: "16px" }}>
               <h4 style={{ marginBottom: "8px" }}>Answers:</h4>
               {question.answers?.map((answer, idx) => (
@@ -274,7 +279,7 @@ const QuestionManager = () => {
                 </div>
               ))}
             </div>
-
+  
             <div>
               <h4 style={{ marginBottom: "8px" }}>Test Cases:</h4>
               {question.test_cases?.map((testCase, idx) => (
@@ -308,11 +313,11 @@ const QuestionManager = () => {
           </Card>
         ))
       )}
-
+  
       {isModalOpen && (
         <Overlay onClick={() => setIsModalOpen(false)}>
           <Modal onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: "20px" }}>Add New Question</h2>
+          <h2 style={{ marginTop: "40px", marginBottom: "20px" }}>Add New Question</h2>
             <form onSubmit={handleAddQuestion}>
               <TextArea
                 $large
@@ -324,35 +329,18 @@ const QuestionManager = () => {
                 })}
                 required
               />
-
-              <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-                <QuestionTypeSelector
-                  selectedType={newQuestion.questionType}
-                  onChange={(type) => setNewQuestion({
-                    ...newQuestion,
-                    questionType: type
-                  })}
-                />
-                <LanguageSelector
-                  language={newQuestion.language}
-                  onSelect={(language) => setNewQuestion({
-                    ...newQuestion,
-                    language
-                  })}
-                />
-              </div>
-
+  
+              <QuestionTypeSelector
+                selectedType={newQuestion.questionType}
+                onChange={(type) => setNewQuestion({
+                  ...newQuestion,
+                  questionType: type
+                })}
+              />
+  
               <h3 style={{ margin: "20px 0 10px" }}>Answers</h3>
               {newQuestion.answers.map((answer, idx) => (
-                <div 
-                  key={idx} 
-                  style={{
-                    marginBottom: "15px",
-                    padding: "15px",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                  }}
-                >
+                <div key={idx} style={{ marginBottom: "10px" }}>
                   <Input
                     placeholder="Answer text"
                     value={answer.text}
@@ -367,7 +355,7 @@ const QuestionManager = () => {
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    marginTop: "8px",
+                    marginTop: "4px",
                   }}>
                     <input
                       type="checkbox"
@@ -380,32 +368,18 @@ const QuestionManager = () => {
                     />
                     Correct Answer
                   </label>
-                  {newQuestion.answers.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const newAnswers = newQuestion.answers.filter((_, i) => i !== idx);
-                        setNewQuestion({ ...newQuestion, answers: newAnswers });
-                      }}
-                      style={{ marginTop: "8px" }}
-                    >
-                      Remove Answer
-                    </Button>
-                  )}
                 </div>
               ))}
-
               <Button
                 type="button"
                 onClick={() => setNewQuestion({
                   ...newQuestion,
                   answers: [...newQuestion.answers, { text: "", isCorrect: false }],
                 })}
-                style={{ marginBottom: "20px" }}
               >
                 Add Answer
               </Button>
-
+  
               <h3 style={{ margin: "20px 0 10px" }}>Test Cases</h3>
               {newQuestion.testCases.map((testCase, idx) => (
                 <div
@@ -457,24 +431,12 @@ const QuestionManager = () => {
                       setNewQuestion({ ...newQuestion, testCases: newTestCases });
                     }}
                   />
-                  {newQuestion.testCases.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        const newTestCases = newQuestion.testCases.filter((_, i) => i !== idx);
-                        setNewQuestion({ ...newQuestion, testCases: newTestCases });
-                      }}
-                      style={{ marginTop: "8px" }}
-                    >
-                      Remove Test Case
-                    </Button>
-                  )}
                 </div>
               ))}
-              <Button type="button" onClick={addTestCase} style={{ marginBottom: "20px" }}>
+              <Button type="button" onClick={addTestCase}>
                 Add Test Case
               </Button>
-
+  
               <div style={{
                 display: "flex",
                 justifyContent: "flex-end",

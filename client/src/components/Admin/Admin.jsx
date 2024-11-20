@@ -12,6 +12,8 @@ import {
   Input,
   Button,
   YearSelection,
+  YearTitle,
+  Divider,
 } from "./admin_styles";
 
 const YEARS = ["Year 1", "Year 2", "Year 3", "Year 4"];
@@ -124,34 +126,49 @@ const Admin = () => {
     <AdminContainer>
       <Title>Subject Management</Title>
 
+
+
       {YEARS.map((year, yearIndex) => {
-        const yearSubjects = subjects.filter(
-          (subject) => subject.year === year
-        );
+          const yearSubjects = subjects.filter(
+            (subject) => subject.year === year
+          );
 
-        if (yearSubjects.length === 0) return null;
+          if (yearSubjects.length === 0) return null;
 
-        return (
-          <div key={`year-section-${yearIndex}`}>
-            <h2>{year}</h2>
-            <SubjectsGrid>
-              {yearSubjects.map((subject) => (
-                <SubjectBox
-                  key={`subject-${subject.subject_id}`}
-                  onClick={() => handleSubjectClick(subject.subject_id)}
-                >
-                  {subject.subject_name}
-                  <DeleteButton
-                    onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+          return (
+            <div
+              key={`year-section-${yearIndex}`}
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column", // Ensures year and subjects stack vertically
+                alignItems: "stretch",  // Aligns everything to the container's width
+              }}
+            >
+              <YearTitle>{year}</YearTitle>
+              <SubjectsGrid>
+                {yearSubjects.map((subject) => (
+                  <SubjectBox
+                    key={`subject-${subject.subject_id}`}
+                    onClick={() => handleSubjectClick(subject.subject_id)}
                   >
-                    ×
-                  </DeleteButton>
-                </SubjectBox>
-              ))}
-            </SubjectsGrid>
-          </div>
-        );
-      })}
+                    {subject.subject_name}
+                    <DeleteButton
+                      onClick={(e) => handleDeleteSubject(subject.subject_id, e)}
+                    >
+                      ×
+                    </DeleteButton>
+                  </SubjectBox>
+                ))}
+              </SubjectsGrid>
+              {/* Add divider unless it's the last section */}
+              {yearIndex < YEARS.length - 1 && <Divider />}
+            </div>
+          );
+        })}
+
+
+
 
       <SubjectAddingBox onClick={() => setIsModalOpen(true)}>
         + Add Subject
