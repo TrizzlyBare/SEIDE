@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+<<<<<<< HEAD
 import QuestionTypeSelector from './QuestionTypeSelector';
 import { BackButton } from "./topics_manager";
+=======
+import QuestionTypeSelector from "./QuestionTypeSelector";
+import LanguageSelector from "../CodeEditor/LanguageSelector";
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
 
 const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
+<<<<<<< HEAD
   background:#dbe2ef;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   margin-left:300px;
+=======
+  background-color: #f4f4f4;
+  margin-left: 250px;
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
 `;
 
 const PageTitle = styled.h1`
@@ -49,6 +59,7 @@ const Button = styled.button`
   border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   border-radius: 4px;
   cursor: pointer;
+
   &:hover {
     background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
     border: 2px solid;
@@ -114,13 +125,19 @@ const QuestionManager = () => {
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
     questionType: "homework",
+<<<<<<< HEAD
+=======
+    language: "python", // Default language
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
     answers: [{ text: "", isCorrect: false }],
-    testCases: [{
-      input: "",
-      expectedOutput: "",
-      setupScript: "#!/bin/bash\n\n",
-      validationScript: 'diff <(echo "$expected") <(echo "$output")',
-    }],
+    testCases: [
+      {
+        input: "",
+        expectedOutput: "",
+        setupScript: "#!/bin/bash\n\n",
+        validationScript: 'diff <(echo "$expected") <(echo "$output")',
+      },
+    ],
   });
 
   const fetchQuestions = async () => {
@@ -139,7 +156,7 @@ const QuestionManager = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Update the handleAddQuestion function endpoints
   const handleAddQuestion = async (e) => {
     e.preventDefault();
@@ -153,6 +170,10 @@ const QuestionManager = () => {
           body: JSON.stringify({
             question_text: newQuestion.questionText,
             question_type: newQuestion.questionType,
+<<<<<<< HEAD
+=======
+            language: newQuestion.language, // Adding language to the request
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
             topic_id: parseInt(topic_id),
           }),
         }
@@ -160,7 +181,7 @@ const QuestionManager = () => {
   
       if (!questionResponse.ok) throw new Error("Failed to create question");
       const questionData = await questionResponse.json();
-  
+
       // Update answer endpoint
       for (const answer of newQuestion.answers) {
         const answerResponse = await fetch(
@@ -176,7 +197,7 @@ const QuestionManager = () => {
         );
         if (!answerResponse.ok) throw new Error("Failed to create answer");
       }
-  
+
       // Update test case endpoint
       for (const testCase of newQuestion.testCases) {
         const testCaseResponse = await fetch(
@@ -194,7 +215,7 @@ const QuestionManager = () => {
         );
         if (!testCaseResponse.ok) throw new Error("Failed to create test case");
       }
-  
+
       setIsModalOpen(false);
       resetForm();
       fetchQuestions();
@@ -209,6 +230,11 @@ const QuestionManager = () => {
   const resetForm = () => {
     setNewQuestion({
       questionText: "",
+<<<<<<< HEAD
+=======
+      questionType: "homework",
+      language: "python", // Reset to default language
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
       answers: [{ text: "", isCorrect: false }],
       testCases: [
         {
@@ -242,6 +268,7 @@ const QuestionManager = () => {
 
   return (
     <Container>
+<<<<<<< HEAD
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
         <PageTitle>Questions</PageTitle>
         <BackButton onClick={() => navigate(`/admin/${subject_id}/create`)}>← Back to Topics</BackButton>
@@ -251,13 +278,48 @@ const QuestionManager = () => {
   
       <Button $primary onClick={() => setIsModalOpen(true)} style={{ marginBottom: "20px" }}>Add New Question</Button>
   
+=======
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}
+      >
+        <Button onClick={() => navigate(`/admin/${subject_id}/create`)}>
+          ← Back to Topics
+        </Button>
+        <h1 style={{ margin: 0, fontSize: "24px" }}>Questions</h1>
+      </div>
+
+      {error && (
+        <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>
+      )}
+
+      <Button
+        $primary
+        onClick={() => setIsModalOpen(true)}
+        style={{ marginBottom: "20px" }}
+      >
+        Add New Question
+      </Button>
+
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
       {isLoading ? (
         <div>Loading...</div>
       ) : (
         questions.map((question) => (
           <Card key={question.question_id}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
               <h3 style={{ margin: 0 }}>{question.question_text}</h3>
+<<<<<<< HEAD
               <span style={{ 
                 padding: "4px 8px", 
                 borderRadius: "4px", 
@@ -266,6 +328,38 @@ const QuestionManager = () => {
               }}>
                 {question.question_type === "homework" ? "Homework" : "Lab"}
               </span>
+=======
+              <div
+                style={{ display: "flex", gap: "8px", alignItems: "center" }}
+              >
+                <span
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    background: "#e3f2fd",
+                    color: "#1565c0",
+                  }}
+                >
+                  {question.language}
+                </span>
+                <span
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    background:
+                      question.question_type === "homework"
+                        ? "#e3f2fd"
+                        : "#f3e5f5",
+                    color:
+                      question.question_type === "homework"
+                        ? "#1565c0"
+                        : "#7b1fa2",
+                  }}
+                >
+                  {question.question_type === "homework" ? "Homework" : "Lab"}
+                </span>
+              </div>
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
             </div>
   
             <div style={{ marginBottom: "16px" }}>
@@ -277,7 +371,9 @@ const QuestionManager = () => {
                     padding: "8px",
                     margin: "4px 0",
                     background: answer.is_correct ? "#e8f5e9" : "#fff",
-                    border: `1px solid ${answer.is_correct ? "#a5d6a7" : "#e0e0e0"}`,
+                    border: `1px solid ${
+                      answer.is_correct ? "#a5d6a7" : "#e0e0e0"
+                    }`,
                     borderRadius: "4px",
                   }}
                 >
@@ -303,12 +399,14 @@ const QuestionManager = () => {
                   {testCase.setup_script && (
                     <div style={{ marginTop: "8px" }}>
                       <strong>Setup Script:</strong>
-                      <pre style={{
-                        background: "#f1f1f1",
-                        padding: "8px",
-                        marginTop: "4px",
-                        borderRadius: "4px",
-                      }}>
+                      <pre
+                        style={{
+                          background: "#f1f1f1",
+                          padding: "8px",
+                          marginTop: "4px",
+                          borderRadius: "4px",
+                        }}
+                      >
                         {testCase.setup_script}
                       </pre>
                     </div>
@@ -329,12 +427,15 @@ const QuestionManager = () => {
                 $large
                 placeholder="Question text"
                 value={newQuestion.questionText}
-                onChange={(e) => setNewQuestion({
-                  ...newQuestion,
-                  questionText: e.target.value,
-                })}
+                onChange={(e) =>
+                  setNewQuestion({
+                    ...newQuestion,
+                    questionText: e.target.value,
+                  })
+                }
                 required
               />
+<<<<<<< HEAD
   
               <QuestionTypeSelector
                 selectedType={newQuestion.questionType}
@@ -347,6 +448,43 @@ const QuestionManager = () => {
               <h3 style={{ margin: "20px 0 10px" }}>Answers</h3>
               {newQuestion.answers.map((answer, idx) => (
                 <div key={idx} style={{ marginBottom: "10px" }}>
+=======
+
+              <div
+                style={{ display: "flex", gap: "20px", marginBottom: "20px" }}
+              >
+                <QuestionTypeSelector
+                  selectedType={newQuestion.questionType}
+                  onChange={(type) =>
+                    setNewQuestion({
+                      ...newQuestion,
+                      questionType: type,
+                    })
+                  }
+                />
+                <LanguageSelector
+                  language={newQuestion.language}
+                  onSelect={(language) =>
+                    setNewQuestion({
+                      ...newQuestion,
+                      language,
+                    })
+                  }
+                />
+              </div>
+
+              <h3 style={{ margin: "20px 0 10px" }}>Answers</h3>
+              {newQuestion.answers.map((answer, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    marginBottom: "15px",
+                    padding: "15px",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                  }}
+                >
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
                   <Input
                     placeholder="Answer text"
                     value={answer.text}
@@ -357,12 +495,23 @@ const QuestionManager = () => {
                     }}
                     required
                   />
+<<<<<<< HEAD
                   <label style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
                     marginTop: "4px",
                   }}>
+=======
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginTop: "8px",
+                    }}
+                  >
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
                     <input
                       type="checkbox"
                       checked={answer.isCorrect}
@@ -374,14 +523,44 @@ const QuestionManager = () => {
                     />
                     Correct Answer
                   </label>
+<<<<<<< HEAD
+=======
+                  {newQuestion.answers.length > 1 && (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const newAnswers = newQuestion.answers.filter(
+                          (_, i) => i !== idx
+                        );
+                        setNewQuestion({ ...newQuestion, answers: newAnswers });
+                      }}
+                      style={{ marginTop: "8px" }}
+                    >
+                      Remove Answer
+                    </Button>
+                  )}
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
                 </div>
               ))}
               <Button
                 type="button"
+<<<<<<< HEAD
                 onClick={() => setNewQuestion({
                   ...newQuestion,
                   answers: [...newQuestion.answers, { text: "", isCorrect: false }],
                 })}
+=======
+                onClick={() =>
+                  setNewQuestion({
+                    ...newQuestion,
+                    answers: [
+                      ...newQuestion.answers,
+                      { text: "", isCorrect: false },
+                    ],
+                  })
+                }
+                style={{ marginBottom: "20px" }}
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
               >
                 Add Answer
               </Button>
@@ -403,7 +582,10 @@ const QuestionManager = () => {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].input = e.target.value;
-                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
+                      setNewQuestion({
+                        ...newQuestion,
+                        testCases: newTestCases,
+                      });
                     }}
                     required
                   />
@@ -413,7 +595,10 @@ const QuestionManager = () => {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].expectedOutput = e.target.value;
-                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
+                      setNewQuestion({
+                        ...newQuestion,
+                        testCases: newTestCases,
+                      });
                     }}
                     required
                   />
@@ -424,7 +609,10 @@ const QuestionManager = () => {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].setupScript = e.target.value;
-                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
+                      setNewQuestion({
+                        ...newQuestion,
+                        testCases: newTestCases,
+                      });
                     }}
                   />
                   <TextArea
@@ -434,9 +622,13 @@ const QuestionManager = () => {
                     onChange={(e) => {
                       const newTestCases = [...newQuestion.testCases];
                       newTestCases[idx].validationScript = e.target.value;
-                      setNewQuestion({ ...newQuestion, testCases: newTestCases });
+                      setNewQuestion({
+                        ...newQuestion,
+                        testCases: newTestCases,
+                      });
                     }}
                   />
+<<<<<<< HEAD
                 </div>
               ))}
               <Button type="button" onClick={addTestCase}>
@@ -449,6 +641,43 @@ const QuestionManager = () => {
                 gap: "8px",
                 marginTop: "20px",
               }}>
+=======
+                  {newQuestion.testCases.length > 1 && (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const newTestCases = newQuestion.testCases.filter(
+                          (_, i) => i !== idx
+                        );
+                        setNewQuestion({
+                          ...newQuestion,
+                          testCases: newTestCases,
+                        });
+                      }}
+                      style={{ marginTop: "8px" }}
+                    >
+                      Remove Test Case
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                onClick={addTestCase}
+                style={{ marginBottom: "20px" }}
+              >
+                Add Test Case
+              </Button>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "8px",
+                  marginTop: "20px",
+                }}
+              >
+>>>>>>> 95efa4367dade18e51263180e299fe15f666b7f7
                 <Button type="submit" $primary disabled={isLoading}>
                   {isLoading ? "Adding..." : "Add Question"}
                 </Button>
@@ -462,5 +691,5 @@ const QuestionManager = () => {
       )}
     </Container>
   );
-}
+};
 export default QuestionManager;
