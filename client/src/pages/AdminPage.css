@@ -1,0 +1,11 @@
+.admin-page {
+  display: flex;
+  margin-top: 60px; /* Adjust top margin to account for navbar height */
+  margin-bottom: 60px; /* Adjust bottom margin to account for footer height */
+}
+
+.admin-content {
+  flex: 1;
+  margin-left: 250px; /* Same width as the sidebar */
+  padding: 20px;
+}

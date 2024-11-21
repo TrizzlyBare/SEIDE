@@ -1,0 +1,34 @@
+.sidebar {
+  width: 250px;
+  background-color: #f4f4f4;
+  padding: 20px;
+  position: fixed;
+  height: calc(100vh - 80px); /* Adjust height to account for navbar */
+  top: 80px; /* Adjust top position to account for navbar height */
+  left: 0;
+  overflow-y: auto;
+  z-index: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.2rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  border: 1px solid #2d3748;
+  padding: 20px;
+  left: 0;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.sidebar ul li a:hover {
+  color: #007bff;
+}
