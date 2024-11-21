@@ -140,6 +140,7 @@ async def read_topic(subject_id: int, topic_id: int, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic 
 
+
 @router.get("/subjects/{role}/{year}")
 async def get_subjects(
     role: str,
@@ -148,29 +149,49 @@ async def get_subjects(
     current_user: User = Depends(get_current_user)
 ):
     try:
-        # Verify user has access to requested role/year
-        if current_user.role != UserRole.ADMIN and (
-            current_user.role.value != role or 
-            current_user.year != year
-        ):
+        logging.info(f"Fetching subjects for role: {role}, year: {year}")
+        
+        # Map year number to year string format used in database
+        year_mapping = {
+            1: "Year 1",
+            2: "Year 2",
+            3: "Year 3",
+            4: "Year 4"
+        }
+        
+        # Convert numeric year to string format
+        year_str = year_mapping.get(year)
+        
+        if not year_str and role != "ADMIN":
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid year"
             )
 
         # Get subjects based on role
         if role == "ADMIN":
-            # Admin can see all subjects
             subjects = db.query(Subject).all()
+            logging.info(f"Admin fetching all subjects. Found: {len(subjects)}")
         else:
-            # Students can only see subjects for their year
-            subjects = db.query(Subject).filter(Subject.year == year).all()
+            subjects = db.query(Subject).filter(Subject.year == year_str).all()
+            logging.info(f"Fetching subjects for year {year_str}. Found: {len(subjects)}")
 
-        return subjects
+        # Convert subjects to response format
+        subject_list = [
+            {
+                "subject_id": subject.subject_id,
+                "subject_name": subject.subject_name,
+                "year": subject.year,
+                "user_id": subject.user_id
+            }
+            for subject in subjects
+        ]
+
+        return subject_list
 
     except Exception as e:
         logging.error(f"Error fetching subjects: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching subjects"
+            detail=f"Error fetching subjects: {str(e)}"
         )

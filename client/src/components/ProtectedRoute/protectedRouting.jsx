@@ -1,20 +1,69 @@
-import React, { useContext, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import { UserContext } from "../Context/UserContext";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
 
-const ProtectedRoute = ({ element }) => {
-  const { user, setUser } = useContext(UserContext);
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const [userRole, setUserRole] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const location = useLocation();
 
-  useEffect(() => {
-    if (!user) {
-      const storedRole = localStorage.getItem("userRole");
-      if (storedRole) {
-        setUser({ role: storedRole });
+  const checkUserRole = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setIsLoading(false);
+        return;
       }
-    }
-  }, [user, setUser]);
 
-  return user && user.role === "ADMIN" ? element : <Navigate to="/" />;
+      const response = await fetch("http://localhost:8000/api/role-check", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user role");
+      }
+
+      const data = await response.json();
+      console.log("Role check response:", data);
+      setUserRole(data.role);
+    } catch (error) {
+      console.error("Error checking user role:", error);
+      // Clear token on error
+      localStorage.removeItem("access_token");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    checkUserRole();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  if (!userRole || !allowedRoles.includes(userRole)) {
+    console.log(
+      `Access denied. User role: ${userRole}, Required roles: ${allowedRoles}`
+    );
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

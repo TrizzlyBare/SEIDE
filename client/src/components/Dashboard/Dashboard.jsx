@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [userYear, setUserYear] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const fetchUserRole = async () => {
@@ -39,11 +40,6 @@ const Dashboard = () => {
         return;
       }
 
-      console.log(
-        "Sending token for role check:",
-        token.substring(0, 10) + "..."
-      );
-
       const response = await fetch("http://localhost:8000/api/role-check", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -52,12 +48,7 @@ const Dashboard = () => {
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          navigate("/");
-          return;
-        }
-        throw new Error("Failed to fetch user role");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -67,15 +58,16 @@ const Dashboard = () => {
       setUserYear(data.year);
     } catch (error) {
       console.error("Failed to fetch user role:", error);
-      if (error.message.includes("401")) {
-        navigate("/");
-      }
+      setError("Failed to authenticate user");
+      navigate("/");
     }
   };
 
   const fetchSubjects = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+
       const token = localStorage.getItem("access_token");
 
       if (!token || !userRole) {
@@ -83,7 +75,10 @@ const Dashboard = () => {
         return;
       }
 
-      const url = `http://localhost:8000/subjects/${userRole}/${userYear}`;
+      // Construct the URL with role and year
+      const yearParam = userRole === "ADMIN" ? 0 : userYear; // Use 0 for admin
+      const url = `http://localhost:8000/subjects/${userRole}/${yearParam}`;
+
       console.log("Fetching subjects with URL:", url);
 
       const response = await fetch(url, {
@@ -94,51 +89,30 @@ const Dashboard = () => {
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          navigate("/");
-          return;
-        }
         throw new Error(`Failed to fetch subjects: ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log("Subjects data:", data);
+      console.log("Fetched subjects:", data);
 
-      const filteredSubjects = filterSubjectsByRole(data);
-      setSubjects(filteredSubjects);
+      setSubjects(data);
     } catch (error) {
       console.error("Failed to fetch subjects:", error);
+      setError("Failed to load subjects");
       setSubjects([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filterSubjectsByRole = (subjects) => {
-    if (!userRole || !userYear) return [];
-
-    if (userRole === "ADMIN") {
-      // Admin can see all subjects
-      return subjects;
-    }
-
-    // Extract year number from role (e.g., 'YEAR1' -> 1)
-    const roleYear = userYear;
-
-    // Filter subjects based on year
-    return subjects.filter((subject) => {
-      return subject.year === roleYear;
-    });
-  };
-
-  // Check authentication on mount
+  // Effect for initial authentication
   useEffect(() => {
     fetchUserRole();
   }, []);
 
+  // Effect to fetch subjects when role and year are available
   useEffect(() => {
-    if (userRole && userYear) {
+    if (userRole && (userYear || userRole === "ADMIN")) {
       fetchSubjects();
     }
   }, [userRole, userYear]);
@@ -182,6 +156,15 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [texts.length]);
 
+  if (error) {
+    return (
+      <Container>
+        <Header>Error</Header>
+        <div style={{ color: "red", padding: "20px" }}>{error}</div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Header>Home Page</Header>
@@ -195,13 +178,18 @@ const Dashboard = () => {
         </CardTextContainer>
       </Card>
 
-      <Header>Subjects</Header>
+      <Header>
+        {userRole === "ADMIN" ? "All subjects" : `Year ${userYear} Subjects`}
+      </Header>
 
       <DashboardContainer>
         {isLoading ? (
-          <p>Loading...</p>
+          <p>Loading subjects...</p>
         ) : subjects.length === 0 ? (
-          <p>No subjects found</p>
+          <p>
+            No subjects found{" "}
+            {userRole !== "ADMIN" ? `for Year ${userYear}` : ""}
+          </p>
         ) : (
           <SubjectList>
             {subjects.map((subject) => (
@@ -209,6 +197,17 @@ const Dashboard = () => {
                 <Subject>
                   <SubjectTitle onClick={() => handleSubjectClick(subject)}>
                     {subject.subject_name}
+                    {userRole === "ADMIN" && (
+                      <span
+                        style={{
+                          fontSize: "0.8em",
+                          color: "#666",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        ({subject.year})
+                      </span>
+                    )}
                   </SubjectTitle>
                   <ViewTopicsButton
                     onClick={(e) => {

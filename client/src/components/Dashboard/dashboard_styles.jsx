@@ -99,11 +99,11 @@ export const Card = styled.div`
   text-align: center;
   padding: 20px;
   margin: 20px;
-  flex-direction: row; /* Use row direction for 70-30 ratio */
+  flex-direction: row;
 `;
 
 export const CardImageContainer = styled.div`
-  flex: 7; /* 70% of the card */
+  flex: 7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,7 @@ export const CardImage = styled.img`
 `;
 
 export const CardTextContainer = styled.div`
-  flex: 3; /* 30% of the card */
+  flex: 3;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -25,7 +25,7 @@ import Curriculum from "./components/Curriculum/Curriculum";
 import Sidebar from "./components/Sidebar/Sidebar";
 import AdminUsers from "./components/Admin/AdminUsers";
 
-function App() {
+const AppContent = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const hideNavBar = location.pathname === "/";
@@ -33,53 +33,140 @@ function App() {
   const hideFooterAdmin = location.pathname.startsWith("/admin");
 
   return (
-    <UserProvider>
-      <div className="app-container">
-        {!hideNavBar && <NavBar />}
-        <div className="content-container">
-          {isAdminRoute && <Sidebar />}{" "}
-          {/* Show sidebar only for admin routes */}
-          <Routes>
-            <Route path="/" element={<AuthPage />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/curriculum" element={<Curriculum />} />
-            <Route path="/editor" element={<CodeEditorPage />} />
+    <div className="app-container">
+      {!hideNavBar && <NavBar />}
+      <div className="content-container">
+        {isAdminRoute && <Sidebar />}
+        <Routes>
+          {/* Public route */}
+          <Route path="/" element={<AuthPage />} />
 
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/subjects" element={<Dashboard />} />
-            <Route
-              path="/subjects/:subject_id/topics"
-              element={<TopicDashboard />}
-            />
-            <Route
-              path="/subjects/:subject_id/topics/:topic_id/questions"
-              element={<QuestionDashboard />}
-            />
-            <Route
-              caseSensitive
-              path="/admin"
-              element={<ProtectedRoute element={<AdminPage />} />}
-            />
-            <Route
-              path="/admin/:subject_id/create"
-              element={<ProtectedRoute element={<TopicsManager />} />}
-            />
-            <Route
-              path="/admin/:subject_id/topics/:topic_id/questions"
-              element={<ProtectedRoute element={<QuestionManager />} />}
-            />
-            <Route
-              path="/admin/users"
-              element={<ProtectedRoute element={<AdminUsers />} />}
-            />
-            <Route
-              path="/editor/:subject_id/:topic_id/:question_id"
-              element={<QuestionCodeEditor />}
-            />
-          </Routes>
-        </div>
-        {!hideFooter && !hideFooterAdmin && <Footer />}
+          {/* Protected student/admin routes */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/curriculum"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <Curriculum />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editor"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <CodeEditorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subject_id/topics"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <TopicDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id/questions"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <QuestionDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editor/:subject_id/:topic_id/:question_id"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
+              >
+                <QuestionCodeEditor />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected admin-only routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/:subject_id/create"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <TopicsManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/:subject_id/topics/:topic_id/questions"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <QuestionManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </div>
+      {!hideFooter && !hideFooterAdmin && <Footer />}
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <UserProvider>
+      <AppContent />
     </UserProvider>
   );
 }

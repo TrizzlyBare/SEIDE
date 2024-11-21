@@ -106,3 +106,18 @@ export const ProfileLink = styled(Link)`
     }
   }
 `;
+
+export const AdminLink = styled(BaseLink)`
+  color: #e74c3c; // Red color for admin link
+  font-weight: 600;
+
+  &:hover {
+    color: #c0392b; // Darker red on hover
+  }
+
+  // Optional: Add an admin icon
+  &::before {
+    content: "🔧 "; // You can replace this with an icon of your choice
+    margin-right: 4px;
+  }
+`;
