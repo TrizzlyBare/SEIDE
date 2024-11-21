@@ -138,7 +138,8 @@ const fadeIn = keyframes`
 `;
 
 export const ChangingText = styled.div`
-  font-size: 2rem;
+  font-size: 4rem;
+  font-weight: bold;
   margin-top: 10px;
   color: #555;
   ${({ show }) =>

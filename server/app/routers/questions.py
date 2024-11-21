@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel
 import logging
 from typing import List, Optional
@@ -103,6 +104,23 @@ class CodeSubmissionResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class CompletedQuestionResponse(BaseModel):
+    question_id: int
+    is_correct: bool
+    submitted_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserCodeResponse(BaseModel):
+    question_id: int
+    user_id: int
+    code_data: Optional[str]
+    created_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
 
 @router.get("/questions/", response_model=List[QuestionResponse])
 async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
@@ -326,20 +344,18 @@ async def submit_code(
 
         # Execute code and check against test cases
         is_correct = False
-        try:
-            test_case = question.test_cases[0] if question.test_cases else None
-            if test_case:
-                result_output = submission.output.strip() if submission.output else ""
-                expected_output = test_case.expected_output.strip()
-                is_correct = result_output == expected_output
-        except IndexError:
-            logging.warning(f"No test cases found for question {question_id}")
+        test_case = question.test_cases[0] if question.test_cases else None
+        if test_case:
+            result_output = submission.output.strip() if submission.output else ""
+            expected_output = test_case.expected_output.strip()
+            is_correct = result_output == expected_output
 
 
         # Save user's code
         user_code = UserCodeData(
             code_data=submission.code,
-            question_id=question_id
+            question_id=question_id,
+            user_id=current_user.id 
         )
         db.add(user_code)
 
@@ -347,46 +363,131 @@ async def submit_code(
         # Create or update DoneQuestion entry
         submission_time = datetime.utcnow()
 
-
-        existing_submission = db.query(DoneQuestion).filter(
+        existing_done = db.query(DoneQuestion).filter(
             DoneQuestion.question_id == question_id,
-            DoneQuestion.user_id == current_user.id  # Changed from user_id to id
+            DoneQuestion.user_id == current_user.id
         ).first()
 
-
-        if existing_submission:
-            existing_submission.is_correct = is_correct
-            existing_submission.submitted_at = submission_time
-            db_submission = existing_submission
+        if existing_done:
+            existing_done.is_correct = is_correct
+            existing_done.submitted_at = submission_time
+            db_submission = existing_done
         else:
             db_submission = DoneQuestion(
                 question_id=question_id,
-                user_id=current_user.id,  # Changed from user_id to id
+                user_id=current_user.id,
                 is_correct=is_correct,
                 submitted_at=submission_time
             )
             db.add(db_submission)
 
-
         db.commit()
-        db.refresh(user_code)
-
 
         return {
             "question_id": question_id,
-            "user_id": current_user.id,  # Changed from user_id to id
+            "user_id": current_user.id,
             "code_data": submission.code,
             "is_correct": is_correct,
             "submitted_at": submission_time
         }
 
 
-    except HTTPException as he:
-        raise he
     except Exception as e:
         db.rollback()
         logging.error(f"Error submitting code: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error submitting code: {str(e)}"
+            detail=str(e)
+        )
+
+@router.get("/questions/completed", response_model=List[CompletedQuestionResponse])
+async def get_completed_questions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all completed questions for the current user
+    """
+    try:
+        completed_questions = (
+            db.query(DoneQuestion)
+            .filter(DoneQuestion.user_id == current_user.user_id)
+            .all()
+        )
+
+        return completed_questions
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.get("/questions/{question_id}/user-code", response_model=UserCodeResponse)
+async def get_user_code(
+    question_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Fetch the most recent code submission for a user for a specific question
+    """
+    try:
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required"
+            )
+
+        # Log the request details for debugging
+        logging.info(f"Fetching code for question_id={question_id}, user_id={current_user.id}")  
+
+        # Verify the question exists
+        question = db.query(Question).filter(Question.question_id == question_id).first()
+        if not question:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Question not found"
+            )
+
+        try:
+            latest_code = (
+                db.query(UserCodeData)
+                .filter(
+                    UserCodeData.question_id == question_id,
+                    UserCodeData.user_id == current_user.id  
+                )
+                .order_by(UserCodeData.user_code_data_id.desc())  
+                .first()
+            )
+
+            if not latest_code:
+                return UserCodeResponse(
+                    question_id=question_id,
+                    user_id=current_user.id,  # Changed from user_id to id
+                    code_data=None,
+                    created_at=None
+                )
+
+            return UserCodeResponse(
+                question_id=question_id,
+                user_id=current_user.id, 
+                code_data=latest_code.code_data,
+                created_at=datetime.utcnow() 
+            )
+
+        except SQLAlchemyError as e:
+            logging.error(f"Database error while fetching user code: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error occurred while fetching user code"
+            )
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Unexpected error in get_user_code: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected error occurred: {str(e)}"
         )

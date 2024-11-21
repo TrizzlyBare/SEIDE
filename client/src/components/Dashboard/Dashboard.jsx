@@ -105,12 +105,10 @@ const Dashboard = () => {
     }
   };
 
-  // Effect for initial authentication
   useEffect(() => {
     fetchUserRole();
   }, []);
 
-  // Effect to fetch subjects when role and year are available
   useEffect(() => {
     if (userRole && (userYear || userRole === "ADMIN")) {
       fetchSubjects();

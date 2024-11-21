@@ -6,6 +6,8 @@ import LanguageSelector from "./LanguageSelector";
 import Output from "./Output";
 import { LANGUAGE_VERSIONS, CODE_SNIPPETS } from "../../middleware/constants";
 import "../../styles/CodeEditorPage.css";
+import UserCodeLoader from "./UserCodeLoader";
+import { User } from "lucide-react";
 
 const Container = styled.div`
   width: 100%;
@@ -355,6 +357,10 @@ const QuestionCodeEditor = () => {
         </EditorHeader>
 
         <EditorContainer>
+          <UserCodeLoader
+            questionId={question_id}
+            onCodeLoad={(code) => setValue(code)}
+          />
           <EditorWrapper>
             <Editor
               height="100%"
@@ -389,7 +395,6 @@ const QuestionCodeEditor = () => {
             />
           </OutputWrapper>
         </EditorContainer>
-
       </EditorPanel>
     </Container>
   );

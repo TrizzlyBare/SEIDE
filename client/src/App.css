@@ -35,8 +35,35 @@ body {
 }
 
 .content-container {
-  padding-top: 60px; /* Add padding to account for the fixed NavBar */
+  padding-top: 60px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* App.css */
+.content-container {
+  padding-top: 60px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.fade-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+.fade-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: opacity 600ms ease, transform 600ms ease;
 }
