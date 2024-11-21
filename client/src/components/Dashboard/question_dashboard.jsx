@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import styled from 'styled-components';
+import styled from "styled-components";
+import { Calendar, Code } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:8000";
 
-// Styled Components
 const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -60,12 +60,31 @@ const QuestionList = styled.ul`
 const QuestionItem = styled.li`
   padding: 1rem;
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
   &:last-child {
     border-bottom: none;
   }
   &:hover {
     background: #f8f8f8;
   }
+`;
+
+const QuestionTitle = styled.div`
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+`;
+
+const QuestionMeta = styled.div`
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 `;
 
 const BackButton = styled.button`
@@ -76,7 +95,7 @@ const BackButton = styled.button`
   color: #666;
   cursor: pointer;
   transition: background 0.2s;
-  
+
   &:hover {
     background: #e0e0e0;
   }
@@ -94,9 +113,15 @@ const LoadingPlaceholder = styled.div`
   animation: pulse 1.5s infinite;
 
   @keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    0% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.6;
+    }
   }
 `;
 
@@ -134,48 +159,50 @@ const QuestionDashboard = () => {
           throw new Error("Invalid subject or topic ID");
         }
 
-        // Fetch subject details
-        const subjectRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}`);
+        const subjectRes = await fetch(
+          `${API_BASE_URL}/subjects/${subjectIdNum}`
+        );
         if (!subjectRes.ok) {
           throw new Error(`Failed to fetch subject (${subjectRes.status})`);
         }
         const subjectData = await subjectRes.json();
         setSubjectName(subjectData.subject_name);
 
-        // Fetch topic details
-        const topicRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}`);
+        const topicRes = await fetch(
+          `${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}`
+        );
         if (!topicRes.ok) {
           throw new Error(`Failed to fetch topic (${topicRes.status})`);
         }
         const topicData = await topicRes.json();
         setTopicName(topicData.topic_name);
 
-        // Fetch questions
-        const questionsRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}/questions`);
+        const questionsRes = await fetch(
+          `${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}/questions`
+        );
         if (!questionsRes.ok) {
           throw new Error(`Failed to fetch questions (${questionsRes.status})`);
         }
         const questionsData = await questionsRes.json();
 
         if (!Array.isArray(questionsData)) {
-          throw new Error('Invalid questions data format');
+          throw new Error("Invalid questions data format");
         }
 
-        // Process questions with consistent property names
-        const processedQuestions = questionsData.map(q => ({
+        const processedQuestions = questionsData.map((q) => ({
           question_id: q.question_id,
           title: q.question_text,
-          type: q.question_type
+          type: q.question_type,
+          language: q.language,
+          due_date: q.due_date,
         }));
 
-        // Properly separate labs and homework based on question type
         setQuestions({
-          labs: processedQuestions.filter(q => q.type === 'lab'),
-          homework: processedQuestions.filter(q => q.type === 'homework')
+          labs: processedQuestions.filter((q) => q.type === "lab"),
+          homework: processedQuestions.filter((q) => q.type === "homework"),
         });
-
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -185,11 +212,23 @@ const QuestionDashboard = () => {
     fetchData();
   }, [subject_id, topic_id]);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "No due date";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const LoadingState = () => (
     <LoadingContainer>
-      <LoadingPlaceholder style={{ width: '60%' }} />
-      <LoadingPlaceholder style={{ width: '80%' }} />
-      <LoadingPlaceholder style={{ width: '40%' }} />
+      <LoadingPlaceholder style={{ width: "60%" }} />
+      <LoadingPlaceholder style={{ width: "80%" }} />
+      <LoadingPlaceholder style={{ width: "40%" }} />
     </LoadingContainer>
   );
 
@@ -211,10 +250,23 @@ const QuestionDashboard = () => {
           questions.map((question) => (
             <QuestionItem
               key={question.question_id}
-              onClick={() => navigate(`/editor/${subject_id}/${topic_id}/${question.question_id}`)}
-              style={{ cursor: 'pointer' }}
+              onClick={() =>
+                navigate(
+                  `/editor/${subject_id}/${topic_id}/${question.question_id}`
+                )
+              }
             >
-              {question.title}
+              <QuestionTitle>{question.title}</QuestionTitle>
+              <QuestionMeta>
+                <MetaItem>
+                  <Code size={16} />
+                  {question.language || "No language specified"}
+                </MetaItem>
+                <MetaItem>
+                  <Calendar size={16} />
+                  {formatDate(question.due_date)}
+                </MetaItem>
+              </QuestionMeta>
             </QuestionItem>
           ))
         ) : (
@@ -239,13 +291,10 @@ const QuestionDashboard = () => {
       </Header>
 
       <ContentSection>
-        <QuestionCard 
-          title="Lab Questions" 
-          questions={questions.labs} 
-        />
-        <QuestionCard 
-          title="Homework Questions" 
-          questions={questions.homework} 
+        <QuestionCard title="Lab Questions" questions={questions.labs} />
+        <QuestionCard
+          title="Homework Questions"
+          questions={questions.homework}
         />
       </ContentSection>
     </DashboardContainer>

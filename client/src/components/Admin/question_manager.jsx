@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+import { format } from "date-fns";
 import QuestionTypeSelector from "./QuestionTypeSelector";
 import LanguageSelector from "../CodeEditor/LanguageSelector";
 
@@ -91,7 +92,8 @@ const QuestionManager = () => {
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
     questionType: "homework",
-    language: "python", // Default language
+    language: "python",
+    dueDate: "",
     answers: [{ text: "", isCorrect: false }],
     testCases: [
       {
@@ -125,46 +127,79 @@ const QuestionManager = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
+      setError(null); // Clear any previous errors
+
+      // Prepare the question data
+      const requestData = {
+        question_text: newQuestion.questionText,
+        question_type: newQuestion.questionType,
+        language: newQuestion.language,
+        due_date: newQuestion.dueDate
+          ? new Date(newQuestion.dueDate).toISOString()
+          : null,
+        topic_id: parseInt(topic_id),
+      };
+
+      // For debugging
+      console.log("Sending question data:", requestData);
+
       const questionResponse = await fetch(
         `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question_text: newQuestion.questionText,
-            question_type: newQuestion.questionType,
-            language: newQuestion.language, // Adding language to the request
-            topic_id: parseInt(topic_id),
-          }),
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include", // Include this if you're using authentication
+          body: JSON.stringify(requestData),
         }
       );
 
-      if (!questionResponse.ok) throw new Error("Failed to create question");
-      const questionData = await questionResponse.json();
+      // Handle non-OK responses
+      if (!questionResponse.ok) {
+        const errorData = await questionResponse.json().catch(() => ({}));
+        console.error("Server response:", errorData);
+        throw new Error(errorData.detail || "Failed to create question");
+      }
+
+      const createdQuestion = await questionResponse.json();
+      console.log("Question created:", createdQuestion); // For debugging
 
       // Update answer endpoint
       for (const answer of newQuestion.answers) {
         const answerResponse = await fetch(
-          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${questionData.question_id}/answers`,
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${createdQuestion.question_id}/answers`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
             body: JSON.stringify({
               answer_text: answer.text,
               is_correct: answer.isCorrect,
             }),
           }
         );
-        if (!answerResponse.ok) throw new Error("Failed to create answer");
+        if (!answerResponse.ok) {
+          const errorData = await answerResponse.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Failed to create answer");
+        }
       }
 
       // Update test case endpoint
       for (const testCase of newQuestion.testCases) {
         const testCaseResponse = await fetch(
-          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${questionData.question_id}/testcases`,
+          `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/questions/${createdQuestion.question_id}/testcases`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
             body: JSON.stringify({
               input_data: testCase.input,
               expected_output: testCase.expectedOutput,
@@ -173,15 +208,18 @@ const QuestionManager = () => {
             }),
           }
         );
-        if (!testCaseResponse.ok) throw new Error("Failed to create test case");
+        if (!testCaseResponse.ok) {
+          const errorData = await testCaseResponse.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Failed to create test case");
+        }
       }
 
       setIsModalOpen(false);
       resetForm();
-      fetchQuestions();
+      await fetchQuestions();
     } catch (err) {
-      setError(err.message);
-      console.error("Error adding question:", err);
+      console.error("Error details:", err);
+      setError(err.message || "An error occurred while creating the question");
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +229,8 @@ const QuestionManager = () => {
     setNewQuestion({
       questionText: "",
       questionType: "homework",
-      language: "python", // Reset to default language
+      language: "python",
+      dueDate: "",
       answers: [{ text: "", isCorrect: false }],
       testCases: [
         {
@@ -292,6 +331,22 @@ const QuestionManager = () => {
                   }}
                 >
                   {question.question_type === "homework" ? "Homework" : "Lab"}
+                  {question.due_date && (
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        background: "#fff3e0",
+                        color: "#e65100",
+                      }}
+                    >
+                      Due:{" "}
+                      {format(
+                        new Date(question.due_date),
+                        "MMM d, yyyy h:mm a"
+                      )}
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -371,26 +426,70 @@ const QuestionManager = () => {
               />
 
               <div
-                style={{ display: "flex", gap: "20px", marginBottom: "20px" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                  marginBottom: "20px",
+                }}
               >
-                <QuestionTypeSelector
-                  selectedType={newQuestion.questionType}
-                  onChange={(type) =>
-                    setNewQuestion({
-                      ...newQuestion,
-                      questionType: type,
-                    })
-                  }
-                />
-                <LanguageSelector
-                  language={newQuestion.language}
-                  onSelect={(language) =>
-                    setNewQuestion({
-                      ...newQuestion,
-                      language,
-                    })
-                  }
-                />
+                <div
+                  style={{ display: "flex", gap: "20px", alignItems: "center" }}
+                >
+                  <QuestionTypeSelector
+                    selectedType={newQuestion.questionType}
+                    onChange={(type) =>
+                      setNewQuestion({
+                        ...newQuestion,
+                        questionType: type,
+                      })
+                    }
+                  />
+                  <LanguageSelector
+                    language={newQuestion.language}
+                    onSelect={(language) =>
+                      setNewQuestion({
+                        ...newQuestion,
+                        language,
+                      })
+                    }
+                  />
+                </div>
+                <div
+                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
+                >
+                  <span style={{ fontWeight: "500" }}>Due Date:</span>
+                  <input
+                    type="datetime-local"
+                    value={newQuestion.dueDate}
+                    onChange={(e) =>
+                      setNewQuestion({
+                        ...newQuestion,
+                        dueDate: e.target.value,
+                      })
+                    }
+                    style={{
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      flex: "1",
+                    }}
+                  />
+                  {newQuestion.dueDate && (
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        setNewQuestion({
+                          ...newQuestion,
+                          dueDate: "",
+                        })
+                      }
+                      style={{ background: "#dc3545" }}
+                    >
+                      Clear Date
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <h3 style={{ margin: "20px 0 10px" }}>Answers</h3>
