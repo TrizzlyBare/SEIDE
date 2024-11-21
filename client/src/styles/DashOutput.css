@@ -1,0 +1,43 @@
+/* Container for output and button */
+.output-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top:62px;
+    padding: 20px;
+  }
+  
+  /* Style the output container with a fixed size */
+  .output-container {
+    width: 700px;
+    height: 600px;
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px 0px;
+    font-size: 16px;
+    border:none;
+    overflow: auto;
+    box-sizing: border-box;
+    border-radius:5px;
+  }
+  
+  /* Text styling for the output */
+  .output-text {
+    white-space: pre-wrap;
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  /* Success output text (green) */
+  .success-text .output-text {
+    color: green;
+  }
+  
+  /* Error output text (red) */
+  .error-text .output-text {
+    color: red;
+  }
+  .inputcontainer{
+    margin-left:2%;
+  }

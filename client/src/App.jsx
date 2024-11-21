@@ -9,6 +9,7 @@ import { UserProvider } from "./components/Context/UserContext";
 import NavBar from "./components/navBar/NavBar";
 import AuthPage from "./pages/AuthPage";
 import CodeEditorPage from "./pages/CodeEditorPage";
+import DashCodeEditorPage from "./pages/DashCodeEditorPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
@@ -68,7 +69,7 @@ const AppContent = () => {
               <ProtectedRoute
                 allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
               >
-                <CodeEditorPage />
+                <DashCodeEditorPage />
               </ProtectedRoute>
             }
           />
