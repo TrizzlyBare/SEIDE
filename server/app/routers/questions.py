@@ -51,6 +51,7 @@ class QuestionResponse(BaseModel):
     due_date: Optional[datetime]
     answers: List['AnswerResponse']
     test_cases: List['TestCaseResponse']
+    question_completed: bool
 
     class Config:
         orm_mode = True
@@ -317,7 +318,6 @@ async def submit_code(
                 detail=f"Language mismatch. Question requires {question.language}"
             )
 
-        # Execute code and check against test cases
         is_correct = False
         try:
             test_case = question.test_cases[0] if question.test_cases else None
@@ -328,29 +328,28 @@ async def submit_code(
         except IndexError:
             logging.warning(f"No test cases found for question {question_id}")
         
-        # Save user's code
         user_code = UserCodeData(
             code_data=submission.code,
             question_id=question_id
         )
         db.add(user_code)
         
-        # Create or update DoneQuestion entry
         submission_time = datetime.utcnow()
         
         existing_submission = db.query(DoneQuestion).filter(
             DoneQuestion.question_id == question_id,
-            DoneQuestion.user_id == current_user.id  # Changed from user_id to id
+            DoneQuestion.user_id == current_user.id
         ).first()
 
         if existing_submission:
-            existing_submission.is_correct = is_correct
-            existing_submission.submitted_at = submission_time
+            if is_correct or not existing_submission.is_correct:
+                existing_submission.is_correct = is_correct
+                existing_submission.submitted_at = submission_time
             db_submission = existing_submission
         else:
             db_submission = DoneQuestion(
                 question_id=question_id,
-                user_id=current_user.id,  # Changed from user_id to id
+                user_id=current_user.id,
                 is_correct=is_correct,
                 submitted_at=submission_time
             )
@@ -358,13 +357,18 @@ async def submit_code(
         
         db.commit()
         db.refresh(user_code)
+        if existing_submission:
+            db.refresh(existing_submission)
+        else:
+            db.refresh(db_submission)
         
         return {
             "question_id": question_id,
-            "user_id": current_user.id,  # Changed from user_id to id
+            "user_id": current_user.id,
             "code_data": submission.code,
             "is_correct": is_correct,
-            "submitted_at": submission_time
+            "submitted_at": submission_time,
+            "question_completed": is_correct
         }
         
     except HTTPException as he:
@@ -375,4 +379,40 @@ async def submit_code(
         raise HTTPException(
             status_code=500,
             detail=f"Error submitting code: {str(e)}"
+        )
+
+@router.get("/questions/{question_id}/completion", response_model=dict)
+async def get_question_completion(
+    question_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get the completion status of a question for the current user.
+    Returns whether the question has been attempted and if it was completed correctly.
+    """
+    try:
+        if not current_user:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication required"
+            )
+
+        # Query the DoneQuestion table for this user and question
+        done_question = db.query(DoneQuestion).filter(
+            DoneQuestion.question_id == question_id,
+            DoneQuestion.user_id == current_user.id
+        ).first()
+
+        # Return completion status
+        return {
+            "is_completed": done_question is not None,
+            "is_correct": done_question.is_correct if done_question else False
+        }
+
+    except Exception as e:
+        logging.error(f"Error getting question completion status: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error getting completion status: {str(e)}"
         )

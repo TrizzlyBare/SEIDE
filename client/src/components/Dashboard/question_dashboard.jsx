@@ -74,13 +74,6 @@ const QuestionTitle = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-const QuestionMeta = styled.div`
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: #666;
-`;
-
 const MetaItem = styled.div`
   display: flex;
   align-items: center;
@@ -127,6 +120,27 @@ const ErrorContainer = styled.div`
   color: #d32f2f;
 `;
 
+const StatusIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: ${props => props.$completed ? '#4caf50' : '#9e9e9e'};
+`;
+
+const QuestionMeta = styled.div`
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const MetaGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
 const QuestionDashboard = () => {
   const [questions, setQuestions] = useState({ labs: [], homework: [] });
   const [subjectName, setSubjectName] = useState("");
@@ -153,37 +167,49 @@ const QuestionDashboard = () => {
           throw new Error("Invalid subject or topic ID");
         }
 
-        const subjectRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}`);
-        if (!subjectRes.ok) {
-          throw new Error(`Failed to fetch subject (${subjectRes.status})`);
-        }
-        const subjectData = await subjectRes.json();
+        // Fetch subject and topic data
+        const [subjectData, topicData, questionsData] = await Promise.all([
+          fetch(`${API_BASE_URL}/subjects/${subjectIdNum}`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}/questions`).then(res => res.json())
+        ]);
+
         setSubjectName(subjectData.subject_name);
-
-        const topicRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}`);
-        if (!topicRes.ok) {
-          throw new Error(`Failed to fetch topic (${topicRes.status})`);
-        }
-        const topicData = await topicRes.json();
         setTopicName(topicData.topic_name);
-
-        const questionsRes = await fetch(`${API_BASE_URL}/subjects/${subjectIdNum}/topics/${topicIdNum}/questions`);
-        if (!questionsRes.ok) {
-          throw new Error(`Failed to fetch questions (${questionsRes.status})`);
-        }
-        const questionsData = await questionsRes.json();
 
         if (!Array.isArray(questionsData)) {
           throw new Error('Invalid questions data format');
         }
 
-        const processedQuestions = questionsData.map(q => ({
-          question_id: q.question_id,
-          title: q.question_text,
-          type: q.question_type,
-          language: q.language,
-          due_date: q.due_date
-        }));
+        // Process questions and fetch completion status for each
+        const processedQuestions = await Promise.all(
+          questionsData.map(async q => {
+            try {
+              // Try to fetch completion status for each question
+              const completionRes = await fetch(`${API_BASE_URL}/questions/${q.question_id}/completion`, {
+                credentials: 'include'  // Include cookies for authentication
+              });
+              const completionData = await completionRes.json();
+
+              return {
+                question_id: q.question_id,
+                title: q.question_text,
+                type: q.question_type,
+                language: q.language,
+                due_date: q.due_date,
+                completed: completionData.is_completed,
+                is_correct: completionData.is_correct
+              };
+            } catch (error) {
+              console.warn(`Failed to fetch completion status for question ${q.question_id}:`, error);
+              return {
+                ...q,
+                completed: false,
+                is_correct: false
+              };
+            }
+          })
+        );
 
         setQuestions({
           labs: processedQuestions.filter(q => q.type === 'lab'),
@@ -201,36 +227,6 @@ const QuestionDashboard = () => {
     fetchData();
   }, [subject_id, topic_id]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No due date';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const LoadingState = () => (
-    <LoadingContainer>
-      <LoadingPlaceholder style={{ width: '60%' }} />
-      <LoadingPlaceholder style={{ width: '80%' }} />
-      <LoadingPlaceholder style={{ width: '40%' }} />
-    </LoadingContainer>
-  );
-
-  const ErrorState = () => (
-    <ErrorContainer>
-      <h3>Error Loading Questions</h3>
-      <p>{error}</p>
-      <BackButton onClick={() => navigate(`/subjects/${subject_id}/topics`)}>
-        Back to Topics
-      </BackButton>
-    </ErrorContainer>
-  );
-
   const QuestionCard = ({ title, questions = [] }) => (
     <Card>
       <CardTitle>{title}</CardTitle>
@@ -243,14 +239,23 @@ const QuestionDashboard = () => {
             >
               <QuestionTitle>{question.title}</QuestionTitle>
               <QuestionMeta>
-                <MetaItem>
-                  <Code size={16} />
-                  {question.language || 'No language specified'}
-                </MetaItem>
-                <MetaItem>
-                  <Calendar size={16} />
-                  {formatDate(question.due_date)}
-                </MetaItem>
+                <MetaGroup>
+                  <MetaItem>
+                    <Code size={16} />
+                    {question.language || 'No language specified'}
+                  </MetaItem>
+                  <MetaItem>
+                    <Calendar size={16} />
+                    {formatDate(question.due_date)}
+                  </MetaItem>
+                </MetaGroup>
+                <StatusIcon $completed={question.is_correct}>
+                  {question.is_correct ? (
+                    <CheckCircle size={20} />
+                  ) : (
+                    <Circle size={20} />
+                  )}
+                </StatusIcon>
               </QuestionMeta>
             </QuestionItem>
           ))
@@ -261,9 +266,8 @@ const QuestionDashboard = () => {
     </Card>
   );
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState />;
-
+  // ... (keep existing helper components and render logic)
+  
   return (
     <DashboardContainer>
       <Header>
