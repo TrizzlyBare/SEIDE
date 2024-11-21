@@ -5,6 +5,7 @@ from sqlalchemy_utils import ChoiceType
 import enum
 from datetime import datetime, timedelta
 
+
 class QuestionType(enum.Enum):
     HOMEWORK = "homework"
     LAB = "lab"

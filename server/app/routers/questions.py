@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 import logging
 from typing import List, Optional
 from app.models.dashboard.db_config import get_db
@@ -108,6 +109,15 @@ class CompletedQuestionResponse(BaseModel):
     question_id: int
     is_correct: bool
     submitted_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserCodeResponse(BaseModel):
+    question_id: int
+    user_id: int
+    code_data: Optional[str]
+    created_at: Optional[datetime]
 
     class Config:
         from_attributes = True
@@ -404,4 +414,74 @@ async def get_completed_questions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
+        )
+    
+@router.get("/questions/{question_id}/user-code", response_model=UserCodeResponse)
+async def get_user_code(
+    question_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Fetch the most recent code submission for a user for a specific question
+    """
+    try:
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required"
+            )
+
+        # Log the request details for debugging
+        logging.info(f"Fetching code for question_id={question_id}, user_id={current_user.id}")  # Changed from user_id to id
+
+        # Verify the question exists
+        question = db.query(Question).filter(Question.question_id == question_id).first()
+        if not question:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Question not found"
+            )
+
+        try:
+            # Get the most recent code submission using user.id instead of user.user_id
+            latest_code = (
+                db.query(UserCodeData)
+                .filter(
+                    UserCodeData.question_id == question_id,
+                    UserCodeData.user_id == current_user.id  # Changed from user_id to id
+                )
+                .order_by(UserCodeData.user_code_data_id.desc())  # Changed to use existing column
+                .first()
+            )
+
+            if not latest_code:
+                return UserCodeResponse(
+                    question_id=question_id,
+                    user_id=current_user.id,  # Changed from user_id to id
+                    code_data=None,
+                    created_at=None
+                )
+
+            return UserCodeResponse(
+                question_id=question_id,
+                user_id=current_user.id, 
+                code_data=latest_code.code_data,
+                created_at=datetime.utcnow() 
+            )
+
+        except SQLAlchemyError as e:
+            logging.error(f"Database error while fetching user code: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error occurred while fetching user code"
+            )
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Unexpected error in get_user_code: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected error occurred: {str(e)}"
         )
