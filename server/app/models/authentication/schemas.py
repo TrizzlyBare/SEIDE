@@ -4,26 +4,6 @@ from typing import Optional
 from enum import Enum
 from app.models.authentication.models import UserRole
 
-class LeadBase(BaseModel):
-    first_name: str
-    last_name: str
-    email: EmailStr
-    company: str
-    note: str
-
-    class Config:
-        from_attributes = True
-
-class LeadCreate(LeadBase):
-    pass
-
-class Lead(LeadBase):
-    id: int
-    owner_id: int
-
-    class Config:
-        from_attributes = True
-
 class UserBase(BaseModel):
     email: str
     first_name: str

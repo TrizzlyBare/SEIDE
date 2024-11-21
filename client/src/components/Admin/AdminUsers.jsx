@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminUsers.css";
 
-const CURRENT_USER_ID = 0; // Replace with actual current user ID
+const CURRENT_USER_ID = 0;
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -56,7 +56,7 @@ const AdminUsers = () => {
 
         setNewSubject("");
         setIsModalOpen(false);
-        await fetchUsers(); // Refresh the user list after adding a new subject
+        await fetchUsers();
       } catch (error) {
         alert(`Failed to add subject: ${error.message}`);
       } finally {

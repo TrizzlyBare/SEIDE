@@ -12,6 +12,7 @@ export const FooterContainer = styled.footer`
   flex-direction: column;
   background-color: #333;
   color: white;
+  margin-top: auto;
 `;
 
 export const FooterText = styled.p`

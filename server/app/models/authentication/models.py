@@ -29,22 +29,7 @@ class User(Base):
     last_name = Column(String, index=True)
     year = Column(Integer)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.YEAR1)
-    leads = _orm.relationship("Lead", back_populates="owner")
 
     def verify_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.hashed_password)
 
-class Lead(Base):
-    __tablename__ = "leads"
-    
-    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
-    owner_id = _sql.Column(_sql.Integer, _sql.ForeignKey("users.id"))
-    first_name = _sql.Column(_sql.String, index=True)
-    last_name = _sql.Column(_sql.String, index=True)
-    email = _sql.Column(_sql.String, index=True)
-    company = _sql.Column(_sql.String, index=True, default="")
-    note = _sql.Column(_sql.String, default="")
-    date_created = _sql.Column(_sql.DateTime, default=_dt.datetime.utcnow)
-    date_last_updated = _sql.Column(_sql.DateTime, default=_dt.datetime.utcnow)
-
-    owner = _orm.relationship("User", back_populates="leads")

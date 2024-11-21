@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.models.authentication.models import User, UserRole
 
-
 router = _fastapi.APIRouter(tags=["Authentication"])
 
 oauth2schema = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -208,50 +207,9 @@ async def get_current_user_info(
 ):
     return current_user
 
-@router.post("/api/leads", response_model=_schemas.Lead)
-async def create_lead(
-    lead: _schemas.LeadCreate,
-    user: _schemas.User = _fastapi.Depends(_services.get_current_user),
-    db: _orm.Session = _fastapi.Depends(_services.get_db),
-):
-    return await _services.create_lead(user=user, db=db, lead=lead)
-
-@router.get("/api/leads", response_model=List[_schemas.Lead])
-async def get_leads(
-    user: _schemas.User = _fastapi.Depends(_services.get_current_user),
-    db: _orm.Session = _fastapi.Depends(_services.get_db),
-):
-    return await _services.get_leads(user=user, db=db)
-
-@router.get("/api/leads/{lead_id}", status_code=200, response_model=_schemas.Lead)
-async def get_lead(
-    lead_id: int,
-    user: _schemas.User = _fastapi.Depends(_services.get_current_user),
-    db: _orm.Session = _fastapi.Depends(_services.get_db),
-):
-    return await _services.get_lead(lead_id, user, db)
-
-@router.delete("/api/leads/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_lead(
-    lead_id: int,
-    user: _schemas.User = _fastapi.Depends(_services.get_current_user),
-    db: _orm.Session = _fastapi.Depends(_services.get_db),
-):
-    await _services.delete_lead(lead_id, user, db)
-    return None  # 204 status code should not return content
-
-@router.put("/api/leads/{lead_id}", status_code=200, response_model=_schemas.Lead)
-async def update_lead(
-    lead_id: int,
-    lead: _schemas.LeadCreate,
-    user: _schemas.User = _fastapi.Depends(_services.get_current_user),
-    db: _orm.Session = _fastapi.Depends(_services.get_db),
-):
-    return await _services.update_lead(lead_id, lead, user, db)
-
 @router.get("/api")
 async def root():
-    return {"message": "Awesome Leads Manager"}
+    return {"message": "Awesome Manager"}
 
 @router.post("/initialize-admin")
 async def initialize_admin(db: Session = Depends(_services.get_db)):
@@ -270,26 +228,3 @@ async def initialize_admin(db: Session = Depends(_services.get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to initialize admin: {str(e)}"
         )
-
-# @router.get("/api/role-check")
-# async def check_role_access(
-#     current_user: User = Depends(_services.get_current_user)
-# ):
-#     """Check user's role and access level"""
-#     try:
-#         is_admin = current_user.role == UserRole.ADMIN
-#         return {
-#             "role": current_user.role.value,
-#             "year": current_user.year,
-#             "permissions": {
-#                 "can_access_admin": is_admin,
-#                 "can_access_student": not is_admin,
-#                 "year_level": current_user.year if not is_admin else None
-#             }
-#         }
-#     except Exception as e:
-#         logging.error(f"Role check error: {str(e)}")
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail="Error checking role access"
-#         )
