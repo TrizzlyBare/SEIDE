@@ -9,28 +9,57 @@ const Container = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
+
+  background:#dbe2ef;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-left:300px;
+
   background-color: #f4f4f4;
   margin-left: 250px;
+
 `;
+
+const PageTitle = styled.h1`
+  display: flex;
+  justify-content: space-between;
+  padding: 30px;
+  background-color: #333;
+  color: #fff;
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:80%;
+`;
+
 
 const Card = styled.div`
   background: white;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left:20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adds shadow */
+  width:80%;
 `;
 
 const Button = styled.button`
+  width:20%;
   padding: 8px 16px;
-  background: ${(props) => (props.$primary ? "#1a73e8" : "#666")};
-  color: white;
-  border: none;
+  margin-left:27px;
+  font-size: 18px;
+  background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+  color: ${(props) => (props.$primary ? "#333" : "#fff")};
+  border: 2px dashed;
+  border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background: ${(props) => (props.$primary ? "#1557b0" : "#555")};
+    background: ${(props) => (props.$primary ? "#fff" : "#3f72af")};
+    border: 2px solid;
+    border-color:${(props) => (props.$primary ? "#333" : "#fff")};
   }
   &:disabled {
     background: #999;
@@ -60,7 +89,7 @@ const Modal = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: #dbe2ef;
   padding: 24px;
   border-radius: 8px;
   width: 90%;
@@ -80,7 +109,6 @@ const Overlay = styled.div`
   align-items: center;
   justify-content: center;
 `;
-
 const QuestionManager = () => {
   const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

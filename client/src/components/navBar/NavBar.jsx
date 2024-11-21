@@ -5,8 +5,15 @@ import {
   BaseLink,
   ProfileLink,
   LogoImage,
-  AdminLink, // You'll need to add this to your styles
+  AdminLink,
 } from "./NavBarStyle";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHouse } from "@fortawesome/free-solid-svg-icons"; // Import the house icon
+import { faCode } from "@fortawesome/free-solid-svg-icons"; // Import the code icon
+import { faUser } from "@fortawesome/free-regular-svg-icons"; // Import the user icon
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons"; // Corrected icon for info
+
 
 const NavBar = () => {
   const [userRole, setUserRole] = useState(null);
@@ -52,15 +59,32 @@ const NavBar = () => {
     <HeaderContainer>
       <LogoImage src="https://www.se.kmitl.ac.th/assets/se.png" alt="Logo" />
       <NavLinks>
-        <BaseLink to="/home">Home</BaseLink>
-        <BaseLink to="/curriculum">Program</BaseLink>
-        <BaseLink to="/editor">Code Editor</BaseLink>
+        {/* Home link with icon */}
+        <BaseLink to="/home">
+          <FontAwesomeIcon icon={faHouse} size="1x" />
+        </BaseLink>
+
+        {/* Program link */}
+        <BaseLink to="/curriculum">
+          <FontAwesomeIcon icon={faInfoCircle} size="1x" />
+        </BaseLink>
+
+        {/* Code Editor link with icon */}
+        <BaseLink to="/editor">
+          <FontAwesomeIcon icon={faCode} size="1x" />
+        </BaseLink>
+
+        {/* Admin Panel link only visible for ADMIN users */}
         {userRole === "ADMIN" && (
-          <BaseLink to="/admin" style={{ color: "#e74c3c" }}>
+          <BaseLink to="/admin" style={{ color: "#e74c3c", fontSize: "1.2em" }}>
             Admin Panel
           </BaseLink>
         )}
-        <ProfileLink to="/profile">Profile</ProfileLink>
+
+        {/* Profile link with icon */}
+        <ProfileLink to="/profile">
+          <FontAwesomeIcon icon={faUser} size="1x" />
+        </ProfileLink>
       </NavLinks>
     </HeaderContainer>
   );
