@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 const TypeSelection = styled.div`
   display: flex;
@@ -16,7 +16,7 @@ const SelectionGroup = styled.div`
   display: flex;
   gap: 20px;
   align-items: center;
-
+  
   label {
     display: flex;
     align-items: center;
@@ -37,6 +37,7 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-left: auto;
+
   &:hover {
     background: #1557b0;
   }
@@ -48,6 +49,7 @@ const DateSelectionGroup = styled.div`
   gap: 10px;
   margin-top: 10px;
   width: 100%;
+
   input[type="datetime-local"] {
     padding: 8px;
     border: 1px solid #ddd;
@@ -55,10 +57,12 @@ const DateSelectionGroup = styled.div`
     font-size: 14px;
     flex: 1;
   }
+
   .date-label {
     font-weight: 500;
     min-width: 80px;
   }
+
   .date-display {
     padding: 8px;
     background: #e3f2fd;
@@ -68,12 +72,7 @@ const DateSelectionGroup = styled.div`
   }
 `;
 
-const QuestionTypeSelector = ({
-  selectedType,
-  onChange,
-  dueDate,
-  onDueDateChange,
-}) => {
+const QuestionTypeSelector = ({ selectedType, onChange, dueDate, onDueDateChange }) => {
   return (
     <div>
       <TypeSelection>
@@ -84,7 +83,7 @@ const QuestionTypeSelector = ({
               value="homework"
               name="questionType"
               checked={selectedType === "homework"}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={e => onChange(e.target.value)}
             />
             Homework
           </label>
@@ -94,7 +93,7 @@ const QuestionTypeSelector = ({
               value="lab"
               name="questionType"
               checked={selectedType === "lab"}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={e => onChange(e.target.value)}
             />
             Lab
           </label>
