@@ -17,7 +17,7 @@
   .content__cover {
     position: relative;
     height: 200px;
-    background: linear-gradient(to right, #4a90e2, #63b3ed);
+    background: linear-gradient(to right, #112d4e, #3f72af);
     border-radius: 1rem 1rem 0 0;
     margin: -2rem -2rem 0;
   }
@@ -122,3 +122,23 @@
   .theme-purple {
     background-color: #a855f7;
   }
+
+  .content {
+    position: relative; /* Ensure the content div is the parent container for positioning */
+  }
+  
+  .icon-bottom-right {
+    position: absolute; /* Position relative to the content div */
+    bottom: 20px; /* Spacing from the bottom */
+    right: 20px; /* Spacing from the right */
+    font-size: 2rem; /* Adjust icon size */
+    color: #007bff; /* Icon color */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: transform 0.2s, color 0.2s; /* Smooth scaling and color transition */
+  }
+  
+  .icon-bottom-right:hover {
+    transform: scale(1.2); /* Slightly enlarge on hover */
+    color: #0056b3; /* Change color on hover */
+  }
+  

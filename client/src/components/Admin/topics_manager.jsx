@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
+
 // Existing styled components remain the same
 const TopicsContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   padding: 20px;
-  background-color: #f4f4f4;
-  text-align: center;
+  background:#dbe2ef;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  margin-left:30px;
 `;
 
 const DeleteButton = styled.button`
@@ -39,15 +40,17 @@ const DeleteButton = styled.button`
 `;
 
 const TopicBox = styled.div`
-  aspect-ratio: 1;
+  width: 100%; /* Takes full width of the container */
+  height: auto; /* Adjusts height based on content */
+  min-height: 90px; /* Sets a minimum height */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 20px;
   color: #333;
-  background: white;
+  background: #fff; /* Lighter background color */
   padding: 15px;
   text-align: center;
   word-break: break-word;
@@ -56,36 +59,50 @@ const TopicBox = styled.div`
   &:hover ${DeleteButton} {
     opacity: 1;
   }
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adds shadow */
+  }
 `;
 
+
 const Title = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  color: #333;
+  display: flex;
+  justify-content: space-between;
+  padding: 30px;
+  background-color: #333;
+  color: #fff;
+  margin: 40px 20px 0 20px;
+  font-size: 24px;
+  border-radius: 6px;
+  width:70%;
 `;
 
 const TopicsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: column; /* Stack topics vertically */
   gap: 20px;
-  margin-top: 20px;
   width: 100%;
   max-width: 1200px;
   padding: 20px;
 `;
 
+
 const AddTopicBox = styled(TopicBox)`
-  border: 2px dashed #e0e0e0;
+  border: 2px dashed #333;
   cursor: pointer;
   transition: all 0.2s ease;
+  background-color: white;
+  color: #333;
 
   &:hover {
-    border-color: #999;
-    background-color: #f8f8f8;
+    border: 2px solid #333;
+    color:#333;
+    background-color: #fff;
   }
 `;
 
-const BackButton = styled.button`
+export const BackButton = styled.button`
   padding: 10px 20px;
   font-size: 16px;
   background-color: #666;
@@ -93,6 +110,9 @@ const BackButton = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  position: absolute;  /* Position it relative to the nearest positioned ancestor */
+  left: 20px;  /* 20px from the left */
+  bottom: 20px;  /* 20px from the bottom */
   margin-top: 20px;
   margin-bottom: 20px;
 
@@ -100,6 +120,7 @@ const BackButton = styled.button`
     background-color: #555;
   }
 `;
+
 
 const ErrorMessage = styled.div`
   color: #ff0000;
@@ -372,7 +393,7 @@ const TopicsManager = () => {
               <DeleteButton
                 onClick={(e) => handleDeleteTopic(topic.topic_id, e)}
               >
-                ×
+                X
               </DeleteButton>
             </TopicBox>
           ))}

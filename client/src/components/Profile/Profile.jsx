@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Context/UserContext";
 import "../../styles/Profilestyle.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -15,44 +17,22 @@ const Profile = () => {
       try {
         const token = localStorage.getItem("access_token");
 
-        // Debug token
-        console.log("Token from localStorage:", {
-          token,
-          tokenLength: token?.length,
-          firstChars: token?.substring(0, 20),
-          lastChars: token?.substring(token?.length - 20),
-        });
-
         if (!token) {
-          console.warn("No token found in localStorage");
           navigate("/");
           return;
         }
 
-        // Create headers and log them
         const headers = {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         };
-        console.log("Request headers:", headers);
 
         const response = await fetch("http://localhost:8000/api/profile", {
           method: "GET",
           headers,
         });
 
-        // Log full response
-        console.log("Response:", {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries()),
-        });
-
         if (response.status === 401) {
-          const errorData = await response.json();
-          console.log("401 Error full details:", errorData);
-
-          // Clear auth state and redirect
           localStorage.removeItem("access_token");
           localStorage.removeItem("userRole");
           setUser(null);
@@ -71,7 +51,6 @@ const Profile = () => {
           role: localStorage.getItem("userRole") || "user",
         });
       } catch (error) {
-        console.error("Full error details:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -81,7 +60,6 @@ const Profile = () => {
     fetchProfile();
   }, [navigate, setUser]);
 
-  // Common button styles
   const buttonClasses =
     "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors";
 
@@ -124,11 +102,9 @@ const Profile = () => {
     <div className="profile-page">
       <div className="content">
         <div className="content__cover">
-          {/* <div className="content__avatar"> */}
           <div className="text-2xl font-bold">
             {profile.first_name?.[0]}
             {profile.last_name?.[0]}
-            {/* </div> */}
           </div>
         </div>
 
@@ -144,27 +120,10 @@ const Profile = () => {
           <p>KMITL</p>
         </div>
 
-        {/* <div className="profile-content">
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Skills</h2>
-            <ul className="grid grid-cols-2 gap-2">
-              <li>Python</li>
-              <li>JavaScript</li>
-              <li>React</li>
-              <li>FastAPI</li>
-              <li>SQL</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold mb-4">Projects</h2>
-            <ul className="space-y-2">
-              <li>Student Management System</li>
-              <li>Portfolio Website</li>
-              <li>E-commerce Platform</li>
-            </ul>
-          </section>
-        </div> */}
+        {/* Font Awesome Icon positioned at bottom right */}
+        <div className="icon-bottom-right" onClick={() => navigate("/")}>
+          <FontAwesomeIcon icon={faArrowRightFromBracket} />
+        </div>
       </div>
     </div>
   );
