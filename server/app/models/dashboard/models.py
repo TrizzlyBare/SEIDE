@@ -106,6 +106,8 @@ class UserCodeData(Base):
 
     user_code_data_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     code_data: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"), nullable=False)
 
     question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
     question: Mapped["Question"] = relationship("Question", back_populates="user_code")
+    user: Mapped["User"] = relationship("User", backref="code_submissions")

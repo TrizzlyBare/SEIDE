@@ -104,6 +104,14 @@ class CodeSubmissionResponse(BaseModel):
     class Config:
         orm_mode = True
 
+class CompletedQuestionResponse(BaseModel):
+    question_id: int
+    is_correct: bool
+    submitted_at: datetime
+
+    class Config:
+        from_attributes = True
+
 @router.get("/questions/", response_model=List[QuestionResponse])
 async def get_questions(topic_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(Question).options(
@@ -302,19 +310,16 @@ async def submit_code(
                 detail="Authentication required"
             )
 
-
         # Get the question and its test cases
         question = db.query(Question).options(
             joinedload(Question.test_cases)
         ).filter(Question.question_id == question_id).first()
-
 
         if not question:
             raise HTTPException(
                 status_code=404,
                 detail="Question not found"
             )
-
 
         # Validate language matches question
         if question.language.lower() != submission.language.lower():
@@ -323,70 +328,80 @@ async def submit_code(
                 detail=f"Language mismatch. Question requires {question.language}"
             )
 
-
-        # Execute code and check against test cases
+        # Check test cases and determine if submission is correct
         is_correct = False
-        try:
-            test_case = question.test_cases[0] if question.test_cases else None
-            if test_case:
-                result_output = submission.output.strip() if submission.output else ""
-                expected_output = test_case.expected_output.strip()
-                is_correct = result_output == expected_output
-        except IndexError:
-            logging.warning(f"No test cases found for question {question_id}")
+        test_case = question.test_cases[0] if question.test_cases else None
+        if test_case:
+            result_output = submission.output.strip() if submission.output else ""
+            expected_output = test_case.expected_output.strip()
+            is_correct = result_output == expected_output
 
-
-        # Save user's code
+        # Create user code data record with user_id
         user_code = UserCodeData(
             code_data=submission.code,
-            question_id=question_id
+            question_id=question_id,
+            user_id=current_user.id  # Add the user_id here
         )
         db.add(user_code)
 
-
-        # Create or update DoneQuestion entry
+        # Create or update done question record
         submission_time = datetime.utcnow()
-
-
-        existing_submission = db.query(DoneQuestion).filter(
+        existing_done = db.query(DoneQuestion).filter(
             DoneQuestion.question_id == question_id,
-            DoneQuestion.user_id == current_user.id  # Changed from user_id to id
+            DoneQuestion.user_id == current_user.id
         ).first()
 
-
-        if existing_submission:
-            existing_submission.is_correct = is_correct
-            existing_submission.submitted_at = submission_time
-            db_submission = existing_submission
+        if existing_done:
+            existing_done.is_correct = is_correct
+            existing_done.submitted_at = submission_time
+            db_submission = existing_done
         else:
             db_submission = DoneQuestion(
                 question_id=question_id,
-                user_id=current_user.id,  # Changed from user_id to id
+                user_id=current_user.id,
                 is_correct=is_correct,
                 submitted_at=submission_time
             )
             db.add(db_submission)
 
-
+        # Commit all changes
         db.commit()
-        db.refresh(user_code)
-
 
         return {
             "question_id": question_id,
-            "user_id": current_user.id,  # Changed from user_id to id
+            "user_id": current_user.id,
             "code_data": submission.code,
             "is_correct": is_correct,
             "submitted_at": submission_time
         }
 
-
-    except HTTPException as he:
-        raise he
     except Exception as e:
         db.rollback()
         logging.error(f"Error submitting code: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error submitting code: {str(e)}"
+            detail=str(e)
+        )
+    
+@router.get("/questions/completed", response_model=List[CompletedQuestionResponse])
+async def get_completed_questions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all completed questions for the current user
+    """
+    try:
+        completed_questions = (
+            db.query(DoneQuestion)
+            .filter(DoneQuestion.user_id == current_user.user_id)
+            .all()
+        )
+
+        return completed_questions
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
         )
