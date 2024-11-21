@@ -335,6 +335,7 @@ const QuestionCodeEditor = () => {
               editorRef={editorRef} 
               language={selectedLanguage}
               testCase={selectedTestCase !== null ? question?.test_cases[selectedTestCase] : null}
+              questionId={question_id}
             />
           </OutputWrapper>
         </EditorContainer>

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect import
 import { executeCode } from "../../middleware/Editorapi";
 import RunButton from "./RunButton";
+import SubmitButton from "./SubmitButton";
 import styled from "styled-components";
 
 const OutputContainer = styled.div`
@@ -20,6 +21,11 @@ const OutputHeader = styled.div`
   border-bottom: 1px solid #404040;
 `;
 
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
 const OutputContent = styled.div`
   flex: 1;
   padding: 16px;
@@ -37,10 +43,49 @@ const SuccessText = styled.div`
   color: #89d185;
 `;
 
-const Output = ({ editorRef, language, testCase }) => {
+const Output = ({ editorRef, language, testCase, questionId }) => {
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  // Get authentication token for API requests
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('access_token');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
+  useEffect(() => {
+    checkUserRole();
+  }, []);
+
+  const checkUserRole = async () => {
+    try {
+      // Include the auth token in the request
+      const response = await fetch('http://localhost:8000/api/role-check', {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUserRole(data.role);
+      } else if (response.status === 401) {
+        console.log('User not authenticated');
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error('Error checking role:', error);
+      setUserRole(null);
+    }
+  };
+
+  const isStudent = () => {
+    return userRole && ['YEAR1', 'YEAR2', 'YEAR3', 'YEAR4'].includes(userRole);
+  };
 
   const runCode = async () => {
     const sourceCode = editorRef.current?.getValue();
@@ -66,13 +111,162 @@ const Output = ({ editorRef, language, testCase }) => {
     }
   };
 
+  const handleSubmit = async () => {
+    const sourceCode = editorRef.current?.getValue();
+    if (!sourceCode) {
+      setOutput(["❌ No code to submit", "Please write some code before submitting."]);
+      setIsError(true);
+      return;
+    }
+
+    if (!isStudent()) {
+      setOutput([
+        "❌ Access denied",
+        "Only students can submit code.",
+        "",
+        userRole ? "Your role: " + userRole : "Please log in as a student."
+      ]);
+      setIsError(true);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // Run the code first
+      const { run: result } = await executeCode(language, sourceCode);
+      
+      // Check if code passes test case
+      const outputStr = result.output.trim();
+      const isCorrect = testCase ? 
+        (outputStr === testCase.expected_output.trim()) : 
+        true;
+
+      // Submit code with auth headers
+      const response = await fetch(`http://localhost:8000/questions/${questionId}/submit-code`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          code: sourceCode,
+          language: language,
+          output: result.output,
+          execution_time: result.executionTime,
+          memory_used: result.memoryUsed
+        }),
+      });
+
+      if (response.status === 401) {
+        setOutput([
+          "❌ Authentication required",
+          "Please log in to submit your code.",
+          "",
+          "Click the login button to continue."
+        ]);
+        setIsError(true);
+        return;
+      }
+
+      if (response.status === 403) {
+        setOutput([
+          "❌ Access denied",
+          "Only students can submit code.",
+          "",
+          "Please log in with a student account."
+        ]);
+        setIsError(true);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to submit code');
+      }
+
+      const submissionResult = await response.json();
+
+      // Show success message
+      setOutput([
+        `✅ Code ${submissionResult.is_correct ? 'passed' : 'failed'} and has been saved!`,
+        "",
+        "Submission Details:",
+        `Status: ${submissionResult.is_correct ? 'Passed ✓' : 'Failed ✗'}`,
+        `Submitted at: ${new Date(submissionResult.submitted_at).toLocaleString()}`,
+        `Your role: ${userRole}`,
+        "",
+        submissionResult.is_correct 
+          ? "Great work! Your solution has been saved." 
+          : "Keep trying! Your progress has been saved.",
+        "",
+        "Test Case Results:",
+        `${testCase ? `Input: ${testCase.input_data}` : ''}`,
+        `Expected: ${testCase ? testCase.expected_output : 'No test case'}`,
+        `Your output: ${outputStr}`
+      ]);
+      setIsError(!submissionResult.is_correct);
+
+    } catch (error) {
+      console.error(error);
+      setOutput([
+        "❌ Submission failed",
+        error.message || "Unable to submit code",
+        "",
+        "Please try again or contact support if the issue persists."
+      ]);
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <OutputContainer>
       <OutputHeader>
-        <div>Output</div>
-        <RunButton runCode={runCode} isLoading={isLoading} />
+        <div>
+          Output
+          {userRole && (
+            <span style={{ 
+              marginLeft: '10px', 
+              fontSize: '0.8em',
+              color: isStudent() ? '#4caf50' : '#ff9800'
+            }}>
+              ({userRole})
+            </span>
+          )}
+        </div>
+        <ButtonGroup>
+          <RunButton runCode={runCode} isLoading={isLoading} />
+          <SubmitButton 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting}
+            disabled={!isStudent()}
+          />
+        </ButtonGroup>
       </OutputHeader>
       <OutputContent>
+        {!userRole && (
+          <div style={{ 
+            padding: '8px 16px',
+            marginBottom: '16px',
+            background: '#fff3e0',
+            border: '1px solid #ffe0b2',
+            borderRadius: '4px',
+            color: '#ef6c00'
+          }}>
+            ⚠️ Please log in to submit code
+          </div>
+        )}
+        {userRole && !isStudent() && (
+          <div style={{ 
+            padding: '8px 16px',
+            marginBottom: '16px',
+            background: '#fff3e0',
+            border: '1px solid #ffe0b2',
+            borderRadius: '4px',
+            color: '#ef6c00'
+          }}>
+            ⚠️ Only students can submit code. Current role: {userRole}
+          </div>
+        )}
         {output && output.map((line, index) => (
           isError ? (
             <ErrorText key={index}>{line}</ErrorText>
@@ -80,7 +274,7 @@ const Output = ({ editorRef, language, testCase }) => {
             <SuccessText key={index}>{line}</SuccessText>
           )
         ))}
-        {testCase && output && (
+        {testCase && output && !isSubmitting && (
           <div style={{ marginTop: '16px', borderTop: '1px solid #404040', paddingTop: '16px' }}>
             <div>Test Case Result:</div>
             <div style={{ color: isError ? '#f48771' : '#89d185' }}>

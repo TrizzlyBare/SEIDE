@@ -109,3 +109,4 @@ class UserCodeData(Base):
 
     question_id: Mapped[int] = mapped_column(ForeignKey("question_table.question_id"))
     question: Mapped["Question"] = relationship("Question", back_populates="user_code")
+    

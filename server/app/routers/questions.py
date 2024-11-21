@@ -5,9 +5,12 @@ from pydantic import BaseModel
 import logging
 from typing import List, Optional
 from app.models.dashboard.db_config import get_db
-from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion
+from app.models.dashboard.models import Base, User, Subject, Topic, Question, Answer, TestCase, DoneQuestion, UserCodeData
 from app.models.dashboard.createtable import create_tables
+from app.models.authentication.services import get_current_user, role_required
+from app.models.authentication.models import UserRole
 import fastapi as _fastapi
+
 
 router = APIRouter(tags=["Questions"])
 
@@ -81,6 +84,23 @@ class DoneQuestionResponse(BaseModel):
     is_correct: bool
     submitted_at: datetime
 
+    class Config:
+        orm_mode = True
+
+class CodeSubmissionCreate(BaseModel):
+    code: str
+    language: str
+    output: Optional[str] = None
+    execution_time: Optional[float] = None
+    memory_used: Optional[float] = None
+
+class CodeSubmissionResponse(BaseModel):
+    question_id: int
+    user_id: int
+    code_data: str
+    is_correct: bool
+    submitted_at: datetime
+    
     class Config:
         orm_mode = True
 
@@ -265,19 +285,94 @@ async def get_question(question_id: int, db: Session = Depends(get_db)):
     
     return question
 
-@router.post("/questions/{question_id}/submit", response_model=DoneQuestionResponse)
-async def submit_question(
+@router.post("/questions/{question_id}/submit-code", response_model=CodeSubmissionResponse)
+async def submit_code(
     question_id: int,
-    submission: DoneQuestionCreate,
+    submission: CodeSubmissionCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    db_submission = DoneQuestion(
-        question_id=question_id,
-        user_id=submission.user_id,
-        is_correct=submission.is_correct,
-        submitted_at=datetime.utcnow()
-    )
-    db.add(db_submission)
-    db.commit()
-    db.refresh(db_submission)
-    return db_submission
+    try:
+        if not current_user:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication required"
+            )
+
+        # Get the question and its test cases
+        question = db.query(Question).options(
+            joinedload(Question.test_cases)
+        ).filter(Question.question_id == question_id).first()
+        
+        if not question:
+            raise HTTPException(
+                status_code=404,
+                detail="Question not found"
+            )
+        
+        # Validate language matches question
+        if question.language.lower() != submission.language.lower():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Language mismatch. Question requires {question.language}"
+            )
+
+        # Execute code and check against test cases
+        is_correct = False
+        try:
+            test_case = question.test_cases[0] if question.test_cases else None
+            if test_case:
+                result_output = submission.output.strip() if submission.output else ""
+                expected_output = test_case.expected_output.strip()
+                is_correct = result_output == expected_output
+        except IndexError:
+            logging.warning(f"No test cases found for question {question_id}")
+        
+        # Save user's code
+        user_code = UserCodeData(
+            code_data=submission.code,
+            question_id=question_id
+        )
+        db.add(user_code)
+        
+        # Create or update DoneQuestion entry
+        submission_time = datetime.utcnow()
+        
+        existing_submission = db.query(DoneQuestion).filter(
+            DoneQuestion.question_id == question_id,
+            DoneQuestion.user_id == current_user.id  # Changed from user_id to id
+        ).first()
+
+        if existing_submission:
+            existing_submission.is_correct = is_correct
+            existing_submission.submitted_at = submission_time
+            db_submission = existing_submission
+        else:
+            db_submission = DoneQuestion(
+                question_id=question_id,
+                user_id=current_user.id,  # Changed from user_id to id
+                is_correct=is_correct,
+                submitted_at=submission_time
+            )
+            db.add(db_submission)
+        
+        db.commit()
+        db.refresh(user_code)
+        
+        return {
+            "question_id": question_id,
+            "user_id": current_user.id,  # Changed from user_id to id
+            "code_data": submission.code,
+            "is_correct": is_correct,
+            "submitted_at": submission_time
+        }
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        db.rollback()
+        logging.error(f"Error submitting code: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error submitting code: {str(e)}"
+        )
