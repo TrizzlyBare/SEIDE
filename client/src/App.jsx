@@ -18,6 +18,7 @@ import TopicDashboard from "./components/Dashboard/topic_dashboard";
 import Dashboard from "./components/Dashboard/Dashboard";
 import QuestionDashboard from "./components/Dashboard/question_dashboard";
 import ProtectedRoute from "./components/ProtectedRoute/protectedRouting";
+import DashCodeEditorPage from "./pages/DashCodeEditorPage";
 import "./App.css";
 import QuestionCodeEditor from "./components/CodeEditor/CodeEditor";
 import Footer from "./components/Footer/Footer";
@@ -68,7 +69,7 @@ const AppContent = () => {
               <ProtectedRoute
                 allowedRoles={["ADMIN", "YEAR1", "YEAR2", "YEAR3", "YEAR4"]}
               >
-                <CodeEditorPage />
+                <DashCodeEditorPage />
               </ProtectedRoute>
             }
           />
@@ -123,7 +124,6 @@ const AppContent = () => {
             }
           />
 
-          {/* Protected admin-only routes */}
           <Route
             path="/admin"
             element={

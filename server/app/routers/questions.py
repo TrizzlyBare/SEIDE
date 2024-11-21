@@ -47,7 +47,7 @@ class QuestionResponse(BaseModel):
     topic_id: int
     question_type: str
     language: str
-
+    due_date: Optional[datetime]
     answers: List['AnswerResponse']
     test_cases: List['TestCaseResponse']
 
